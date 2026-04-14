@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EduTrack Admin Dashboard</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#fdf7ff",
+                        "on-surface-variant": "#566166",
+                        "on-surface": "#2a3439",
+                        "on-tertiary-container": "#4f4964",
+                        "surface-dim": "#cfdce3",
+                        "primary-fixed": "#dde1ff",
+                        "outline-variant": "#a9b4b9",
+                        "on-primary-fixed-variant": "#3352c0",
+                        "surface-bright": "#f7f9fb",
+                        "surface-container": "#e8eff3",
+                        "on-primary-fixed": "#0732a3",
+                        "on-tertiary-fixed": "#3c3650",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#752121",
+                        "error-dim": "#4e0309",
+                        "background": "#f7f9fb",
+                        "surface": "#f7f9fb",
+                        "tertiary-container": "#dfd5f7",
+                        "on-secondary": "#faf8fc",
+                        "secondary-container": "#e4e2e6",
+                        "secondary-fixed": "#e4e2e6",
+                        "on-primary-container": "#2747b6",
+                        "surface-container-highest": "#d9e4ea",
+                        "primary": "#3755c3",
+                        "tertiary": "#625b77",
+                        "primary-container": "#dde1ff",
+                        "primary-fixed-dim": "#cad2ff",
+                        "surface-tint": "#3755c3",
+                        "on-background": "#2a3439",
+                        "secondary-fixed-dim": "#d5d3d8",
+                        "error": "#9f403d",
+                        "primary-dim": "#2848b7",
+                        "tertiary-dim": "#564f6b",
+                        "on-secondary-fixed": "#3f3f43",
+                        "outline": "#717c82",
+                        "on-error": "#fff7f6",
+                        "error-container": "#fe8983",
+                        "secondary": "#5f5f62",
+                        "tertiary-fixed-dim": "#d0c7e8",
+                        "inverse-surface": "#0b0f10",
+                        "inverse-primary": "#6d89fa",
+                        "surface-container-low": "#f0f4f7",
+                        "inverse-on-surface": "#9a9d9f",
+                        "on-secondary-fixed-variant": "#5b5b5f",
+                        "on-secondary-container": "#515155",
+                        "secondary-dim": "#535356",
+                        "on-primary": "#f8f7ff",
+                        "surface-container-high": "#e1e9ee",
+                        "surface-variant": "#d9e4ea",
+                        "tertiary-fixed": "#dfd5f7",
+                        "on-tertiary-fixed-variant": "#59526e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5xl",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface mb-24">
+<!-- TopAppBar -->
+<nav class="fixed top-0 w-full z-50 bg-slate-50/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-[0px_20px_40px_rgba(42,52,57,0.06)] flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl overflow-hidden bg-primary-container flex items-center justify-center">
+<img alt="Institution Logo" class="w-full h-full object-cover" data-alt="Modern geometric education logo for an academy, clean blue and white academic shield icon on a minimalist background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzOKfoiJeIteQ7cOjIODaeuHg_ek2saTxyV2Rlnfv7p8e1zRxX0386yXXaRyWRX7WOIsTA0UknTledegZEE6HuLARXyyVaKuvQ0ozzmbUxMwLO-S7lMGm0mBNZv2M-qgbGmaGN11z2lKIFCLRnl1PK8r3_RO2IoWGM5nqqhPQhRHUKs5483KnkA2y6Y8TgYM6BAno_m5Jsfu51XP2xbBKKgummu-JIWIcT6KQfpW7APcwMdX2Jd-yO_Xf0LQVOccSxAV-AVgkK9G8"/>
+</div>
+<span class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 font-headline">EduTrack</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-200/50 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-container-high border-2 border-primary/20 overflow-hidden">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="Professional portrait of a male educator in a light blue suit, academic lead role, bright office lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1u1V_mwWXr0jHU2JOIhDeAti6jVZTBVUddB1QL7QHGI5A3oNVDPJdmnTM1_2GzRS-xt-1oG4TXiRe0Ql8TjxjlUygkTuaQKkt5y1jCBrOzd0qiCGp0BY5hMhsp8FCBcaDV5G9T4lv7MW_WenX0YO8hjT3kRcwWhf8dArnelMyXBOeaYXMGHHs14DZVgPXKpTVIIoCJFVzhj1cbganC9Tz8L06Pvcb82IoWKlH3fauBxxrANY-fE2mwxEqkBA5mKPMsMXB7L9avFk"/>
+</div>
+</div>
+</nav>
+<main class="pt-20 px-4 space-y-6">
+<!-- Filter Section -->
+<section class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide no-scrollbar">
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest text-primary font-semibold rounded-full shadow-sm whitespace-nowrap border-primary border">
+<span class="material-symbols-outlined text-[18px]">account_balance</span>
+<span class="text-xs uppercase tracking-wider font-bold">Main Branch</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-low text-on-surface-variant rounded-full whitespace-nowrap">
+<span class="text-xs uppercase tracking-wider font-bold">Year 2024</span>
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-low text-on-surface-variant rounded-full whitespace-nowrap">
+<span class="text-xs uppercase tracking-wider font-bold">Section B</span>
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-low text-on-surface-variant rounded-full whitespace-nowrap">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+<span class="text-xs uppercase tracking-wider font-bold">More</span>
+</button>
+</section>
+<!-- Notifications/Alerts Section (Asymmetric) -->
+<section class="bg-tertiary-container/40 p-4 rounded-2xl flex items-start gap-4">
+<div class="bg-tertiary p-2 rounded-xl text-on-tertiary shadow-sm">
+<span class="material-symbols-outlined">notifications_active</span>
+</div>
+<div class="flex-1">
+<h3 class="text-sm font-bold text-on-tertiary-container">Weekly Attendance Alert</h3>
+<p class="text-xs text-on-tertiary-container/80 mt-1">Section B attendance dropped by 4% this week. Review pending remarks.</p>
+</div>
+<button class="text-on-tertiary-container">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</section>
+<!-- Overview Cards Grid -->
+<section class="grid grid-cols-2 gap-4">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl shadow-sm border-b-2 border-primary/10">
+<div class="flex justify-between items-start mb-3">
+<span class="material-symbols-outlined text-primary text-3xl">groups</span>
+<span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">+12</span>
+</div>
+<div class="text-2xl font-black text-on-surface font-headline">1,248</div>
+<div class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mt-1">Total Students</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl shadow-sm border-b-2 border-primary/10">
+<div class="flex justify-between items-start mb-3">
+<span class="material-symbols-outlined text-primary text-3xl">how_to_reg</span>
+<span class="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">-2.1%</span>
+</div>
+<div class="text-2xl font-black text-on-surface font-headline">94.2%</div>
+<div class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mt-1">Attendance</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl shadow-sm border-b-2 border-primary/10">
+<div class="flex justify-between items-start mb-3">
+<span class="material-symbols-outlined text-primary text-3xl">analytics</span>
+<span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">+5%</span>
+</div>
+<div class="text-2xl font-black text-on-surface font-headline">82.5</div>
+<div class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mt-1">Avg Marks</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container-lowest p-5 rounded-2xl shadow-sm border-b-2 border-primary/10">
+<div class="flex justify-between items-start mb-3">
+<span class="material-symbols-outlined text-primary text-3xl">pending_actions</span>
+<span class="text-[10px] font-bold text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">3 Today</span>
+</div>
+<div class="text-2xl font-black text-on-surface font-headline">07</div>
+<div class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mt-1">Pending Remarks</div>
+</div>
+</section>
+<!-- Charts Section -->
+<section class="space-y-4">
+<!-- Line Chart Mockup -->
+<div class="bg-surface-container-lowest p-5 rounded-3xl shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-lg font-bold font-headline text-on-surface">Attendance Trends</h2>
+<span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+</div>
+<!-- Abstract Graphic representation -->
+<div class="relative h-32 flex items-end justify-between gap-1">
+<div class="w-1/12 bg-primary/10 h-1/2 rounded-t-full"></div>
+<div class="w-1/12 bg-primary/20 h-2/3 rounded-t-full"></div>
+<div class="w-1/12 bg-primary/30 h-1/3 rounded-t-full"></div>
+<div class="w-1/12 bg-primary/40 h-3/4 rounded-t-full"></div>
+<div class="w-1/12 bg-primary-dim h-4/5 rounded-t-full"></div>
+<div class="w-1/12 bg-primary h-full rounded-t-full shadow-lg shadow-primary/20"></div>
+<div class="w-1/12 bg-primary/60 h-3/4 rounded-t-full"></div>
+<div class="w-1/12 bg-primary/40 h-1/2 rounded-t-full"></div>
+<div class="w-1/12 bg-primary/20 h-2/3 rounded-t-full"></div>
+</div>
+<div class="flex justify-between mt-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
+<span>Mon</span>
+<span>Tue</span>
+<span>Wed</span>
+<span>Thu</span>
+<span>Fri</span>
+<span>Sat</span>
+</div>
+</div>
+<!-- Bar Chart Mockup (Side Scroller) -->
+<div class="bg-surface-container-lowest p-5 rounded-3xl shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-lg font-bold font-headline text-on-surface">Marks Distribution</h2>
+<div class="flex gap-2">
+<div class="flex items-center gap-1">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<span class="text-[10px] text-on-surface-variant font-bold uppercase">Math</span>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-3">
+<span class="text-xs font-bold w-12 text-on-surface-variant uppercase tracking-tighter">A+ 90+</span>
+<div class="flex-1 h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[35%]"></div>
+</div>
+<span class="text-xs font-bold text-on-surface">35%</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-xs font-bold w-12 text-on-surface-variant uppercase tracking-tighter">A 80-89</span>
+<div class="flex-1 h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[45%]"></div>
+</div>
+<span class="text-xs font-bold text-on-surface">45%</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-xs font-bold w-12 text-on-surface-variant uppercase tracking-tighter">B 70-79</span>
+<div class="flex-1 h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[15%]"></div>
+</div>
+<span class="text-xs font-bold text-on-surface">15%</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Student List (Focus Plate) -->
+<section class="bg-surface-container-lowest p-6 rounded-[24px] shadow-sm mb-8">
+<div class="flex justify-between items-end mb-6">
+<div>
+<h2 class="text-xl font-extrabold font-headline text-on-surface tracking-tight">Recent Activity</h2>
+<p class="text-xs text-on-surface-variant font-medium mt-1">Student Performance Highlights</p>
+</div>
+<button class="text-primary text-xs font-bold uppercase tracking-widest hover:underline decoration-2 underline-offset-4">View All</button>
+</div>
+<div class="divide-y divide-surface-container space-y-4">
+<!-- Student 1 -->
+<div class="flex items-center justify-between pt-4 first:pt-0">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-2xl bg-secondary-container overflow-hidden">
+<img alt="Student" class="w-full h-full object-cover" data-alt="Close-up portrait of a cheerful diverse primary school student, bright studio lighting, colorful educational background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNfwwLR1l1EXD0dQ5zLvNz2YVOIqjH_p6UXS3xhLKayW45qdWahSFhRxXWP5YbGJjYCMOMrCvOlpHTCQzFuQFwlt5zFg1ZWo2qaQJW_nMuo8wQCc4cZY6hVBRqw6h8lNc1aBWq7sublF9YxcdXOfiHQH5bGz8z-cEnhfkQnmFLWz1hxjyVMAURtXo-1mTsTLkxs0Btany8TUcbIoXckrnZ5pOAJi4lswWoFGE-YhcgzAIwqSyjRS2uVLvkfBsA5JMEv6Q3RPMbu54"/>
+</div>
+<div>
+<div class="text-sm font-bold text-on-surface">Liam Carter</div>
+<div class="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wider">Roll No: 2045</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-sm font-black text-primary">98%</div>
+<div class="flex gap-2 mt-1">
+<button class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Student 2 -->
+<div class="flex items-center justify-between pt-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-2xl bg-secondary-container overflow-hidden">
+<img alt="Student" class="w-full h-full object-cover" data-alt="Close-up portrait of a focused elementary school girl, soft natural light, library or bookshelf background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUmoOIr87brIxckUN7bwLt_mWsr-vmFUc73knqo8kTsWbsXiYP0o1r7hYQmBVlm43_YidtlXOL8GyymbwjSii7CF_7GbIPa8fbr2OG1QExQ7FUKngPQ7luAFFxp1IhgcKKXtJrTIVygvuR1pF4U0Z5vgaVmS2CCPv7JC2CabiH2Ov-inXZ2UU1pKvNhCfCQlVUdkSKr_xf9ylBASkWwy60_BG7meIdrm6EAa9EWMmdpkxJua3AUnQKYPNgwjF-OVYH-rqpgzqfTcU"/>
+</div>
+<div>
+<div class="text-sm font-bold text-on-surface">Sophia Vance</div>
+<div class="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wider">Roll No: 2046</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-sm font-black text-error">72%</div>
+<div class="flex gap-2 mt-1">
+<button class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Student 3 -->
+<div class="flex items-center justify-between pt-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-2xl bg-secondary-container overflow-hidden">
+<img alt="Student" class="w-full h-full object-cover" data-alt="Young student with glasses smiling at the camera, educational setting with soft ambient morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSM-eshLrewiM7VP3V0_In_HUlwwcBaiSKa1TTHZlfUxe38Pt_o_-yDpCR7d9up3ozHrVf9DHAjEALSLhbbxyp9gepuquKYRUGKN54z7asDSRpz5w_7ZGXX7Sjp6jiUHKLCjguHewNA9IvUkDwxoZUZZbP_bl5ktezdQsE4-7AXkFNp9C7Hl5OrHhk9aFw-TXlknM0l5bG3fy75GqHl3Oi7UYi6dCfCh0ZJXADzujMfO1B1lYffD8GHdPTRWvhtd4NqH2r9ST09g0"/>
+</div>
+<div>
+<div class="text-sm font-bold text-on-surface">Marcus Zhou</div>
+<div class="text-[10px] text-on-surface-variant font-semibold uppercase tracking-wider">Roll No: 2047</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-sm font-black text-primary">89%</div>
+<div class="flex gap-2 mt-1">
+<button class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-t-3xl shadow-2xl border-t border-slate-100 dark:border-slate-800">
+<a class="flex flex-col items-center justify-center text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded-xl px-3 py-1 active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-inter text-[10px] uppercase tracking-widest mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-500 active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-inter text-[10px] uppercase tracking-widest mt-1">Students</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-500 active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined">assessment</span>
+<span class="font-inter text-[10px] uppercase tracking-widest mt-1">Reports</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-500 active:scale-90 transition-all" href="#">
+<span class="material-symbols-outlined">menu</span>
+<span class="font-inter text-[10px] uppercase tracking-widest mt-1">Menu</span>
+</a>
+</nav>
+<!-- Floating Action Button (Only on Dashboard) -->
+<button class="fixed bottom-24 right-6 w-14 h-14 bg-gradient-to-br from-primary to-primary-dim text-white rounded-2xl shadow-xl shadow-primary/30 flex items-center justify-center active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</body></html>

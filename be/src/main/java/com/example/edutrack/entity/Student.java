@@ -1,0 +1,86 @@
+package com.example.edutrack.entity;
+
+import java.time.LocalDate;
+import java.util.UUID;
+import java.util.List;
+import java.math.BigDecimal;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import com.example.edutrack.entity.enums.StudentStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hibernate.annotations.UuidGenerator;
+
+import lombok.EqualsAndHashCode;
+
+@Entity
+@Table(name = "students", indexes = {
+    @Index(name = "idx_student_lookup", columnList = "institution_id, id"),
+    @Index(name = "idx_student_search", columnList = "institution_id, firstName, lastName, email")
+})
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class Student extends BaseEntity {
+    @Id
+    @UuidGenerator(style = UuidGenerator.Style.TIME)
+    @Column(columnDefinition = "BINARY(16)")
+    private UUID id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "institution_id", insertable = false, updatable = false)
+    @JsonIgnore
+    private Institution institution;
+
+    private String studentId;
+    private String firstName;
+    private String lastName;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id", nullable = false, columnDefinition = "BINARY(16)")
+    private Department department;
+
+    @Enumerated(EnumType.STRING)   
+    private StudentStatus status;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String password;
+
+    private String avatarUrl;
+    private String phone;
+    private String address;
+    private String email;
+    private String gender;
+    private LocalDate dateOfBirth;
+    private boolean isHosteller;
+    private BigDecimal CGPA;
+    private LocalDate admissionDate;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "student_guardian_map",
+        joinColumns = @JoinColumn(name = "student_id", columnDefinition = "BINARY(16)"),
+        inverseJoinColumns = @JoinColumn(name = "guardian_id", columnDefinition = "BINARY(16)")
+    )
+    private List<Guardian> guardians;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bus_id", nullable = true)
+    private Buses bus;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    private List<Remarks> remarks;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    private List<Fee> fees;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    private List<Assessment> assessments;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    private List<Attendance> attendance;
+    
+}

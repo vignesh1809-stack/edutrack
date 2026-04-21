@@ -1,14 +1,14 @@
 import React from 'react';
-import Sidebar from '../components/Sidebar';
-import TopAppBar from '../components/TopAppBar';
-import BottomNavBar from '../components/BottomNavBar';
+import Sidebar from '../../components/Sidebar';
+import TopAppBar from '../../components/TopAppBar';
+import BottomNavBar from '../../components/BottomNavBar';
 
 const Reports = () => {
   return (
     <>
       <Sidebar />
       <TopAppBar />
-      <main className="pt-24 pb-32 md:pb-10 px-6 md:pl-80 max-w-7xl mx-auto min-h-screen">
+      <main className="pt-24 pb-32 md:pb-10 px-6 md:pl-72 max-w-7xl mx-auto min-h-screen">
         {/* Filter Header Section */}
         <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>

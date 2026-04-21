@@ -1,12 +1,14 @@
 import React from 'react';
-import Sidebar from '../components/Sidebar';
-import BottomNavBar from '../components/BottomNavBar';
+import { useNavigate } from 'react-router-dom';
+import Sidebar from '../../components/Sidebar';
+import BottomNavBar from '../../components/BottomNavBar';
 
 const Profile = () => {
+  const navigate = useNavigate();
   return (
     <>
       <Sidebar />
-      <main className="flex-1 flex flex-col min-h-screen relative md:pl-80">
+      <main className="flex-1 flex flex-col min-h-screen relative md:pl-72">
         
         {/* Top App Bar */}
         <header className="flex justify-between items-center px-6 h-16 w-full bg-slate-50/70 dark:bg-slate-900/70 backdrop-blur-xl sticky top-0 z-40 shadow-[0px_20px_40px_rgba(42,52,57,0.06)]">
@@ -183,7 +185,7 @@ const Profile = () => {
                     <span className="material-symbols-outlined text-primary mb-3 group-hover:scale-110 transition-transform">notifications</span>
                     <span className="text-sm font-bold text-on-surface">Notifications</span>
                   </button>
-                  <button className="flex flex-col items-center justify-center p-6 bg-error-container/10 rounded-2xl hover:bg-error-container group transition-all">
+                  <button onClick={() => navigate('/')} className="flex flex-col items-center justify-center p-6 bg-error-container/10 rounded-2xl hover:bg-error-container group transition-all">
                     <span className="material-symbols-outlined text-error mb-3 group-hover:scale-110 transition-transform">logout</span>
                     <span className="text-sm font-bold text-on-error-container">Logout</span>
                   </button>

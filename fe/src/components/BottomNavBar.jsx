@@ -5,14 +5,14 @@ const BottomNavBar = () => {
   const location = useLocation();
 
   const navItems = [
-    { name: 'Home', icon: 'home', path: '/' },
+    { name: 'Home', icon: 'home', path: '/principal/dashboard' },
     { name: 'Students', icon: 'group', path: '/students' },
     { name: 'Reports', icon: 'analytics', path: '/reports' },
     { name: 'Profile', icon: 'account_circle', path: '/profile' }
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 w-full z-[100] flex justify-around items-center px-4 py-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.04)] border-t border-slate-100 dark:border-slate-800 pb-safe">
+    <nav className="md:hidden fixed bottom-6 left-6 right-6 z-[100] flex justify-around items-center px-4 py-3 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl rounded-2xl shadow-[0_12px_40px_rgba(42,52,57,0.12)] border border-white/40 dark:border-slate-800/40">
       {navItems.map((item) => {
         const isActive = location.pathname === item.path;
         return (

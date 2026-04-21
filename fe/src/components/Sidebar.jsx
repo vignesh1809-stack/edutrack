@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 
 const navItems = [
-  { name: 'Dashboard', icon: 'dashboard', path: '/' },
+  { name: 'Dashboard', icon: 'dashboard', path: '/principal/dashboard' },
   { name: 'Students', icon: 'group', path: '/students' },
   { name: 'Reports', icon: 'analytics', path: '/reports' },
   { name: 'Profile', icon: 'account_circle', path: '/profile' },
@@ -12,7 +12,7 @@ const navItems = [
 
 const Sidebar = () => {
   return (
-    <aside className="hidden md:flex fixed left-0 top-0 h-full w-72 bg-surface-container-low flex-col p-4 z-40 transition-all duration-200 ease-in-out">
+    <aside className="hidden md:flex fixed left-0 top-0 h-full w-54 bg-gradient-to-b from-blue-50/80 to-white/60 backdrop-blur-xl border-r border-white/60 shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex-col p-4 z-40 transition-all duration-200 ease-in-out">
       <div className="mb-10 px-4 py-6">
         <h2 className="font-headline font-extrabold text-blue-700 text-xl">EduTrack Horizon</h2>
         <p className="text-slate-500 text-xs font-medium uppercase tracking-widest mt-1">Main Campus</p>

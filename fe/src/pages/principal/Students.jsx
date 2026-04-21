@@ -1,16 +1,16 @@
 import React from 'react';
-import Sidebar from '../components/Sidebar';
-import StudentHeader from '../components/StudentHeader';
-import SearchPlate from '../components/SearchPlate';
-import StudentDirectory from '../components/StudentDirectory';
-import BottomNavBar from '../components/BottomNavBar';
+import Sidebar from '../../components/Sidebar';
+import StudentHeader from '../../components/StudentHeader';
+import SearchPlate from '../../components/SearchPlate';
+import StudentDirectory from '../../components/StudentDirectory';
+import BottomNavBar from '../../components/BottomNavBar';
 
 const Students = () => {
   return (
     <>
       <Sidebar />
       <StudentHeader />
-      <main className="pt-24 pb-32 md:pb-10 px-6 md:pl-80 max-w-7xl mx-auto min-h-screen">
+      <main className="pt-24 pb-32 md:pb-10 px-6 md:pl-72 max-w-7xl mx-auto min-h-screen">
         <SearchPlate />
         <StudentDirectory />
       </main>

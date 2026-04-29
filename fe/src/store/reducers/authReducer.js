@@ -1,7 +1,8 @@
 import * as types from '../types/authTypes';
 
 const initialState = {
-    token: localStorage.getItem('accessToken') || null,
+    accessToken: localStorage.getItem('accessToken') || null,
+    refreshToken: localStorage.getItem('refreshToken') || null,
     user: JSON.parse(localStorage.getItem('user')) || null,
     loading: false,
     error: null
@@ -10,6 +11,7 @@ const initialState = {
 const authReducer = (state = initialState, action) => {
     switch (action.type) {
         case types.LOGIN_REQUEST:
+        case types.REFRESH_TOKEN_REQUEST:
             return {
                 ...state,
                 loading: true,
@@ -19,11 +21,21 @@ const authReducer = (state = initialState, action) => {
             return {
                 ...state,
                 loading: false,
-                token: action.payload.accessToken,
+                accessToken: action.payload.accessToken,
+                refreshToken: action.payload.refreshToken,
                 user: action.payload.user,
                 error: null
             };
+        case types.REFRESH_TOKEN_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                accessToken: action.payload.accessToken,
+                refreshToken: action.payload.refreshToken,
+                error: null
+            };
         case types.LOGIN_FAILURE:
+        case types.REFRESH_TOKEN_FAILURE:
             return {
                 ...state,
                 loading: false,
@@ -32,7 +44,8 @@ const authReducer = (state = initialState, action) => {
         case types.LOGOUT:
             return {
                 ...state,
-                token: null,
+                accessToken: null,
+                refreshToken: null,
                 user: null,
                 error: null
             };

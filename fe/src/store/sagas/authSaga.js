@@ -9,9 +9,30 @@ const loginApi = async (credentials) => {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(credentials)
+        body: JSON.stringify({
+            institutionId: credentials.institutionId,
+            phone: credentials.phone,
+            password: credentials.password,
+            role: credentials.role,
+        })
     });
 
+    return await handleAuthResponse(response);
+};
+
+const refreshTokenApi = async (refreshToken) => {
+    const response = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ refreshToken })
+    });
+
+    return await handleAuthResponse(response);
+};
+
+const handleAuthResponse = async (response) => {
     const contentType = response.headers.get("content-type");
     let data = null;
 
@@ -22,44 +43,56 @@ const loginApi = async (credentials) => {
             console.error("JSON parsing error:", e);
         }
     } else {
-        // Handle non-JSON responses (like plain text or empty)
         const text = await response.text();
-        if (text) {
-            data = { message: text };
-        }
+        if (text) data = { message: text };
     }
 
     if (!response.ok) {
-        throw new Error(data?.message || `Login failed with status ${response.status}`);
-    }
-    
-    if (!data) {
-        throw new Error("Empty response from server");
+        throw new Error(data?.message || `Auth action failed with status ${response.status}`);
     }
 
+    if (!data) throw new Error("Empty response from server");
     return data;
 };
 
 function* handleLogin(action) {
     try {
         const data = yield call(loginApi, action.payload);
-        
+
         // Persist session
         localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
         localStorage.setItem('user', JSON.stringify(data.user));
-        
+
         yield put(actions.loginSuccess(data));
     } catch (error) {
         yield put(actions.loginFailure(error.message));
     }
 }
 
+function* handleRefreshToken(action) {
+    try {
+        const data = yield call(refreshTokenApi, action.payload);
+
+        localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
+
+        yield put(actions.refreshTokenSuccess(data));
+    } catch (error) {
+        yield put(actions.refreshTokenFailure(error.message));
+        // If refresh fails, log the user out
+        yield put(actions.logout());
+    }
+}
+
 function* handleLogout() {
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
 }
 
 export default function* authSaga() {
     yield takeLatest(types.LOGIN_REQUEST, handleLogin);
+    yield takeLatest(types.REFRESH_TOKEN_REQUEST, handleRefreshToken);
     yield takeLatest(types.LOGOUT, handleLogout);
 }

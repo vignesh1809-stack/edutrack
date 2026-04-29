@@ -8,12 +8,14 @@ import org.springframework.stereotype.Component;
 public class InstitutionMapper {
 
     public InstitutionDto toDto(Institution entity) {
-        if (entity == null) {
-            return null;
-        }
+        if (entity == null) return null;
         InstitutionDto dto = new InstitutionDto();
         dto.setId(entity.getId());
         dto.setName(entity.getName());
+        dto.setLevel(entity.getLevel());
+        if (entity.getLevel() != null) {
+            dto.setLevelDisplayName(entity.getLevel().getDisplayName());
+        }
         return dto;
     }
 }

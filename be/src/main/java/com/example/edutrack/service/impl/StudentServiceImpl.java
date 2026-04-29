@@ -11,6 +11,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 import com.example.edutrack.entity.Student;
 import java.util.UUID;
 
@@ -22,34 +23,39 @@ public class StudentServiceImpl implements StudentService {
     private final StudentRepository studentRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public Page<Student> getAllStudents(Pageable pageable) {
-        return studentRepository.findAll(pageable);
+        return studentRepository.findAllActive(pageable);
     }
 
     @Override
+    @Transactional(readOnly = true)
     @Cacheable(value = "students", keyGenerator = "tenantKeyGenerator")
     public Student getStudentById(UUID id) {
-        return studentRepository.findById(id).orElse(null);
+        return studentRepository.findActiveById(id).orElse(null);
     }
 
     @Override
+    @Transactional
     public Student create(Student student) {
         return studentRepository.save(student);
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = "students", keyGenerator = "tenantKeyGenerator")
     public Student update(UUID id, Student student) {
-        if(studentRepository.existsById(id)){
+        if (studentRepository.existsById(id)) {
             return studentRepository.save(student);
         }
         return null;
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = "students", keyGenerator = "tenantKeyGenerator")
     public void delete(UUID id) {
-        studentRepository.deleteById(id);
+        studentRepository.softDelete(id);
     }
 }
 

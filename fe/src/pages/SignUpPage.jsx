@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const SignUpPage = () => {
     const navigate = useNavigate();
-    const [role, setRole] = useState('student');
+    const location = useLocation();
+    const fromLogin = location.state?.from === 'login';
+    const institution = location.state?.institution;
+    const roleFromState = location.state?.role;
+    const [role, setRole] = useState(roleFromState?.toLowerCase() || 'student');
     const [showPassword, setShowPassword] = useState(false);
 
     return (
@@ -27,7 +31,10 @@ const SignUpPage = () => {
                     {/* Back Button */}
                     <div className="mb-4 flex-shrink-0">
                         <button 
-                            onClick={() => navigate('/login-credentials')}
+                            onClick={() => fromLogin
+                                ? navigate('/login-credentials', { state: { institution, role: roleFromState } })
+                                : navigate('/select-role', { state: { institution } })
+                            }
                             className="flex items-center gap-1 text-on-surface-variant hover:text-primary transition-colors group"
                         >
                             <span className="material-symbols-outlined text-xl">arrow_back</span>
@@ -182,7 +189,7 @@ const SignUpPage = () => {
                                         <span className="text-xs text-on-surface-variant font-medium">Already have an account?</span>
                                         <button 
                                             type="button"
-                                            onClick={() => navigate('/login-credentials')}
+                                            onClick={() => navigate('/login-credentials', { state: { institution, role: roleFromState } })}
                                             className="text-xs font-bold text-primary hover:underline transition-all"
                                         >
                                             Switch back to Login

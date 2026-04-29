@@ -3,9 +3,9 @@ import { NavLink } from 'react-router-dom';
 
 const navItems = [
   { name: 'Dashboard', icon: 'dashboard', path: '/principal/dashboard' },
-  { name: 'Students', icon: 'group', path: '/students' },
-  { name: 'Reports', icon: 'analytics', path: '/reports' },
-  { name: 'Profile', icon: 'account_circle', path: '/profile' },
+  { name: 'Students', icon: 'group', path: '/principal/students' },
+  { name: 'Reports', icon: 'analytics', path: '/principal/reports' },
+  { name: 'Profile', icon: 'account_circle', path: '/principal/profile' },
   { name: 'Attendance', icon: 'calendar_today', path: '/attendance' },
   { name: 'Settings', icon: 'settings', path: '/settings' },
 ];

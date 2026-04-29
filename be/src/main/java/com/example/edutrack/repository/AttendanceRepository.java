@@ -1,0 +1,44 @@
+package com.example.edutrack.repository;
+
+import com.example.edutrack.entity.Attendance;
+import com.example.edutrack.entity.enums.AttendanceStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.time.LocalDate;
+import java.util.UUID;
+
+public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
+
+    /** Count distinct students who have at least one record on a given date for this institution */
+    @Query(value = """
+            SELECT COUNT(DISTINCT a.student_id)
+            FROM attendances a
+            WHERE a.institution_id = :instId
+              AND a.record_date    = :date
+              AND a.is_deleted     = false
+            """, nativeQuery = true)
+    long countDistinctStudentsOnDate(@Param("instId") UUID instId, @Param("date") LocalDate date);
+
+    /** Count PRESENT records for a given date in this institution */
+    @Query(value = """
+            SELECT COUNT(*)
+            FROM attendances a
+            WHERE a.institution_id     = :instId
+              AND a.record_date        = :date
+              AND a.attendance_status  = 'PRESENT'
+              AND a.is_deleted         = false
+            """, nativeQuery = true)
+    long countPresentOnDate(@Param("instId") UUID instId, @Param("date") LocalDate date);
+
+    /** Total attendance records (all statuses) for a given date */
+    @Query(value = """
+            SELECT COUNT(*)
+            FROM attendances a
+            WHERE a.institution_id = :instId
+              AND a.record_date    = :date
+              AND a.is_deleted     = false
+            """, nativeQuery = true)
+    long countTotalOnDate(@Param("instId") UUID instId, @Param("date") LocalDate date);
+}

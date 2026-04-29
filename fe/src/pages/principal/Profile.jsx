@@ -1,10 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../store/actions/authActions';
 import Sidebar from '../../components/Sidebar';
 import BottomNavBar from '../../components/BottomNavBar';
 
 const Profile = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/');
+  };
   return (
     <>
       <Sidebar />
@@ -185,7 +193,7 @@ const Profile = () => {
                     <span className="material-symbols-outlined text-primary mb-3 group-hover:scale-110 transition-transform">notifications</span>
                     <span className="text-sm font-bold text-on-surface">Notifications</span>
                   </button>
-                  <button onClick={() => navigate('/')} className="flex flex-col items-center justify-center p-6 bg-error-container/10 rounded-2xl hover:bg-error-container group transition-all">
+                  <button onClick={handleLogout} className="flex flex-col items-center justify-center p-6 bg-error-container/10 rounded-2xl hover:bg-error-container group transition-all">
                     <span className="material-symbols-outlined text-error mb-3 group-hover:scale-110 transition-transform">logout</span>
                     <span className="text-sm font-bold text-on-error-container">Logout</span>
                   </button>

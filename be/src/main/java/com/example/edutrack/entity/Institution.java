@@ -1,5 +1,6 @@
 package com.example.edutrack.entity;
 
+import com.example.edutrack.entity.enums.InstitutionLevel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,6 +31,10 @@ public class Institution {
     private String email;
     private String phone;
     private String address;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private InstitutionLevel level;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

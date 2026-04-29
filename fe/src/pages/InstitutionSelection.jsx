@@ -20,7 +20,7 @@ const InstitutionSelection = () => {
     const handleContinue = () => {
         if (selectedId) {
             const selected = institutions.find(i => i.id === selectedId);
-            navigate('/login-credentials', { state: { institution: selected } });
+            navigate('/select-role', { state: { institution: selected } });
         }
     };
 

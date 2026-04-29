@@ -1,10 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../store/actions/authActions';
 import GuardianNavBar from '../../components/GuardianNavBar';
 import GuardianSidebar from '../../components/GuardianSidebar';
 
 const GuardianProfile = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/');
+  };
 
   return (
     <div className="bg-surface font-body text-on-surface antialiased mb-24 md:mb-0 min-h-screen">
@@ -140,7 +148,7 @@ const GuardianProfile = () => {
           </section>
 
           <footer className="pt-8 flex justify-center">
-            <button onClick={() => navigate('/')} className="flex items-center gap-2 px-8 py-4 rounded-2xl text-error font-bold hover:bg-error/5 transition-all active:scale-95 duration-200">
+            <button onClick={handleLogout} className="flex items-center gap-2 px-8 py-4 rounded-2xl text-error font-bold hover:bg-error/5 transition-all active:scale-95 duration-200">
               <span className="material-symbols-outlined">logout</span>
               Log Out
             </button>

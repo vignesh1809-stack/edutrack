@@ -22,3 +22,18 @@ export const logout = () => ({
 export const clearAuthError = () => ({
     type: types.CLEAR_AUTH_ERROR
 });
+
+export const refreshTokenRequest = (refreshToken) => ({
+    type: types.REFRESH_TOKEN_REQUEST,
+    payload: refreshToken
+});
+
+export const refreshTokenSuccess = (tokens) => ({
+    type: types.REFRESH_TOKEN_SUCCESS,
+    payload: tokens
+});
+
+export const refreshTokenFailure = (error) => ({
+    type: types.REFRESH_TOKEN_FAILURE,
+    payload: error
+});

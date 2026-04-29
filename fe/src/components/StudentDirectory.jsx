@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const studentsData = [
@@ -102,7 +102,7 @@ const StudentCard = ({ student, isExpanded, onToggle, viewMode }) => {
             <p className="text-xl font-bold text-on-surface">{student.avgMarks}</p>
           </div>
         </div>
-        <button onClick={(e) => { e.stopPropagation(); navigate('/student-profile'); }} className={`mt-4 w-full py-2.5 rounded-xl text-sm font-bold opacity-100 transition-opacity ${student.actionStyle}`}>
+        <button onClick={(e) => { e.stopPropagation(); navigate('/principal/student-profile'); }} className={`mt-4 w-full py-2.5 rounded-xl text-sm font-bold opacity-100 transition-opacity ${student.actionStyle}`}>
           {student.actionBtn}
         </button>
       </div>

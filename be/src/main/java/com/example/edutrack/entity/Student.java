@@ -18,7 +18,9 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Table(name = "students", indexes = {
     @Index(name = "idx_student_lookup", columnList = "institution_id, id"),
-    @Index(name = "idx_student_search", columnList = "institution_id, firstName, lastName, email")
+    // email dropped from search index — combined UTF8MB4 key would exceed MySQL's 3072-byte limit.
+    // Email lookups use a separate query with findByInstitutionIdAndPhone.
+    @Index(name = "idx_student_search", columnList = "institution_id, firstName, lastName")
 })
 @AllArgsConstructor
 @NoArgsConstructor

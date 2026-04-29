@@ -17,7 +17,7 @@ public class StudentDto {
     private String phone;
     private String address;
     private String admissionDate;
-    private GaurdianDto guardian;
+    private GuardianDto guardian;
     private String gender;
     private LocalDate dateOfBirth;
     private boolean isHosteller;

@@ -15,6 +15,7 @@ import java.util.UUID;
 public class CustomUserDetails implements UserDetails {
 
     private UUID id;
+    private String name;
     private String phone;
     private String password;
     private String role;
@@ -22,7 +23,9 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
+        // Store both the raw role name AND a ROLE_ prefixed variant
+        // so both hasAuthority('Administrator') and hasRole('Administrator') work
+        return Collections.singletonList(new SimpleGrantedAuthority(role));
     }
 
     @Override

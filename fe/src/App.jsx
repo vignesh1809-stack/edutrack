@@ -17,6 +17,7 @@ import GuardianProfile from './pages/guardian/GuardianProfile';
 import GuardianChat from './pages/guardian/GuardianChat';
 import StudentDashboard from './pages/student/StudentDashboard';
 import StudentRemarks from './pages/student/StudentRemarks';
+import SubmitFeedback from './pages/student/SubmitFeedback';
 import TransportDashboard from './pages/transport-incharge/TransportDashboard';
 import TransportStaffDirectory from './pages/transport-incharge/TransportStaffDirectory';
 import TransportRoutes from './pages/transport-incharge/TransportRoutes';
@@ -51,6 +52,7 @@ function App() {
         {/* --- Student --- */}
         <Route path="/student/dashboard" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
         <Route path="/student/remarks" element={<ProtectedRoute><StudentRemarks /></ProtectedRoute>} />
+        <Route path="/student/submit-feedback" element={<ProtectedRoute><SubmitFeedback /></ProtectedRoute>} />
 
         {/* --- Transport Incharge --- */}
         <Route path="/transport/dashboard" element={<ProtectedRoute><TransportDashboard /></ProtectedRoute>} />

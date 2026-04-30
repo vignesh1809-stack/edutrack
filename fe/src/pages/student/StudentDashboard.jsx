@@ -151,7 +151,10 @@ const StudentDashboard = () => {
                         </div>
                         
                         {/* Submit Remarks Button */}
-                        <button className="col-span-2 lg:col-span-1 w-full bg-gradient-to-br from-primary to-primary-dim text-on-primary py-5 md:py-8 px-6 rounded-2xl md:rounded-3xl flex items-center justify-between shadow-lg md:shadow-xl shadow-primary/20 active:scale-[0.98] transition-transform">
+                        <button 
+                            onClick={() => navigate('/student/submit-feedback')}
+                            className="col-span-2 lg:col-span-1 w-full bg-gradient-to-br from-primary to-primary-dim text-on-primary py-5 md:py-8 px-6 rounded-2xl md:rounded-3xl flex items-center justify-between shadow-lg md:shadow-xl shadow-primary/20 active:scale-[0.98] transition-transform"
+                        >
                             <div className="flex items-center gap-4">
                                 <div className="bg-white/20 p-2 md:p-3 rounded-xl md:rounded-2xl">
                                     <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }}>rate_review</span>

@@ -9,7 +9,6 @@ import com.example.edutrack.service.StudentService;
 
 import lombok.Data;
 
-
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,6 +45,4 @@ public class StudentController {
         studentService.delete(id);
     }
 
-
-    
 }

@@ -73,8 +73,11 @@ public class Student extends BaseEntity {
     @JoinColumn(name = "bus_id", nullable = true)
     private Buses bus;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
-    private List<Remarks> remarks;
+    @OneToMany(mappedBy = "targetStudent", cascade = CascadeType.ALL)
+    private List<Remarks> remarksTargeted;
+
+    @OneToMany(mappedBy = "authorStudent", cascade = CascadeType.ALL)
+    private List<Remarks> remarksAuthored;
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<Fee> fees;

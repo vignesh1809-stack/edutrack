@@ -3,6 +3,8 @@ package com.example.edutrack.entity;
 import java.util.UUID;
 import org.hibernate.annotations.UuidGenerator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.example.edutrack.entity.enums.RemarkCategory;
+import com.example.edutrack.entity.enums.RemarkTarget;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,12 +32,28 @@ public class Remarks extends BaseEntity {
     private Institution institution;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", referencedColumnName = "id", columnDefinition = "BINARY(16)")
-    private Student student;
+    @JoinColumn(name = "target_student_id", referencedColumnName = "id", columnDefinition = "BINARY(16)")
+    private Student targetStudent;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "staff_id", referencedColumnName = "id", columnDefinition = "BINARY(16)")
-    private Staff staff;
+    @JoinColumn(name = "target_staff_id", referencedColumnName = "id", columnDefinition = "BINARY(16)")
+    private Staff targetStaff;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_staff_id", referencedColumnName = "id", columnDefinition = "BINARY(16)")
+    private Staff authorStaff;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_student_id", referencedColumnName = "id", columnDefinition = "BINARY(16)")
+    private Student authorStudent;
 
     private String content;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "remark_target")
+    private RemarkTarget target;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "remark_category")
+    private RemarkCategory category;
 }

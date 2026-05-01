@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
@@ -41,4 +42,17 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
               AND a.is_deleted     = false
             """, nativeQuery = true)
     long countTotalOnDate(@Param("instId") UUID instId, @Param("date") LocalDate date);
+
+    @Query(value = """
+            SELECT a.record_date as recordDate, 
+                   COUNT(CASE WHEN a.attendance_status = 'PRESENT' THEN 1 END) as presentCount,
+                   COUNT(a.id) as totalCount
+            FROM attendances a
+            WHERE a.institution_id = :instId
+              AND a.record_date >= :startDate
+              AND a.is_deleted = false
+            GROUP BY a.record_date
+            ORDER BY a.record_date ASC
+            """, nativeQuery = true)
+    List<DailyAttendanceProjection> getAttendanceGraphData(@Param("instId") UUID instId, @Param("startDate") LocalDate startDate);
 }

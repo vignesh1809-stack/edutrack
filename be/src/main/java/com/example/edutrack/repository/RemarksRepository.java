@@ -37,7 +37,7 @@ public interface RemarksRepository extends JpaRepository<Remarks, UUID> {
                    CONCAT(s.first_name, ' ', s.last_name) AS studentName,
                    s.student_id AS studentCode
             FROM remarks r
-            JOIN students s ON s.id = r.student_id
+            JOIN students s ON s.id = r.target_student_id
             WHERE r.institution_id = :instId
               AND r.is_deleted      = false
             ORDER BY r.created_at DESC

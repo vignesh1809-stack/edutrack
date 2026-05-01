@@ -1,6 +1,7 @@
 import { takeLatest, put, call, select } from 'redux-saga/effects';
 import * as types from '../types/dashboardTypes';
 import * as actions from '../actions/dashboardActions';
+import axiosInstance from '../../api/axiosInstance';
 
 // API selector for access token
 const getAccessToken = (state) => state.auth.accessToken;
@@ -35,6 +36,19 @@ function* handleFetchDashboard() {
     }
 }
 
+function* handleFetchStaffAttendanceGraph(action) {
+    try {
+        const days = action.payload || 7;
+        const response = yield call(axiosInstance.get, `/api/staff/dashboard/attendance-graph?days=${days}`);
+        yield put(actions.fetchStaffAttendanceGraphSuccess(response.data));
+    } catch (error) {
+        yield put(actions.fetchStaffAttendanceGraphFailure(
+            error.response?.data?.message || error.message || 'Failed to fetch attendance graph'
+        ));
+    }
+}
+
 export default function* dashboardSaga() {
     yield takeLatest(types.FETCH_PRINCIPAL_DASHBOARD_REQUEST, handleFetchDashboard);
+    yield takeLatest(types.FETCH_STAFF_ATTENDANCE_GRAPH_REQUEST, handleFetchStaffAttendanceGraph);
 }

@@ -1,7 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchStaffAttendanceGraphRequest } from '../store/actions/dashboardActions';
 
 const ChartsSection = () => {
   const [selectedSubject, setSelectedSubject] = useState('All');
+  const dispatch = useDispatch();
+  const { graphData, graphLoading, graphError } = useSelector((state) => state.dashboard);
+
+  useEffect(() => {
+    dispatch(fetchStaffAttendanceGraphRequest(7));
+  }, [dispatch]);
 
   const distributionData = {
     All: [
@@ -32,32 +40,58 @@ const ChartsSection = () => {
 
   return (
     <section className="space-y-4">
-      {/* Line Chart Mockup */}
-      <div className="bg-surface-container-lowest p-5 rounded-3xl shadow-sm">
+      {/* Attendance Trends */}
+      <div className="bg-surface-container-lowest p-5 rounded-[32px] shadow-[0px_20px_40px_rgba(42,52,57,0.04)]">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-bold font-headline text-on-surface">Attendance Trends</h2>
-          <span className="material-symbols-outlined text-on-surface-variant">more_vert</span>
+          <span className="material-symbols-outlined text-on-surface-variant cursor-pointer">more_vert</span>
         </div>
-        {/* Abstract Graphic representation */}
-        <div className="relative h-32 flex items-end justify-between gap-1">
-          <div className="w-1/12 bg-primary/10 h-1/2 rounded-t-full"></div>
-          <div className="w-1/12 bg-primary/20 h-2/3 rounded-t-full"></div>
-          <div className="w-1/12 bg-primary/30 h-1/3 rounded-t-full"></div>
-          <div className="w-1/12 bg-primary/40 h-3/4 rounded-t-full"></div>
-          <div className="w-1/12 bg-primary-dim h-4/5 rounded-t-full"></div>
-          <div className="w-1/12 bg-primary h-full rounded-t-full shadow-lg shadow-primary/20"></div>
-          <div className="w-1/12 bg-primary/60 h-3/4 rounded-t-full"></div>
-          <div className="w-1/12 bg-primary/40 h-1/2 rounded-t-full"></div>
-          <div className="w-1/12 bg-primary/20 h-2/3 rounded-t-full"></div>
-        </div>
-        <div className="flex justify-between mt-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
-          <span>Mon</span>
-          <span>Tue</span>
-          <span>Wed</span>
-          <span>Thu</span>
-          <span>Fri</span>
-          <span>Sat</span>
-        </div>
+        
+        {graphLoading ? (
+          <div className="relative h-32 flex items-end justify-between gap-2 animate-pulse mt-4">
+            {[...Array(7)].map((_, i) => (
+              <div key={i} className="flex-1 bg-surface-container-high rounded-t-full" style={{ height: `${Math.random() * 50 + 20}%` }}></div>
+            ))}
+          </div>
+        ) : graphError ? (
+          <div className="flex items-center justify-center h-32 text-red-500 text-sm mt-4">
+            <span className="material-symbols-outlined mr-2 text-xl">error</span>
+            <span className="font-medium">{graphError}</span>
+          </div>
+        ) : (
+          <>
+            <div className="relative h-32 flex items-end justify-between gap-2 mt-4">
+              {graphData && graphData.length > 0 ? (
+                graphData.map((day, idx) => (
+                  <div 
+                    key={idx} 
+                    className="flex-1 bg-primary/20 hover:bg-primary transition-colors duration-300 rounded-t-full relative group cursor-pointer" 
+                    style={{ height: `${Math.max(10, day.percentage)}%` }}
+                  >
+                    {/* Tooltip */}
+                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-surface-container-highest text-on-surface text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none shadow-sm">
+                      {day.percentage}% ({day.presentCount}/{day.totalCount})
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="flex items-center justify-center w-full h-full text-on-surface-variant text-sm font-medium">
+                  No attendance data available
+                </div>
+              )}
+            </div>
+            
+            {graphData && graphData.length > 0 && (
+              <div className="flex justify-between mt-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest px-1">
+                {graphData.map((day, idx) => {
+                  const date = new Date(day.date);
+                  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                  return <span key={idx}>{days[date.getDay()]}</span>;
+                })}
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Bar Chart Mockup (Side Scroller) */}

@@ -13,6 +13,9 @@ const initialState = {
         latestRemarks: []
     },
     error: null,
+    graphLoading: false,
+    graphData: [],
+    graphError: null,
 };
 
 const dashboardReducer = (state = initialState, action) => {
@@ -34,6 +37,24 @@ const dashboardReducer = (state = initialState, action) => {
                 ...state,
                 loading: false,
                 error: action.payload,
+            };
+        case types.FETCH_STAFF_ATTENDANCE_GRAPH_REQUEST:
+            return {
+                ...state,
+                graphLoading: true,
+                graphError: null,
+            };
+        case types.FETCH_STAFF_ATTENDANCE_GRAPH_SUCCESS:
+            return {
+                ...state,
+                graphLoading: false,
+                graphData: action.payload,
+            };
+        case types.FETCH_STAFF_ATTENDANCE_GRAPH_FAILURE:
+            return {
+                ...state,
+                graphLoading: false,
+                graphError: action.payload,
             };
         default:
             return state;

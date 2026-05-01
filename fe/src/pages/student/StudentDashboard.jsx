@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StudentNavBar from '../../components/StudentNavBar';
 import StudentSidebar from '../../components/StudentSidebar';
 
 const StudentDashboard = () => {
     const navigate = useNavigate();
+    const [isSemesterModalOpen, setIsSemesterModalOpen] = useState(false);
 
     return (
         <div className="bg-surface text-on-surface antialiased mb-24 md:mb-0 font-body min-h-screen">
@@ -43,7 +44,10 @@ const StudentDashboard = () => {
                             <div className="flex justify-between items-center mb-6 md:mb-8">
                                 <div>
                                     <h2 className="font-headline font-bold text-lg md:text-xl text-on-surface">Academic Summary</h2>
-                                    <div className="flex items-center gap-1 text-primary text-sm font-semibold mt-1">
+                                    <div 
+                                        className="flex items-center gap-1 text-primary text-sm font-semibold mt-1 cursor-pointer"
+                                        onClick={() => setIsSemesterModalOpen(true)}
+                                    >
                                         <span>Fall 2023 Semester</span>
                                         <span className="material-symbols-outlined text-sm">expand_more</span>
                                     </div>
@@ -191,6 +195,68 @@ const StudentDashboard = () => {
                     </div>
                 </main>
                 <StudentNavBar />
+                
+                {/* Semester Selection Modal Overlay */}
+                {isSemesterModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-4 bg-inverse-surface/40 backdrop-blur-sm transition-opacity">
+                        <div className="w-full max-w-md bg-surface-container-lowest rounded-t-[32px] md:rounded-[32px] shadow-2xl overflow-hidden transform transition-all animate-in slide-in-from-bottom duration-300">
+                            {/* Modal Header */}
+                            <div className="px-6 py-5 border-b border-surface-container flex items-center justify-between">
+                                <h3 className="font-headline font-bold text-xl text-on-surface">Select Semester</h3>
+                                <button 
+                                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors" 
+                                    onClick={() => setIsSemesterModalOpen(false)}
+                                >
+                                    <span className="material-symbols-outlined text-on-surface-variant">close</span>
+                                </button>
+                            </div>
+                            
+                            {/* Semester List */}
+                            <div className="p-4 space-y-2">
+                                {/* Fall 2023 (Current) */}
+                                <button className="w-full flex items-center justify-between p-4 rounded-2xl bg-primary-container text-on-primary-container group transition-colors">
+                                    <div className="flex items-center gap-3">
+                                        <span className="material-symbols-outlined text-primary">check_circle</span>
+                                        <span className="font-semibold">Fall 2023 (Current)</span>
+                                    </div>
+                                </button>
+                                
+                                {/* Spring 2023 */}
+                                <button className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-surface-container transition-colors text-on-surface group">
+                                    <div className="flex items-center gap-3 text-on-surface-variant group-hover:text-on-surface">
+                                        <span className="material-symbols-outlined">history</span>
+                                        <span className="font-medium">Spring 2023</span>
+                                    </div>
+                                </button>
+                                
+                                {/* Fall 2022 */}
+                                <button className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-surface-container transition-colors text-on-surface group">
+                                    <div className="flex items-center gap-3 text-on-surface-variant group-hover:text-on-surface">
+                                        <span className="material-symbols-outlined">history</span>
+                                        <span className="font-medium">Fall 2022</span>
+                                    </div>
+                                </button>
+                                
+                                {/* Spring 2022 */}
+                                <button className="w-full flex items-center justify-between p-4 rounded-2xl hover:bg-surface-container transition-colors text-on-surface group">
+                                    <div className="flex items-center gap-3 text-on-surface-variant group-hover:text-on-surface">
+                                        <span className="material-symbols-outlined">history</span>
+                                        <span className="font-medium">Spring 2022</span>
+                                    </div>
+                                </button>
+                            </div>
+                            
+                            {/* Bottom Padding for Mobile Safe Area */}
+                            <div className="h-6 md:hidden"></div>
+                        </div>
+                        
+                        {/* Click-outside-to-dismiss backdrop */}
+                        <div 
+                            className="absolute inset-0 -z-10" 
+                            onClick={() => setIsSemesterModalOpen(false)}
+                        ></div>
+                    </div>
+                )}
             </div>
         </div>
     );

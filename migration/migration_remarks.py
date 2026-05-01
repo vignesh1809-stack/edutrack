@@ -48,34 +48,32 @@ def generate_remarks():
             is_deleted = 0
             content = fake.sentence(nb_words=10)
             
-            # Author is usually staff, but can be student 10% of time
-            author_is_staff = random.random() < 0.9
+            # Determine Author (50% staff, 50% student)
+            author_is_staff = random.random() < 0.5
             
             author_staff_id = None
             author_student_id = None
-            
-            if author_is_staff and staffs:
-                author_staff_id = random.choice(staffs)
-            elif students:
-                author_student_id = random.choice(students)
-            else:
-                continue # Skip if no author available
-                
-            target = random.choice(['STUDENT', 'STAFF', 'CAMPUS'])
             target_staff_id = None
             target_student_id = None
             category = None
             
-            if target == 'STUDENT' and students:
+            if author_is_staff and staffs and students:
+                author_staff_id = random.choice(staffs)
+                # Staff can ONLY add remark for student
+                target = 'STUDENT'
                 target_student_id = random.choice(students)
                 category = random.choice(['ACADEMIC', 'BEHAVIORAL', 'ATTENDANCE', 'OTHER'])
-            elif target == 'STAFF' and staffs:
-                target_staff_id = random.choice(staffs)
-                category = random.choice(['ACADEMIC', 'BEHAVIORAL', 'ATTENDANCE', 'OTHER'])
-            elif target == 'CAMPUS':
-                pass # category is null
+            elif not author_is_staff and students and staffs:
+                author_student_id = random.choice(students)
+                # Student can add remark for campus or staff
+                target = random.choice(['STAFF', 'CAMPUS'])
+                if target == 'STAFF':
+                    target_staff_id = random.choice(staffs)
+                    category = random.choice(['ACADEMIC', 'BEHAVIORAL', 'ATTENDANCE', 'OTHER'])
+                elif target == 'CAMPUS':
+                    pass # category is null
             else:
-                continue
+                continue # Skip if no author/target available
                 
             data.append((
                 remark_id, inst, is_deleted, content,

@@ -5,5 +5,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface StaffDashboardService {
-    List<AttendanceGraphDto> getAttendanceGraph(UUID institutionId, int days);
+    List<AttendanceGraphDto> getAttendanceGraph(UUID institutionId, int days, Integer year, String section);
 }

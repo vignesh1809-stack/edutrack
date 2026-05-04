@@ -37,4 +37,17 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
     @Query(value = "SELECT COUNT(*) FROM students WHERE institution_id = :instId AND is_deleted = false",
            nativeQuery = true)
     long countActiveStudents(@Param("instId") UUID instId);
+
+    @Query(value = """
+            SELECT COUNT(s.id) 
+            FROM students s
+            JOIN departments d ON d.id = s.department_id
+            WHERE s.institution_id = :instId 
+              AND s.is_deleted = false
+              AND (:batchYear IS NULL OR d.batch_year = :batchYear)
+              AND (:section IS NULL OR d.section = :section)
+            """, nativeQuery = true)
+    long countActiveStudentsFiltered(@Param("instId") UUID instId, 
+                                     @Param("batchYear") Integer batchYear, 
+                                     @Param("section") String section);
 }

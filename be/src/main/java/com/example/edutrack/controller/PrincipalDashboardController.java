@@ -35,9 +35,11 @@ public class PrincipalDashboardController {
     @GetMapping
     @PreAuthorize("hasAnyAuthority('Administrator', 'Lecturer', 'Head_of_Department', 'Principal')")
     public ResponseEntity<PrincipalDashboardDto> getDashboard(
-            @AuthenticationPrincipal CustomUserDetails principal) {
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) String section) {
 
-        PrincipalDashboardDto dashboard = dashboardService.getDashboard(principal.getInstitutionId());
+        PrincipalDashboardDto dashboard = dashboardService.getDashboard(principal.getInstitutionId(), year, section);
         return ResponseEntity.ok(dashboard);
     }
 }

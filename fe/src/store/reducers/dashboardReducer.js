@@ -16,10 +16,61 @@ const initialState = {
     graphLoading: false,
     graphData: [],
     graphError: null,
+    filters: {
+        year: 'All Years',
+        section: 'All Sections'
+    },
+    availableYears: [],
+    availableSections: [],
+    availableAssessmentTypes: [],
+    marksDistribution: [],
+    marksLoading: false,
+    marksError: null,
 };
 
 const dashboardReducer = (state = initialState, action) => {
     switch (action.type) {
+        case types.SET_DASHBOARD_FILTER:
+            return {
+                ...state,
+                filters: {
+                    ...state.filters,
+                    ...action.payload
+                }
+            };
+        case types.FETCH_YEARS_SUCCESS:
+            return {
+                ...state,
+                availableYears: action.payload
+            };
+        case types.FETCH_SECTIONS_SUCCESS:
+            return {
+                ...state,
+                availableSections: action.payload
+            };
+        case types.FETCH_ASSESSMENT_TYPES_SUCCESS:
+            return {
+                ...state,
+                availableAssessmentTypes: action.payload
+            };
+        case types.FETCH_MARKS_DISTRIBUTION_REQUEST:
+            return {
+                ...state,
+                marksLoading: true,
+                marksError: null,
+            };
+        case types.FETCH_MARKS_DISTRIBUTION_SUCCESS:
+            return {
+                ...state,
+                marksLoading: false,
+                marksDistribution: action.payload,
+            };
+        case types.FETCH_MARKS_DISTRIBUTION_FAILURE:
+            return {
+                ...state,
+                marksLoading: false,
+                marksError: action.payload,
+            };
         case types.FETCH_PRINCIPAL_DASHBOARD_REQUEST:
             return {
                 ...state,

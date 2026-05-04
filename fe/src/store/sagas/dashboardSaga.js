@@ -5,32 +5,27 @@ import axiosInstance from '../../api/axiosInstance';
 
 // API selector for access token
 const getAccessToken = (state) => state.auth.accessToken;
+const getInstitutionId = (state) => state.auth.user?.institutionId;
 
-const fetchDashboardApi = async (token) => {
-    const response = await fetch('/api/principal/dashboard', {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to fetch dashboard data');
-    }
-
-    return await response.json();
-};
-
-function* handleFetchDashboard() {
+function* handleFetchDashboard(action) {
     try {
-        const token = yield select(getAccessToken);
-        if (!token) {
-            throw new Error('No authentication token found');
+        const filters = action.payload || {};
+        let url = '/api/principal/dashboard';
+        const params = [];
+
+        if (filters.year && filters.year !== 'All Years') {
+            params.push(`year=${filters.year}`);
         }
-        const data = yield call(fetchDashboardApi, token);
-        yield put(actions.fetchPrincipalDashboardSuccess(data));
+        if (filters.section && filters.section !== 'All Sections') {
+            params.push(`section=${filters.section}`);
+        }
+
+        if (params.length > 0) {
+            url += `?${params.join('&')}`;
+        }
+
+        const response = yield call(axiosInstance.get, url);
+        yield put(actions.fetchPrincipalDashboardSuccess(response.data));
     } catch (error) {
         yield put(actions.fetchPrincipalDashboardFailure(error.message));
     }
@@ -38,8 +33,17 @@ function* handleFetchDashboard() {
 
 function* handleFetchStaffAttendanceGraph(action) {
     try {
-        const days = action.payload || 7;
-        const response = yield call(axiosInstance.get, `/api/staff/dashboard/attendance-graph?days=${days}`);
+        const { days = 7, filters = {} } = action.payload || {};
+        let url = `/api/staff/dashboard/attendance-graph?days=${days}`;
+        
+        if (filters.year && filters.year !== 'All Years') {
+            url += `&year=${filters.year}`;
+        }
+        if (filters.section && filters.section !== 'All Sections') {
+            url += `&section=${filters.section}`;
+        }
+
+        const response = yield call(axiosInstance.get, url);
         yield put(actions.fetchStaffAttendanceGraphSuccess(response.data));
     } catch (error) {
         yield put(actions.fetchStaffAttendanceGraphFailure(
@@ -48,7 +52,72 @@ function* handleFetchStaffAttendanceGraph(action) {
     }
 }
 
+function* handleFetchYears() {
+    try {
+        const institutionId = yield select(getInstitutionId);
+        if (!institutionId) return;
+        
+        const response = yield call(axiosInstance.get, `/api/departments/years?institutionId=${institutionId}`);
+        yield put(actions.fetchYearsSuccess(['All Years', ...response.data]));
+    } catch (error) {
+        yield put(actions.fetchYearsFailure(error.message));
+    }
+}
+
+function* handleFetchSections(action) {
+    try {
+        const institutionId = yield select(getInstitutionId);
+        if (!institutionId) return;
+
+        const year = action.payload === 'All Years' ? '' : action.payload;
+        let url = `/api/departments/sections?institutionId=${institutionId}`;
+        if (year) {
+            url += `&year=${year}`;
+        }
+        const response = yield call(axiosInstance.get, url);
+        yield put(actions.fetchSectionsSuccess(['All Sections', ...response.data]));
+    } catch (error) {
+        yield put(actions.fetchSectionsFailure(error.message));
+    }
+}
+
+function* handleFetchAssessmentTypes(action) {
+    try {
+        const filters = action.payload || {};
+        let url = '/api/assessments/types';
+        const params = [];
+        if (filters.year && filters.year !== 'All Years') params.push(`year=${filters.year}`);
+        if (filters.section && filters.section !== 'All Sections') params.push(`section=${filters.section}`);
+        if (params.length > 0) url += `?${params.join('&')}`;
+
+        const response = yield call(axiosInstance.get, url);
+        yield put(actions.fetchAssessmentTypesSuccess(response.data));
+    } catch (error) {
+        yield put(actions.fetchAssessmentTypesFailure(error.message));
+    }
+}
+
+function* handleFetchMarksDistribution(action) {
+    try {
+        const { type, filters = {} } = action.payload;
+        if (!type) return;
+
+        let url = `/api/assessments/distribution?type=${type}`;
+        if (filters.year && filters.year !== 'All Years') url += `&year=${filters.year}`;
+        if (filters.section && filters.section !== 'All Sections') url += `&section=${filters.section}`;
+
+        const response = yield call(axiosInstance.get, url);
+        yield put(actions.fetchMarksDistributionSuccess(response.data));
+    } catch (error) {
+        yield put(actions.fetchMarksDistributionFailure(error.message));
+    }
+}
+
 export default function* dashboardSaga() {
     yield takeLatest(types.FETCH_PRINCIPAL_DASHBOARD_REQUEST, handleFetchDashboard);
     yield takeLatest(types.FETCH_STAFF_ATTENDANCE_GRAPH_REQUEST, handleFetchStaffAttendanceGraph);
+    yield takeLatest(types.FETCH_YEARS_REQUEST, handleFetchYears);
+    yield takeLatest(types.FETCH_SECTIONS_REQUEST, handleFetchSections);
+    yield takeLatest(types.FETCH_ASSESSMENT_TYPES_REQUEST, handleFetchAssessmentTypes);
+    yield takeLatest(types.FETCH_MARKS_DISTRIBUTION_REQUEST, handleFetchMarksDistribution);
 }

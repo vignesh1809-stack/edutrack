@@ -5,5 +5,5 @@ import com.example.edutrack.dto.PrincipalDashboardDto;
 import java.util.UUID;
 
 public interface PrincipalDashboardService {
-    PrincipalDashboardDto getDashboard(UUID institutionId);
+    PrincipalDashboardDto getDashboard(UUID institutionId, Integer year, String section);
 }

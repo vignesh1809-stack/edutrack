@@ -1,42 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchStaffAttendanceGraphRequest } from '../store/actions/dashboardActions';
+import { 
+  fetchStaffAttendanceGraphRequest, 
+  fetchAssessmentTypesRequest, 
+  fetchMarksDistributionRequest 
+} from '../store/actions/dashboardActions';
 
 const ChartsSection = () => {
-  const [selectedSubject, setSelectedSubject] = useState('All');
+  const [selectedType, setSelectedType] = useState(null);
+  const [isTypeModalOpen, setIsTypeModalOpen] = useState(false);
   const dispatch = useDispatch();
-  const { graphData, graphLoading, graphError } = useSelector((state) => state.dashboard);
+  const { 
+    graphData, graphLoading, graphError, filters,
+    availableAssessmentTypes, marksDistribution, marksLoading, marksError 
+  } = useSelector((state) => state.dashboard);
 
   useEffect(() => {
-    dispatch(fetchStaffAttendanceGraphRequest(7));
-  }, [dispatch]);
+    dispatch(fetchStaffAttendanceGraphRequest({ days: 7, filters }));
+    dispatch(fetchAssessmentTypesRequest(filters));
+  }, [dispatch, filters]);
 
-  const distributionData = {
-    All: [
-      { grade: 'A+ 90+', percent: 32, width: '32%', color: 'bg-primary' },
-      { grade: 'A 80-89', percent: 42, width: '42%', color: 'bg-primary' },
-      { grade: 'B 70-79', percent: 18, width: '18%', color: 'bg-primary-container' },
-      { grade: 'C <70', percent: 8, width: '8%', color: 'bg-surface-variant' }
-    ],
-    Math: [
-      { grade: 'A+ 90+', percent: 35, width: '35%', color: 'bg-primary' },
-      { grade: 'A 80-89', percent: 45, width: '45%', color: 'bg-primary' },
-      { grade: 'B 70-79', percent: 15, width: '15%', color: 'bg-primary-container' },
-      { grade: 'C <70', percent: 5, width: '5%', color: 'bg-surface-variant' }
-    ],
-    Physics: [
-      { grade: 'A+ 90+', percent: 20, width: '20%', color: 'bg-primary' },
-      { grade: 'A 80-89', percent: 50, width: '50%', color: 'bg-primary' },
-      { grade: 'B 70-79', percent: 20, width: '20%', color: 'bg-primary-container' },
-      { grade: 'C <70', percent: 10, width: '10%', color: 'bg-surface-variant' }
-    ],
-    History: [
-      { grade: 'A+ 90+', percent: 45, width: '45%', color: 'bg-primary' },
-      { grade: 'A 80-89', percent: 30, width: '30%', color: 'bg-primary' },
-      { grade: 'B 70-79', percent: 20, width: '20%', color: 'bg-primary-container' },
-      { grade: 'C <70', percent: 5, width: '5%', color: 'bg-surface-variant' }
-    ]
-  };
+  useEffect(() => {
+    if (availableAssessmentTypes && availableAssessmentTypes.length > 0) {
+      if (!selectedType || !availableAssessmentTypes.includes(selectedType)) {
+        setSelectedType(availableAssessmentTypes[0]);
+      }
+    } else {
+        setSelectedType(null);
+    }
+  }, [availableAssessmentTypes]);
+
+  useEffect(() => {
+    if (selectedType) {
+      dispatch(fetchMarksDistributionRequest({ type: selectedType, filters }));
+    }
+  }, [dispatch, selectedType, filters]);
 
   return (
     <section className="space-y-4">
@@ -66,7 +64,11 @@ const ChartsSection = () => {
                   <div 
                     key={idx} 
                     className="flex-1 bg-primary/20 hover:bg-primary transition-colors duration-300 rounded-t-full relative group cursor-pointer" 
-                    style={{ height: `${Math.max(10, day.percentage)}%` }}
+                    style={{ 
+                      // Logarithmic scaling to emphasize variations in lower ranges 
+                      // height = log10(val + 1) / log10(101) * 100
+                      height: `${Math.max(10, (Math.log10(day.percentage + 1) / Math.log10(101)) * 100)}%` 
+                    }}
                   >
                     {/* Tooltip */}
                     <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-surface-container-highest text-on-surface text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none shadow-sm">
@@ -94,35 +96,112 @@ const ChartsSection = () => {
         )}
       </div>
 
-      {/* Bar Chart Mockup (Side Scroller) */}
-      <div className="bg-surface-container-lowest p-5 rounded-3xl shadow-sm">
+      {/* Marks Distribution */}
+      <div className="bg-surface-container-lowest p-5 rounded-3xl shadow-sm relative">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-bold font-headline text-on-surface">Marks Distribution</h2>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-primary hidden sm:block"></div>
-            <select 
-              value={selectedSubject} 
-              onChange={(e) => setSelectedSubject(e.target.value)}
-              className="bg-surface-container-high border-none outline-none rounded-lg px-2 py-1 text-[11px] font-bold text-slate-700 focus:ring-2 focus:ring-primary cursor-pointer hover:bg-surface-container-highest transition-colors"
-            >
-              <option value="All">All Subjects</option>
-              <option value="Math">Math</option>
-              <option value="Physics">Physics</option>
-              <option value="History">History</option>
-            </select>
+          <div 
+            onClick={() => setIsTypeModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-high hover:bg-surface-container-highest rounded-xl cursor-pointer transition-colors group"
+          >
+            <span className="text-[11px] font-bold text-primary uppercase tracking-tight">{selectedType || 'Select Type'}</span>
+            <span className="material-symbols-outlined text-primary text-lg group-hover:translate-y-0.5 transition-transform">expand_more</span>
           </div>
         </div>
-        <div className="space-y-4">
-          {distributionData[selectedSubject].map((item, idx) => (
-            <div key={idx} className="flex items-center gap-3 group">
-              <span className="text-xs font-bold w-14 text-on-surface-variant uppercase tracking-tighter whitespace-nowrap">{item.grade}</span>
-              <div className="flex-1 h-3 bg-surface-container rounded-full overflow-hidden">
-                <div className={`h-full ${item.color} rounded-full transition-all duration-500`} style={{ width: item.width }}></div>
-              </div>
-              <span className="text-xs font-bold text-on-surface w-8 text-right">{item.percent}%</span>
+
+        {marksLoading ? (
+            <div className="space-y-4 animate-pulse">
+                {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                        <div className="w-14 h-3 bg-surface-container rounded-full"></div>
+                        <div className="flex-1 h-3 bg-surface-container rounded-full"></div>
+                        <div className="w-8 h-3 bg-surface-container rounded-full"></div>
+                    </div>
+                ))}
             </div>
-          ))}
-        </div>
+        ) : marksError ? (
+            <div className="flex items-center justify-center py-10 text-red-500 text-sm">
+                <span className="material-symbols-outlined mr-2">error</span>
+                {marksError}
+            </div>
+        ) : marksDistribution && marksDistribution.length > 0 ? (
+            <div className="space-y-4">
+              {marksDistribution.map((item, idx) => {
+                const colorMap = {
+                  'primary': 'bg-primary',
+                  'tertiary': 'bg-tertiary',
+                  'secondary': 'bg-secondary',
+                  'error': 'bg-error'
+                };
+                const barColor = colorMap[item.color] || 'bg-primary';
+                
+                return (
+                  <div key={idx} className="flex items-center gap-3 group">
+                    <span className="text-xs font-bold w-14 text-on-surface-variant uppercase tracking-tighter whitespace-nowrap">{item.grade}</span>
+                    <div className="flex-1 h-3 bg-surface-container rounded-full overflow-hidden">
+                      <div className={`h-full ${barColor} rounded-full transition-all duration-500`} style={{ width: item.width }}></div>
+                    </div>
+                    <span className="text-xs font-bold text-on-surface w-8 text-right">{item.percent}%</span>
+                  </div>
+                );
+              })}
+            </div>
+        ) : (
+            <div className="flex flex-col items-center justify-center py-10 text-on-surface-variant text-sm text-center">
+                <span className="material-symbols-outlined text-4xl mb-2 opacity-20">analytics</span>
+                <p className="font-medium">No distribution data available</p>
+                <p className="text-xs opacity-60">Try selecting a different filter or assignment type</p>
+            </div>
+        )}
+
+        {/* Assignment Type Selection Modal */}
+        {isTypeModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm transition-opacity">
+            <div className="w-full max-w-sm bg-surface-container-lowest rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+              <div className="px-6 py-5 border-b border-surface-container flex items-center justify-between">
+                <h3 className="font-headline font-bold text-xl text-on-surface">Select Type</h3>
+                <button 
+                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors" 
+                  onClick={() => setIsTypeModalOpen(false)}
+                >
+                  <span className="material-symbols-outlined text-on-surface-variant">close</span>
+                </button>
+              </div>
+              <div className="p-4 space-y-2 max-h-64 overflow-y-auto">
+                {availableAssessmentTypes && availableAssessmentTypes.length > 0 ? (
+                    availableAssessmentTypes.map((type) => (
+                      <button 
+                        key={type}
+                        onClick={() => {
+                          setSelectedType(type);
+                          setIsTypeModalOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between p-4 rounded-2xl transition-colors group ${
+                          selectedType === type 
+                            ? 'bg-primary-container text-on-primary-container' 
+                            : 'hover:bg-surface-container text-on-surface'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="material-symbols-outlined">
+                            {selectedType === type ? 'check_circle' : 'assignment'}
+                          </span>
+                          <span className={selectedType === type ? 'font-semibold' : 'font-medium'}>
+                            {type}
+                          </span>
+                        </div>
+                      </button>
+                    ))
+                ) : (
+                    <div className="p-8 text-center text-on-surface-variant text-sm">
+                        No assignment types found for current filters.
+                    </div>
+                )}
+              </div>
+            </div>
+            <div className="absolute inset-0 -z-10" onClick={() => setIsTypeModalOpen(false)}></div>
+          </div>
+        )}
       </div>
     </section>
   );

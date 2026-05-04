@@ -13,11 +13,11 @@ import FloatingActionButton from '../../components/FloatingActionButton';
 
 const Home = () => {
   const dispatch = useDispatch();
-  const { loading, error } = useSelector((state) => state.dashboard);
+  const { loading, error, filters } = useSelector((state) => state.dashboard);
 
   useEffect(() => {
-    dispatch(fetchPrincipalDashboardRequest());
-  }, [dispatch]);
+    dispatch(fetchPrincipalDashboardRequest(filters));
+  }, [dispatch, filters]);
 
   return (
     <>

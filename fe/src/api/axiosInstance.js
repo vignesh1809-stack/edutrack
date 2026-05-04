@@ -26,8 +26,15 @@ axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
         const original = error.config;
+        const status = error.response?.status;
 
-        if (error.response?.status !== 401 || original._retry) {
+        // Only attempt refresh on 401 or 403 (expired/invalid token)
+        if ((status !== 401 && status !== 403) || original._retry) {
+            return Promise.reject(error);
+        }
+
+        // Don't retry refresh/login calls themselves
+        if (original.url?.includes('/api/auth/')) {
             return Promise.reject(error);
         }
 
@@ -43,6 +50,7 @@ axiosInstance.interceptors.response.use(
 
         original._retry = true;
         isRefreshing = true;
+        console.log('[Auth] Access token expired. Attempting silent refresh...');
 
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) {
@@ -52,7 +60,10 @@ axiosInstance.interceptors.response.use(
         }
 
         try {
-            const { data } = await axios.post('/api/auth/refresh', { refreshToken });
+            // Use plain axios (no interceptors) to avoid infinite loops.
+            // Must include full URL since plain axios has no baseURL.
+            const { data } = await axios.post('http://localhost:8080/api/auth/refresh', { refreshToken });
+            console.log('[Auth] Token refreshed successfully.');
             localStorage.setItem('accessToken', data.accessToken);
             localStorage.setItem('refreshToken', data.refreshToken);
             axiosInstance.defaults.headers.common.Authorization = `Bearer ${data.accessToken}`;
@@ -60,6 +71,7 @@ axiosInstance.interceptors.response.use(
             original.headers.Authorization = `Bearer ${data.accessToken}`;
             return axiosInstance(original);
         } catch (refreshError) {
+            console.error('[Auth] Refresh failed. Logging out.', refreshError);
             processQueue(refreshError, null);
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');

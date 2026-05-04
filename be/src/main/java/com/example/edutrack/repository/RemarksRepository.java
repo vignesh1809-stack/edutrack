@@ -46,4 +46,55 @@ public interface RemarksRepository extends JpaRepository<Remarks, UUID> {
             ORDER BY r.created_at DESC
             """, nativeQuery = true)
     Page<Object[]> findLatestRemarks(@Param("instId") UUID instId, Pageable pageable);
+
+    @Query(value = """
+            SELECT COUNT(r.id)
+            FROM remarks r
+            JOIN students s ON s.id = r.author_student_id
+            JOIN departments d ON d.id = s.department_id
+            WHERE r.institution_id = :instId
+              AND DATE(r.created_at) = :date
+              AND r.is_deleted       = false
+              AND r.remark_target    IN ('CAMPUS', 'STAFF')
+              AND (:batchYear IS NULL OR d.batch_year = :batchYear)
+              AND (:section IS NULL OR d.section = :section)
+            """, nativeQuery = true)
+    long countRemarksSubmittedOnDateFiltered(@Param("instId") UUID instId, 
+                                             @Param("date") LocalDate date,
+                                             @Param("batchYear") Integer batchYear,
+                                             @Param("section") String section);
+
+    @Query(value = """
+            SELECT COUNT(r.id)
+            FROM remarks r
+            JOIN students s ON s.id = r.author_student_id
+            JOIN departments d ON d.id = s.department_id
+            WHERE r.institution_id = :instId
+              AND r.is_deleted      = false
+              AND r.remark_target    IN ('CAMPUS', 'STAFF')
+              AND (:batchYear IS NULL OR d.batch_year = :batchYear)
+              AND (:section IS NULL OR d.section = :section)
+            """, nativeQuery = true)
+    long countTotalRemarksFiltered(@Param("instId") UUID instId,
+                                   @Param("batchYear") Integer batchYear,
+                                   @Param("section") String section);
+
+    @Query(value = """
+            SELECT r.id, r.content, r.created_at,
+                   CONCAT(s.first_name, ' ', s.last_name) AS studentName,
+                   s.student_id AS studentCode
+            FROM remarks r
+            JOIN students s ON s.id = r.author_student_id
+            JOIN departments d ON d.id = s.department_id
+            WHERE r.institution_id = :instId
+              AND r.is_deleted      = false
+              AND r.remark_target    IN ('CAMPUS', 'STAFF')
+              AND (:batchYear IS NULL OR d.batch_year = :batchYear)
+              AND (:section IS NULL OR d.section = :section)
+            ORDER BY r.created_at DESC
+            """, nativeQuery = true)
+    Page<Object[]> findLatestRemarksFiltered(@Param("instId") UUID instId, 
+                                             @Param("batchYear") Integer batchYear,
+                                             @Param("section") String section,
+                                             Pageable pageable);
 }

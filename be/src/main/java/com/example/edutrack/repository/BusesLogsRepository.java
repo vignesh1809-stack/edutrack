@@ -29,4 +29,35 @@ public interface BusesLogsRepository extends JpaRepository<BusesLogs, UUID> {
               AND b.is_deleted      = false
             """, nativeQuery = true)
     long countTotalBuses(@Param("instId") UUID instId);
+
+    @Query(value = """
+            SELECT COUNT(DISTINCT b.id)
+            FROM buses b
+            JOIN students s ON s.bus_id = b.id
+            JOIN departments d ON d.id = s.department_id
+            WHERE b.institution_id = :instId
+              AND b.is_deleted      = false
+              AND (:batchYear IS NULL OR d.batch_year = :batchYear)
+              AND (:section IS NULL OR d.section = :section)
+            """, nativeQuery = true)
+    long countTotalBusesFiltered(@Param("instId") UUID instId,
+                                 @Param("batchYear") Integer batchYear,
+                                 @Param("section") String section);
+
+    @Query(value = """
+            SELECT COUNT(DISTINCT bl.bus_id)
+            FROM buses_logs bl
+            JOIN buses b ON b.id = bl.bus_id
+            JOIN students s ON s.bus_id = b.id
+            JOIN departments d ON d.id = s.department_id
+            WHERE b.institution_id     = :instId
+              AND DATE(bl.arrival_time) = :date
+              AND bl.is_deleted         = false
+              AND (:batchYear IS NULL OR d.batch_year = :batchYear)
+              AND (:section IS NULL OR d.section = :section)
+            """, nativeQuery = true)
+    long countBusesArrivedOnDateFiltered(@Param("instId") UUID instId,
+                                         @Param("date") LocalDate date,
+                                         @Param("batchYear") Integer batchYear,
+                                         @Param("section") String section);
 }

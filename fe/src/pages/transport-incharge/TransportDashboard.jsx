@@ -1,7 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const TransportDashboard = () => {
+    const navigate = useNavigate();
+    
     return (
         <div className="bg-surface text-on-surface selection:bg-primary-container min-h-screen">
             {/* TopAppBar */}
@@ -23,7 +25,7 @@ const TransportDashboard = () => {
 
             <div className="flex min-h-screen pt-20">
                 {/* NavigationDrawer (Sidebar) */}
-                <aside className="h-screen w-64 bg-slate-50 flex flex-col gap-2 p-4 pt-4 fixed left-0 hidden lg:flex">
+                <aside className="h-screen w-64 bg-slate-50 flex flex-col gap-2 p-4 pt-4 fixed left-0 hidden md:flex">
                     <div className="mb-8 px-4 py-6 bg-white rounded-2xl shadow-sm border border-surface-container-highest/50">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
@@ -42,17 +44,13 @@ const TransportDashboard = () => {
                             <span className="material-symbols-outlined">group</span>
                             <span>Staff Directory</span>
                         </Link>
-                        <Link className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-blue-500 hover:bg-slate-200/50 rounded-lg transition-all" to="#">
-                            <span className="material-symbols-outlined">schedule</span>
-                            <span>Time Tracking</span>
-                        </Link>
                         <Link className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-blue-500 hover:bg-slate-200/50 rounded-lg transition-all" to="/transport/routes">
                             <span className="material-symbols-outlined">map</span>
                             <span>Route Analytics</span>
                         </Link>
-                        <Link className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-blue-500 hover:bg-slate-200/50 rounded-lg transition-all" to="#">
-                            <span className="material-symbols-outlined">settings_suggest</span>
-                            <span>Maintenance</span>
+                        <Link className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-blue-500 hover:bg-slate-200/50 rounded-lg transition-all" to="/transport/profile">
+                            <span className="material-symbols-outlined">account_circle</span>
+                            <span>Profile</span>
                         </Link>
                     </nav>
                     <div className="mt-auto p-4 bg-tertiary-container/30 rounded-2xl">
@@ -65,7 +63,7 @@ const TransportDashboard = () => {
                 </aside>
 
                 {/* Main Content Area */}
-                <main className="flex-1 lg:ml-64 p-6 bg-surface">
+                <main className="flex-1 md:ml-64 p-6 bg-surface">
                     <div className="max-w-7xl mx-auto space-y-8">
                         {/* Welcome Section */}
                         <section className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -78,7 +76,10 @@ const TransportDashboard = () => {
                                     <span className="material-symbols-outlined text-lg">file_download</span>
                                     Export Report
                                 </button>
-                                <button className="px-5 py-2.5 bg-gradient-to-br from-primary to-primary-dim text-white font-semibold rounded-xl shadow-lg hover:shadow-primary/20 transition-all flex items-center gap-2">
+                                <button 
+                                    onClick={() => navigate('/transport/add-log')}
+                                    className="px-5 py-2.5 bg-gradient-to-br from-primary to-primary-dim text-white font-semibold rounded-xl shadow-lg hover:shadow-primary/20 transition-all flex items-center gap-2"
+                                >
                                     <span className="material-symbols-outlined text-lg">add</span>
                                     Add Log Entry
                                 </button>
@@ -200,7 +201,7 @@ const TransportDashboard = () => {
             </div>
 
             {/* Bottom Navigation */}
-            <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-white/80 backdrop-blur-lg shadow-[0_-10px_40px_rgba(0,0,0,0.03)] rounded-t-[24px]">
+            <nav className="fixed bottom-0 left-0 w-full z-50 flex md:hidden justify-around items-center px-4 pb-6 pt-3 bg-white/80 backdrop-blur-lg shadow-[0_-10px_40px_rgba(0,0,0,0.03)] rounded-t-[24px]">
                 <Link className="flex flex-col items-center justify-center bg-blue-50 text-blue-700 rounded-xl px-5 py-2 active:scale-90 duration-200" to="/transport/dashboard">
                     <span className="material-symbols-outlined mb-1" style={{ fontVariationSettings: "'FILL' 1" }}>directions_bus</span>
                     <span className="font-inter text-[11px] font-semibold uppercase tracking-wider">Fleet</span>
@@ -221,7 +222,10 @@ const TransportDashboard = () => {
 
             {/* Contextual Floating Action Button */}
             <div className="fixed bottom-24 right-6 md:bottom-10 md:right-10 z-40">
-                <button className="w-14 h-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-transform">
+                <button 
+                    onClick={() => navigate('/transport/add-log')}
+                    className="w-14 h-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
+                >
                     <span className="material-symbols-outlined text-2xl">add_location</span>
                 </button>
             </div>

@@ -53,7 +53,7 @@ const TransportRoutes = () => {
 
             <div className="flex min-h-screen pt-16">
                 {/* Sidebar (Desktop) */}
-                <aside className="h-screen w-64 bg-slate-50 flex flex-col gap-2 p-4 pt-4 fixed left-0 hidden lg:flex border-r border-surface-container">
+                <aside className="h-screen w-64 bg-slate-50 flex flex-col gap-2 p-4 pt-4 fixed left-0 hidden md:flex border-r border-surface-container">
                     <div className="mb-8 px-4 py-6 bg-white rounded-2xl shadow-sm border border-surface-container-highest/50">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
@@ -76,18 +76,14 @@ const TransportRoutes = () => {
                             <span className="material-symbols-outlined">map</span>
                             <span>Routes Management</span>
                         </Link>
-                        <Link className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-blue-500 hover:bg-slate-200/50 rounded-lg transition-all" to="#">
-                            <span className="material-symbols-outlined">schedule</span>
-                            <span>Time Tracking</span>
-                        </Link>
-                        <Link className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-blue-500 hover:bg-slate-200/50 rounded-lg transition-all" to="#">
-                            <span className="material-symbols-outlined">settings_suggest</span>
-                            <span>Maintenance</span>
+                        <Link className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-blue-500 hover:bg-slate-200/50 rounded-lg transition-all" to="/transport/profile">
+                            <span className="material-symbols-outlined">account_circle</span>
+                            <span>Profile</span>
                         </Link>
                     </nav>
                 </aside>
 
-                <main className="flex-1 lg:ml-64 p-4 space-y-6">
+                <main className="flex-1 md:ml-64 p-4 space-y-6">
                     <section className="space-y-4">
                         <div className="flex items-center justify-between px-2">
                             <h2 className="font-headline font-bold text-on-surface text-xl">Active Bus Routes</h2>
@@ -138,7 +134,7 @@ const TransportRoutes = () => {
             </div>
 
             {/* BottomNavBar */}
-            <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-white/80 backdrop-blur-lg shadow-[0_-10px_40px_rgba(0,0,0,0.03)] rounded-t-[24px]">
+            <nav className="fixed bottom-0 left-0 w-full z-50 flex md:hidden justify-around items-center px-4 pb-6 pt-3 bg-white/80 backdrop-blur-lg shadow-[0_-10px_40px_rgba(0,0,0,0.03)] rounded-t-[24px]">
                 <Link className="flex flex-col items-center justify-center text-slate-400 px-5 py-2 hover:text-blue-500 transition-all active:scale-90 duration-200" to="/transport/dashboard">
                     <span className="material-symbols-outlined mb-1">directions_bus</span>
                     <span className="font-inter text-[11px] font-semibold uppercase tracking-wider">Fleet</span>

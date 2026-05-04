@@ -64,16 +64,16 @@ const InstitutionSelection = () => {
             {/* Animated Background Decorations - Improved visibility with z-index */}
             <div aria-hidden="true" className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
                 <div className="absolute top-1/4 left-[10%] opacity-[0.08] text-primary animate-float">
-                    <span className="material-symbols-outlined !text-[120px]">school</span>
+                    <span className="material-symbols-outlined !text-[60px] md:!text-[120px]">school</span>
                 </div>
                 <div className="absolute top-1/2 right-[5%] opacity-[0.1] text-primary animate-float-delayed">
-                    <span className="material-symbols-outlined !text-[100px]">menu_book</span>
+                    <span className="material-symbols-outlined !text-[50px] md:!text-[100px]">menu_book</span>
                 </div>
                 <div className="absolute bottom-[10%] left-[15%] opacity-[0.08] text-primary animate-float-slow">
-                    <span className="material-symbols-outlined !text-[150px]">apartment</span>
+                    <span className="material-symbols-outlined !text-[70px] md:!text-[150px]">apartment</span>
                 </div>
                 <div className="absolute top-1/3 right-[20%] opacity-[0.06] text-primary animate-float-slow">
-                    <span className="material-symbols-outlined !text-[80px]">history_edu</span>
+                    <span className="material-symbols-outlined !text-[40px] md:!text-[80px]">history_edu</span>
                 </div>
                 <div className="absolute bottom-1/4 right-[15%] opacity-[0.05] text-primary animate-float hidden md:block">
                     <span className="material-symbols-outlined !text-[110px]">laptop_mac</span>

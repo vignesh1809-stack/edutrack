@@ -24,6 +24,7 @@ import TransportStaffDirectory from './pages/transport-incharge/TransportStaffDi
 import TransportRoutes from './pages/transport-incharge/TransportRoutes';
 import AddTransportStaff from './pages/transport-incharge/AddTransportStaff';
 import TransportProfile from './pages/transport-incharge/TransportProfile';
+import AddTransportLog from './pages/transport-incharge/AddTransportLog';
 
 function App() {
   return (
@@ -62,6 +63,7 @@ function App() {
         <Route path="/transport/routes" element={<ProtectedRoute><TransportRoutes /></ProtectedRoute>} />
         <Route path="/transport/add-staff" element={<ProtectedRoute><AddTransportStaff /></ProtectedRoute>} />
         <Route path="/transport/profile" element={<ProtectedRoute><TransportProfile /></ProtectedRoute>} />
+        <Route path="/transport/add-log" element={<ProtectedRoute><AddTransportLog /></ProtectedRoute>} />
       </Routes>
     </Router>
   );

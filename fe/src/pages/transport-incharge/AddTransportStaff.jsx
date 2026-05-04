@@ -133,7 +133,7 @@ const AddTransportStaff = () => {
             </main>
 
             {/* BottomNavBar */}
-            <nav className="fixed bottom-0 w-full rounded-t-3xl z-50 bg-white border-t border-slate-100 shadow-[0px_-4px_20px_rgba(0,0,0,0.03)] flex justify-around items-center px-2 pb-6 pt-2">
+            <nav className="fixed bottom-0 w-full rounded-t-3xl z-50 bg-white border-t border-slate-100 shadow-[0px_-4px_20px_rgba(0,0,0,0.03)] flex md:hidden justify-around items-center px-2 pb-6 pt-2">
                 <Link className="flex flex-col items-center gap-1 text-slate-400 px-4 py-2 hover:text-blue-500 transition-all active:scale-90 duration-150" to="/transport/dashboard">
                     <span className="material-symbols-outlined">grid_view</span>
                     <span className="font-['Inter'] text-[11px] font-medium">Dashboard</span>

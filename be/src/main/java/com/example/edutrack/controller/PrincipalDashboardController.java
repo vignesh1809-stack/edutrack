@@ -8,6 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.example.edutrack.dto.PrincipalStudentListDto;
 
 @RestController
 @RequestMapping("/api/principal/dashboard")
@@ -41,5 +44,18 @@ public class PrincipalDashboardController {
 
         PrincipalDashboardDto dashboard = dashboardService.getDashboard(principal.getInstitutionId(), year, section);
         return ResponseEntity.ok(dashboard);
+    }
+
+    @GetMapping("/students")
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Lecturer', 'Head_of_Department', 'Principal')")
+    public ResponseEntity<Page<PrincipalStudentListDto>> getStudentsList(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String status,
+            Pageable pageable) {
+
+        Page<PrincipalStudentListDto> students = dashboardService.getStudentsList(
+                principal.getInstitutionId(), search, status, pageable);
+        return ResponseEntity.ok(students);
     }
 }

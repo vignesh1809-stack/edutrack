@@ -124,4 +124,13 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
                                                                    @Param("startDate") LocalDate startDate,
                                                                    @Param("batchYear") Integer batchYear,
                                                                    @Param("section") String section);
+
+    @Query(value = """
+            SELECT COUNT(CASE WHEN a.attendance_status = 'PRESENT' THEN 1 END) * 100.0 / NULLIF(COUNT(a.id), 0)
+            FROM attendances a
+            WHERE a.student_id = :studentId
+              AND a.institution_id = :instId
+              AND a.is_deleted = false
+            """, nativeQuery = true)
+    Double getAttendancePercentageByStudentId(@Param("instId") UUID instId, @Param("studentId") UUID studentId);
 }

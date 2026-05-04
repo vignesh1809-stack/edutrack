@@ -12,7 +12,9 @@ import org.springframework.data.repository.query.Param;
 
 import com.example.edutrack.entity.Student;
 
-public interface StudentRepository extends JpaRepository<Student, UUID> {
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+public interface StudentRepository extends JpaRepository<Student, UUID>, JpaSpecificationExecutor<Student> {
 
     // All active (non-deleted) students for the current tenant — routed to replica via AOP.
     @Query("SELECT s FROM Student s WHERE s.isDeleted = false")

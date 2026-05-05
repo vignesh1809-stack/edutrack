@@ -1,9 +1,38 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchFiltersRequest } from '../../store/actions/studentActions';
 import Sidebar from '../../components/Sidebar';
 import TopAppBar from '../../components/TopAppBar';
 import BottomNavBar from '../../components/BottomNavBar';
 
 const Reports = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const branches = useSelector(state => state.students?.branches || []);
+  const years = useSelector(state => state.students?.years || []);
+  const [selectedBranch, setSelectedBranch] = useState('All Branches');
+  const [selectedYear, setSelectedYear] = useState('All Years');
+  const [activeDropdown, setActiveDropdown] = useState(null); // 'branch' | 'year' | null
+
+  useEffect(() => {
+    dispatch(fetchFiltersRequest());
+  }, [dispatch]);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = () => setActiveDropdown(null);
+    if (activeDropdown) {
+      window.addEventListener('click', handleClickOutside);
+    }
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, [activeDropdown]);
+
+  const toggleDropdown = (e, type) => {
+    e.stopPropagation();
+    setActiveDropdown(activeDropdown === type ? null : type);
+  };
+
   return (
     <>
       <Sidebar />
@@ -15,24 +44,100 @@ const Reports = () => {
             <h2 className="text-3xl font-bold tracking-tight text-on-surface">Analytics & Insights</h2>
             <p className="text-on-surface-variant mt-1">Deep dive into institutional performance metrics.</p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Branch</label>
-              <select className="bg-surface-container-high border-none rounded-lg px-4 py-2 text-sm font-medium focus:ring-2 focus:ring-primary min-w-[140px]">
-                <option>All Branches</option>
-                <option>CSE</option>
-                <option>ECE</option>
-                <option>ME</option>
-              </select>
+          <div className="flex flex-wrap gap-3 items-end flex-grow">
+            {/* Branch Dropdown — Professional Style */}
+            <div className="relative">
+              <button 
+                onClick={(e) => toggleDropdown(e, 'branch')}
+                className="flex items-center gap-3 px-6 py-2.5 bg-slate-50 border-none text-[#475569] rounded-lg hover:bg-slate-100 transition-all active:scale-95 shadow-sm"
+              >
+                <span className="text-[13px] font-black uppercase tracking-wider whitespace-nowrap">
+                  {selectedBranch === 'All Branches' ? 'ALL BRANCHES' : selectedBranch}
+                </span>
+                <span className={`material-symbols-outlined text-[18px] text-slate-400 transition-transform duration-300 ${activeDropdown === 'branch' ? 'rotate-180' : ''}`}>expand_more</span>
+              </button>
+
+              {activeDropdown === 'branch' && (
+                <div 
+                  className="absolute top-full left-0 mt-2 w-48 bg-white border border-slate-100 rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] py-2 z-50 animate-in fade-in zoom-in-95 duration-200"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button 
+                    onClick={() => { setSelectedBranch('All Branches'); setActiveDropdown(null); }}
+                    className={`w-full flex items-center justify-between px-5 py-3 text-sm transition-colors ${
+                      selectedBranch === 'All Branches' 
+                        ? 'bg-primary/5 text-primary font-bold' 
+                        : 'text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span className="uppercase font-bold tracking-tight">All Branches</span>
+                    {selectedBranch === 'All Branches' && <span className="material-symbols-outlined text-sm">check</span>}
+                  </button>
+                  {branches.map((branch) => (
+                    <button 
+                      key={branch}
+                      onClick={() => { setSelectedBranch(branch); setActiveDropdown(null); }}
+                      className={`w-full flex items-center justify-between px-5 py-3 text-sm transition-colors ${
+                        selectedBranch === branch 
+                          ? 'bg-primary/5 text-primary font-bold' 
+                          : 'text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="uppercase font-bold tracking-tight">{branch}</span>
+                      {selectedBranch === branch && <span className="material-symbols-outlined text-sm">check</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Academic Year</label>
-              <select className="bg-surface-container-high border-none rounded-lg px-4 py-2 text-sm font-medium focus:ring-2 focus:ring-primary min-w-[140px]">
-                <option>2023-2024</option>
-                <option>2022-2023</option>
-              </select>
+
+            {/* Year Dropdown — Professional Style */}
+            <div className="relative">
+              <button 
+                onClick={(e) => toggleDropdown(e, 'year')}
+                className="flex items-center gap-3 px-6 py-2.5 bg-slate-50 border-none text-[#475569] rounded-lg hover:bg-slate-100 transition-all active:scale-95 shadow-sm"
+              >
+                <span className="text-[13px] font-black uppercase tracking-wider whitespace-nowrap">
+                  {selectedYear === 'All Years' ? 'YEAR ALL' : `YEAR ${selectedYear}`}
+                </span>
+                <span className={`material-symbols-outlined text-[18px] text-slate-400 transition-transform duration-300 ${activeDropdown === 'year' ? 'rotate-180' : ''}`}>expand_more</span>
+              </button>
+
+              {activeDropdown === 'year' && (
+                <div 
+                  className="absolute top-full left-0 mt-2 w-48 bg-white border border-slate-100 rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] py-2 z-50 animate-in fade-in zoom-in-95 duration-200"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button 
+                    onClick={() => { setSelectedYear('All Years'); setActiveDropdown(null); }}
+                    className={`w-full flex items-center justify-between px-5 py-3 text-sm transition-colors ${
+                      selectedYear === 'All Years' 
+                        ? 'bg-primary/5 text-primary font-bold' 
+                        : 'text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span className="uppercase font-bold tracking-tight">All Years</span>
+                    {selectedYear === 'All Years' && <span className="material-symbols-outlined text-sm">check</span>}
+                  </button>
+                  {years.map((year) => (
+                    <button 
+                      key={year}
+                      onClick={() => { setSelectedYear(year); setActiveDropdown(null); }}
+                      className={`w-full flex items-center justify-between px-5 py-3 text-sm transition-colors ${
+                        selectedYear === year 
+                          ? 'bg-primary/5 text-primary font-bold' 
+                          : 'text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="uppercase font-bold tracking-tight">{year}</span>
+                      {selectedYear === year && <span className="material-symbols-outlined text-sm">check</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-            <button className="self-end bg-gradient-to-br from-primary to-primary-dim text-on-primary px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2 shadow-sm hover:shadow-lg transition-all active:scale-95">
+
+            <button className="md:ml-auto bg-gradient-to-br from-primary to-primary-dim text-on-primary px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 shadow-sm hover:shadow-lg transition-all active:scale-95">
               <span className="material-symbols-outlined text-lg" data-icon="filter_list">filter_list</span>
               Apply Filters
             </button>
@@ -84,7 +189,12 @@ const Reports = () => {
             <div className="flex flex-col flex-1">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold">Top Performers</h3>
-                <button className="text-primary text-xs font-bold uppercase tracking-wider">View All</button>
+                <button 
+                  onClick={() => navigate('/principal/top-performers')}
+                  className="text-primary text-xs font-bold uppercase tracking-wider hover:underline"
+                >
+                  View All
+                </button>
               </div>
               <div className="space-y-6 flex-grow">
                 {[

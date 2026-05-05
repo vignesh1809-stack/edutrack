@@ -17,6 +17,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.UUID;
 
+import com.example.edutrack.config.TenantContext;
+
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -48,6 +50,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String role = jwtUtils.getRoleFromJwtToken(jwt);
                 UUID institutionId = jwtUtils.getInstitutionIdFromJwtToken(jwt);
 
+                // Set tenant context so Hibernate @TenantId filter works for all queries,
+                // including JpaSpecificationExecutor.findAll(Specification).
+                TenantContext.setCurrentTenant(institutionId.toString());
+
                 CustomUserDetails userDetails = new CustomUserDetails(id, null, phone, null, role, institutionId);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
@@ -59,7 +65,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             logger.warn("Cannot set user authentication: {}", e.getMessage());
         }
 
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            // Always clear tenant context after the request to prevent thread-local leaks
+            // in thread pool environments.
+            TenantContext.clear();
+        }
     }
 
     private String parseJwt(HttpServletRequest request) {

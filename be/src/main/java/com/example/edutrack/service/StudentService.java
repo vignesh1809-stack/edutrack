@@ -5,9 +5,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.example.edutrack.entity.Student;
 
+import com.example.edutrack.dto.StudentListDto;
+import com.example.edutrack.entity.enums.StudentStatus;
+
 public interface StudentService {
 
         Page<Student> getAllStudents(Pageable pageable);
+        Page<StudentListDto> getPrincipalStudentList(UUID institutionId, String search, StudentStatus status, String course, Integer batchYear, String section, Pageable pageable);
+        java.util.List<String> getFilterBranches(UUID institutionId);
+        java.util.List<Integer> getFilterYears(UUID institutionId);
         Student getStudentById(UUID id);
         Student create(Student student);
         Student update(UUID id, Student student);

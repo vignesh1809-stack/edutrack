@@ -3,11 +3,15 @@ import {
     FETCH_STUDENTS_SUCCESS,
     FETCH_STUDENTS_FAILURE,
     SET_STUDENT_FILTER,
+    SET_STUDENT_SORT,
     SET_STUDENT_PAGE,
     RESET_STUDENT_FILTERS,
     FETCH_FILTERS_REQUEST,
     FETCH_FILTERS_SUCCESS,
-    FETCH_FILTERS_FAILURE
+    FETCH_FILTERS_FAILURE,
+    FETCH_TOP_PERFORMERS_REQUEST,
+    FETCH_TOP_PERFORMERS_SUCCESS,
+    FETCH_TOP_PERFORMERS_FAILURE
 } from '../types/studentTypes';
 
 const initialState = {
@@ -29,8 +33,14 @@ const initialState = {
         year: '',
         section: ''
     },
+    sort: '',
     loading: false,
-    error: null
+    error: null,
+    topPerformers: {
+        data: [],
+        loading: false,
+        error: null
+    }
 };
 
 const studentReducer = (state = initialState, action) => {
@@ -74,6 +84,15 @@ const studentReducer = (state = initialState, action) => {
                     page: 0
                 }
             };
+        case SET_STUDENT_SORT:
+            return {
+                ...state,
+                sort: action.payload,
+                pagination: {
+                    ...state.pagination,
+                    page: 0
+                }
+            };
         case SET_STUDENT_PAGE:
             return {
                 ...state,
@@ -97,9 +116,37 @@ const studentReducer = (state = initialState, action) => {
                 branches: action.payload.branches,
                 years: action.payload.years
             };
+        case FETCH_TOP_PERFORMERS_REQUEST:
+            return {
+                ...state,
+                topPerformers: {
+                    ...state.topPerformers,
+                    loading: true,
+                    error: null
+                }
+            };
+        case FETCH_TOP_PERFORMERS_SUCCESS:
+            return {
+                ...state,
+                topPerformers: {
+                    ...state.topPerformers,
+                    data: action.payload,
+                    loading: false,
+                    error: null
+                }
+            };
+        case FETCH_TOP_PERFORMERS_FAILURE:
+            return {
+                ...state,
+                topPerformers: {
+                    ...state.topPerformers,
+                    loading: false,
+                    error: action.payload
+                }
+            };
         default:
             return state;
     }
-};
+}
 
 export default studentReducer;

@@ -33,7 +33,8 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
                 s.status as status,
                 d.name as departmentName,
                 d.batch_year as batchYear,
-                d.section as section
+                d.section as section,
+                s.cgpa as cgpa
             FROM students s
             JOIN departments d ON s.department_id = d.id
             WHERE s.institution_id = :institutionId
@@ -101,4 +102,22 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
     long countActiveStudentsFiltered(@Param("instId") UUID instId, 
                                      @Param("batchYear") Integer batchYear, 
                                      @Param("section") String section);
+
+    @Query(value = """
+            SELECT 
+                d.code as departmentCode, 
+                AVG(s.cgpa) as averageCgpa
+            FROM students s
+            JOIN departments d ON d.id = s.department_id
+            WHERE s.institution_id = :instId 
+              AND s.is_deleted = false
+              AND (:batchYear IS NULL OR d.batch_year = :batchYear)
+              AND (:section IS NULL OR d.section = :section)
+              AND s.cgpa IS NOT NULL
+            GROUP BY d.code
+            """, nativeQuery = true)
+    List<DepartmentAverageProjection> findDepartmentAveragesFiltered(
+            @Param("instId") UUID instId,
+            @Param("batchYear") Integer batchYear,
+            @Param("section") String section);
 }

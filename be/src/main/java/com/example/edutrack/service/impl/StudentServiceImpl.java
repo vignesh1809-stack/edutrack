@@ -88,7 +88,8 @@ public class StudentServiceImpl implements StudentService {
                         "Section " + proj.getSection()
                 ))
                 .attendance(calculateAttendancePlaceholder())
-                .avgMarks(calculateAvgMarksPlaceholder())
+                .avgMarks(proj.getCGPA() != null ? proj.getCGPA().toString() : "0.0")
+                .cgpa(proj.getCGPA() != null ? proj.getCGPA().toString() : "0.0")
                 .build();
     }
 

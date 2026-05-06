@@ -124,4 +124,33 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
                                                                    @Param("startDate") LocalDate startDate,
                                                                    @Param("batchYear") Integer batchYear,
                                                                    @Param("section") String section);
+
+    /**
+     * Monthly attendance % per department branch for the Attendance Trends chart.
+     * Groups by department code (branch), year, and month.
+     * Filters by optional batch year and branch code.
+     */
+    @Query(value = """
+            SELECT 
+                d.code AS branchCode,
+                YEAR(a.record_date) AS yr,
+                MONTH(a.record_date) AS mo,
+                COUNT(CASE WHEN a.attendance_status = 'PRESENT' THEN 1 END) AS presentCount,
+                COUNT(a.id) AS totalCount
+            FROM attendances a
+            JOIN students s ON s.id = a.student_id
+            JOIN departments d ON d.id = s.department_id
+            WHERE a.institution_id = :instId
+              AND a.record_date >= :startDate
+              AND a.is_deleted = false
+              AND (:batchYear IS NULL OR d.batch_year = :batchYear)
+              AND (:branchCode IS NULL OR LOWER(d.code) = LOWER(:branchCode))
+            GROUP BY d.code, YEAR(a.record_date), MONTH(a.record_date)
+            ORDER BY d.code ASC, yr ASC, mo ASC
+            """, nativeQuery = true)
+    List<BranchMonthlyAttendanceProjection> findBranchMonthlyAttendance(
+            @Param("instId") UUID instId,
+            @Param("startDate") LocalDate startDate,
+            @Param("batchYear") Integer batchYear,
+            @Param("branchCode") String branchCode);
 }

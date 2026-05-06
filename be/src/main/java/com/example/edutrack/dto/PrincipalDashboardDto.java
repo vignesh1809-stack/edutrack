@@ -36,6 +36,7 @@ public class PrincipalDashboardDto {
     /** Latest remarks feed (up to 5 most recent) */
     private List<RemarkSummaryDto> latestRemarks;
 
+
     // ── Nested DTO ────────────────────────────────────────────────────────────
     @Data
     @Builder

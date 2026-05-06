@@ -23,9 +23,22 @@ const initialState = {
     availableYears: [],
     availableSections: [],
     availableAssessmentTypes: [],
-    marksDistribution: [],
-    marksLoading: false,
-    marksError: null,
+    marksDistribution: {
+        data: null,
+        loading: false,
+        error: null,
+    },
+    attendanceTrends: {
+        months: [],
+        series: [],
+        loading: false,
+        error: null,
+    },
+    departmentAverages: {
+        data: [],
+        loading: false,
+        error: null,
+    }
 };
 
 const dashboardReducer = (state = initialState, action) => {
@@ -106,6 +119,63 @@ const dashboardReducer = (state = initialState, action) => {
                 ...state,
                 graphLoading: false,
                 graphError: action.payload,
+            };
+        case types.FETCH_ATTENDANCE_TRENDS_REQUEST:
+            return {
+                ...state,
+                attendanceTrends: {
+                    ...state.attendanceTrends,
+                    loading: true,
+                    error: null,
+                },
+            };
+        case types.FETCH_ATTENDANCE_TRENDS_SUCCESS:
+            return {
+                ...state,
+                attendanceTrends: {
+                    ...state.attendanceTrends,
+                    months: action.payload?.months || [],
+                    series: action.payload?.series || [],
+                    loading: false,
+                    error: null,
+                },
+            };
+        case types.FETCH_ATTENDANCE_TRENDS_FAILURE:
+            return {
+                ...state,
+                attendanceTrends: {
+                    ...state.attendanceTrends,
+                    loading: false,
+                    error: action.payload,
+                },
+            };
+        case types.FETCH_DEPARTMENT_AVERAGES_REQUEST:
+            return {
+                ...state,
+                departmentAverages: {
+                    ...state.departmentAverages,
+                    loading: true,
+                    error: null,
+                },
+            };
+        case types.FETCH_DEPARTMENT_AVERAGES_SUCCESS:
+            return {
+                ...state,
+                departmentAverages: {
+                    ...state.departmentAverages,
+                    data: action.payload || [],
+                    loading: false,
+                    error: null,
+                },
+            };
+        case types.FETCH_DEPARTMENT_AVERAGES_FAILURE:
+            return {
+                ...state,
+                departmentAverages: {
+                    ...state.departmentAverages,
+                    loading: false,
+                    error: action.payload,
+                },
             };
         default:
             return state;

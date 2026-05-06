@@ -93,3 +93,33 @@ export const fetchMarksDistributionFailure = (error) => ({
     type: types.FETCH_MARKS_DISTRIBUTION_FAILURE,
     payload: error,
 });
+
+export const fetchAttendanceTrendsRequest = (filters) => ({
+    type: types.FETCH_ATTENDANCE_TRENDS_REQUEST,
+    payload: filters,
+});
+
+export const fetchAttendanceTrendsSuccess = (data) => ({
+    type: types.FETCH_ATTENDANCE_TRENDS_SUCCESS,
+    payload: data,
+});
+
+export const fetchAttendanceTrendsFailure = (error) => ({
+    type: types.FETCH_ATTENDANCE_TRENDS_FAILURE,
+    payload: error,
+});
+
+export const fetchDepartmentAveragesRequest = (filters) => ({
+    type: types.FETCH_DEPARTMENT_AVERAGES_REQUEST,
+    payload: filters,
+});
+
+export const fetchDepartmentAveragesSuccess = (data) => ({
+    type: types.FETCH_DEPARTMENT_AVERAGES_SUCCESS,
+    payload: data,
+});
+
+export const fetchDepartmentAveragesFailure = (error) => ({
+    type: types.FETCH_DEPARTMENT_AVERAGES_FAILURE,
+    payload: error,
+});

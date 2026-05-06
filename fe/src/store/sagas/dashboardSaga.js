@@ -19,6 +19,9 @@ function* handleFetchDashboard(action) {
         if (filters.section && filters.section !== 'All Sections') {
             params.push(`section=${filters.section}`);
         }
+        if (filters.branch && filters.branch !== 'All Branches') {
+            params.push(`branch=${filters.branch}`);
+        }
 
         if (params.length > 0) {
             url += `?${params.join('&')}`;
@@ -113,6 +116,45 @@ function* handleFetchMarksDistribution(action) {
     }
 }
 
+function* handleFetchAttendanceTrends(action) {
+    try {
+        const filters = action.payload || {};
+        let url = '/api/principal/attendance/trends?months=6';
+        
+        if (filters.year && filters.year !== 'All Years') {
+            url += `&year=${filters.year}`;
+        }
+        if (filters.branch && filters.branch !== 'All Branches') {
+            url += `&branch=${filters.branch}`;
+        }
+
+        const response = yield call(axiosInstance.get, url);
+        yield put(actions.fetchAttendanceTrendsSuccess(response.data));
+    } catch (error) {
+        yield put(actions.fetchAttendanceTrendsFailure(error.message));
+    }
+}
+
+function* handleFetchDepartmentAverages(action) {
+    try {
+        const filters = action.payload || {};
+        let url = '/api/principal/dashboard/department-averages?';
+        
+        const params = new URLSearchParams();
+        if (filters.year && filters.year !== 'All Years') {
+            params.append('year', filters.year);
+        }
+        if (filters.section && filters.section !== 'All Sections') {
+            params.append('section', filters.section);
+        }
+
+        const response = yield call(axiosInstance.get, url + params.toString());
+        yield put(actions.fetchDepartmentAveragesSuccess(response.data));
+    } catch (error) {
+        yield put(actions.fetchDepartmentAveragesFailure(error.message));
+    }
+}
+
 export default function* dashboardSaga() {
     yield takeLatest(types.FETCH_PRINCIPAL_DASHBOARD_REQUEST, handleFetchDashboard);
     yield takeLatest(types.FETCH_STAFF_ATTENDANCE_GRAPH_REQUEST, handleFetchStaffAttendanceGraph);
@@ -120,4 +162,6 @@ export default function* dashboardSaga() {
     yield takeLatest(types.FETCH_SECTIONS_REQUEST, handleFetchSections);
     yield takeLatest(types.FETCH_ASSESSMENT_TYPES_REQUEST, handleFetchAssessmentTypes);
     yield takeLatest(types.FETCH_MARKS_DISTRIBUTION_REQUEST, handleFetchMarksDistribution);
+    yield takeLatest(types.FETCH_ATTENDANCE_TRENDS_REQUEST, handleFetchAttendanceTrends);
+    yield takeLatest(types.FETCH_DEPARTMENT_AVERAGES_REQUEST, handleFetchDepartmentAverages);
 }

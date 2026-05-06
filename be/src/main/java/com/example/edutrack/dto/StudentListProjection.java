@@ -12,4 +12,5 @@ public interface StudentListProjection {
     String getDepartmentName();
     Integer getBatchYear();
     String getSection();
+    java.math.BigDecimal getCGPA();
 }

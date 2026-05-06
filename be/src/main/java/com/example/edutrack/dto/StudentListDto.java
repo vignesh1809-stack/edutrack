@@ -20,4 +20,5 @@ public class StudentListDto {
     private List<String> courseDetails;
     private String attendance;
     private String avgMarks;
+    private String cgpa;
 }

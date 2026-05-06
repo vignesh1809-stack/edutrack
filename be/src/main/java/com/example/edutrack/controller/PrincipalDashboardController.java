@@ -37,9 +37,21 @@ public class PrincipalDashboardController {
     public ResponseEntity<PrincipalDashboardDto> getDashboard(
             @AuthenticationPrincipal CustomUserDetails principal,
             @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) String section) {
+            @RequestParam(required = false) String section,
+            @RequestParam(required = false) String branch) {
 
-        PrincipalDashboardDto dashboard = dashboardService.getDashboard(principal.getInstitutionId(), year, section);
+        PrincipalDashboardDto dashboard = dashboardService.getDashboard(principal.getInstitutionId(), year, section, branch);
         return ResponseEntity.ok(dashboard);
+    }
+
+    @GetMapping("/department-averages")
+    @PreAuthorize("hasAuthority('Principal')")
+    public ResponseEntity<java.util.List<com.example.edutrack.dto.DepartmentAverageDto>> getDepartmentAverages(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) String section) {
+        
+        java.util.List<com.example.edutrack.dto.DepartmentAverageDto> data = dashboardService.getDepartmentAverages(principal.getInstitutionId(), year, section);
+        return ResponseEntity.ok(data);
     }
 }

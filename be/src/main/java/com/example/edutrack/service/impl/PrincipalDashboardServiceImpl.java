@@ -1,6 +1,7 @@
 package com.example.edutrack.service.impl;
 
 import com.example.edutrack.config.TenantContext;
+import com.example.edutrack.dto.DepartmentAverageDto;
 import com.example.edutrack.dto.PrincipalDashboardDto;
 import com.example.edutrack.dto.PrincipalDashboardDto.RemarkSummaryDto;
 import com.example.edutrack.repository.AttendanceRepository;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -29,7 +31,7 @@ public class PrincipalDashboardServiceImpl implements PrincipalDashboardService 
 
     @Override
     @Transactional(readOnly = true)
-    public PrincipalDashboardDto getDashboard(UUID institutionId, Integer year, String section) {
+    public PrincipalDashboardDto getDashboard(UUID institutionId, Integer year, String section, String branch) {
         // Ensure tenant context is set
         TenantContext.setCurrentTenant(institutionId.toString());
 
@@ -121,5 +123,46 @@ public class PrincipalDashboardServiceImpl implements PrincipalDashboardService 
                 .totalRemarks(totalRemarks)
                 .latestRemarks(latestRemarks)
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DepartmentAverageDto> getDepartmentAverages(UUID institutionId, Integer year, String section) {
+        TenantContext.setCurrentTenant(institutionId.toString());
+
+        List<com.example.edutrack.repository.DepartmentAverageProjection> currentAverages = studentRepository.findDepartmentAveragesFiltered(institutionId, year, section);
+        
+        List<com.example.edutrack.repository.DepartmentAverageProjection> previousAverages = null;
+        if (year != null) {
+            previousAverages = studentRepository.findDepartmentAveragesFiltered(institutionId, year - 1, section);
+        }
+
+        List<DepartmentAverageDto> results = new ArrayList<>();
+
+        for (com.example.edutrack.repository.DepartmentAverageProjection proj : currentAverages) {
+            double currentPct = Math.round(proj.getAverageCgpa() * 100.0) / 10.0; // Correct rounding to 1 decimal: Math.round(cgpa * 10 * 10) / 10.0
+
+            Double prevPct = null;
+            Double trend = null;
+
+            if (year != null && previousAverages != null) {
+                for (com.example.edutrack.repository.DepartmentAverageProjection prevProj : previousAverages) {
+                    if (prevProj.getDepartmentCode().equals(proj.getDepartmentCode())) {
+                        prevPct = Math.round(prevProj.getAverageCgpa() * 100.0) / 10.0;
+                        trend = Math.round((currentPct - prevPct) * 10.0) / 10.0;
+                        break;
+                    }
+                }
+            }
+
+            results.add(DepartmentAverageDto.builder()
+                    .department(proj.getDepartmentCode())
+                    .averagePercentage(currentPct)
+                    .previousPercentage(prevPct)
+                    .trend(trend)
+                    .build());
+        }
+
+        return results;
     }
 }

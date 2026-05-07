@@ -12,7 +12,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StudentListDto {
-    private String id;
+    private String id; // This will be the UUID for navigation
+    private String studentId; // Human readable ID
     private String name;
     private String roll;
     private String image;

@@ -59,7 +59,9 @@ public class Student extends BaseEntity {
     private LocalDate dateOfBirth;
     private boolean isHosteller;
     private BigDecimal CGPA;
-    private LocalDate admissionDate;
+    private LocalDate batchYear;
+    private String section;
+    private int currentSemester;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

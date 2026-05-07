@@ -22,6 +22,7 @@ public class Department extends BaseEntity {
      
     @Id
     @UuidGenerator(style = UuidGenerator.Style.TIME)
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.BINARY)
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
@@ -33,8 +34,6 @@ public class Department extends BaseEntity {
     private String name;
 
     private String code;
-    private int batchYear;
-    private String section;
 
     @OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
     @JsonIgnore

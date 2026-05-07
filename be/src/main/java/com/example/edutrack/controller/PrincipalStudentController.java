@@ -1,9 +1,11 @@
 package com.example.edutrack.controller;
 
+import com.example.edutrack.dto.PagedResponse;
 import com.example.edutrack.dto.StudentListDto;
 import com.example.edutrack.entity.enums.StudentStatus;
 import com.example.edutrack.security.CustomUserDetails;
 import com.example.edutrack.service.StudentService;
+import com.example.edutrack.dto.StudentProfileDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/principal/students")
@@ -22,7 +25,7 @@ public class PrincipalStudentController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('Principal')")
-    public ResponseEntity<Page<StudentListDto>> getStudentList(
+    public ResponseEntity<PagedResponse<StudentListDto>> getStudentList(
             @AuthenticationPrincipal CustomUserDetails principal,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) StudentStatus status,
@@ -40,7 +43,15 @@ public class PrincipalStudentController {
                 section,
                 pageable
         );
-        return ResponseEntity.ok(students);
+        return ResponseEntity.ok(PagedResponse.fromPage(students));
+    }
+
+    @GetMapping("/{studentId}")
+    @PreAuthorize("hasAuthority('Principal')")
+    public ResponseEntity<StudentProfileDto> getStudentProfile(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @PathVariable UUID studentId) {
+        return ResponseEntity.ok(studentService.getStudentProfile(principal.getInstitutionId(), studentId));
     }
 
     @GetMapping("/filters/branches")

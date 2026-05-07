@@ -19,8 +19,8 @@ public interface AssessmentRepository extends JpaRepository<Assessment, UUID> {
             JOIN departments d ON d.id = s.department_id
             WHERE a.institution_id = :instId
               AND a.is_deleted = false
-              AND (:year IS NULL OR d.batch_year = :year)
-              AND (:section IS NULL OR d.section = :section)
+              AND (:year IS NULL OR YEAR(s.batch_year) = :year)
+              AND (:section IS NULL OR s.section = :section)
             """, nativeQuery = true)
     List<String> findDistinctTypesFiltered(@Param("instId") UUID instId, 
                                             @Param("year") Integer year, 
@@ -35,11 +35,13 @@ public interface AssessmentRepository extends JpaRepository<Assessment, UUID> {
             WHERE a.institution_id = :instId
               AND a.is_deleted = false
               AND a.type = :type
-              AND (:year IS NULL OR d.batch_year = :year)
-              AND (:section IS NULL OR d.section = :section)
+              AND (:year IS NULL OR YEAR(s.batch_year) = :year)
+              AND (:section IS NULL OR s.section = :section)
             """, nativeQuery = true)
     List<Double> findMarksPercentagesFiltered(@Param("instId") UUID instId,
                                                @Param("type") String type,
                                                @Param("year") Integer year,
                                                @Param("section") String section);
+    @Query("SELECT a FROM Assessment a WHERE a.student.id = :studentId")
+    List<Assessment> findByStudentId(@Param("studentId") UUID studentId);
 }

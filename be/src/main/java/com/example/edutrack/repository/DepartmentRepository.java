@@ -11,13 +11,13 @@ import com.example.edutrack.entity.Department;
 
 public interface DepartmentRepository extends JpaRepository<Department, UUID> {
     
-    @Query(value = "SELECT DISTINCT batch_year FROM departments WHERE institution_id = UNHEX(REPLACE(:institutionId, '-', '')) AND is_deleted = 0 ORDER BY batch_year DESC", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT YEAR(batch_year) FROM students WHERE institution_id = UNHEX(REPLACE(:institutionId, '-', '')) AND is_deleted = 0 AND batch_year IS NOT NULL ORDER BY YEAR(batch_year) DESC", nativeQuery = true)
     List<Integer> findDistinctBatchYears(@Param("institutionId") String institutionId);
 
-    @Query(value = "SELECT DISTINCT section FROM departments WHERE institution_id = UNHEX(REPLACE(:institutionId, '-', '')) AND batch_year = :batchYear AND is_deleted = 0 ORDER BY section ASC", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT section FROM students WHERE institution_id = UNHEX(REPLACE(:institutionId, '-', '')) AND YEAR(batch_year) = :batchYear AND is_deleted = 0 AND section IS NOT NULL ORDER BY section ASC", nativeQuery = true)
     List<String> findDistinctSectionsByBatchYear(@Param("institutionId") String institutionId, @Param("batchYear") int batchYear);
 
-    @Query(value = "SELECT DISTINCT section FROM departments WHERE institution_id = UNHEX(REPLACE(:institutionId, '-', '')) AND is_deleted = 0 ORDER BY section ASC", nativeQuery = true)
+    @Query(value = "SELECT DISTINCT section FROM students WHERE institution_id = UNHEX(REPLACE(:institutionId, '-', '')) AND is_deleted = 0 AND section IS NOT NULL ORDER BY section ASC", nativeQuery = true)
     List<String> findAllDistinctSections(@Param("institutionId") String institutionId);
 
     @Query(value = "SELECT DISTINCT code FROM departments WHERE institution_id = UNHEX(REPLACE(:institutionId, '-', '')) AND is_deleted = 0", nativeQuery = true)

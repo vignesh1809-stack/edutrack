@@ -16,7 +16,9 @@ public class StudentDto {
     private String email;
     private String phone;
     private String address;
-    private String admissionDate;
+    private String batchYear;
+    private String section;
+    private int currentSemester;
     private GuardianDto guardian;
     private String gender;
     private LocalDate dateOfBirth;

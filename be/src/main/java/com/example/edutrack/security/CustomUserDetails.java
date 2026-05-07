@@ -20,6 +20,8 @@ public class CustomUserDetails implements UserDetails {
     private String password;
     private String role;
     private UUID institutionId;
+    private String departmentName;
+    private String avatarUrl;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

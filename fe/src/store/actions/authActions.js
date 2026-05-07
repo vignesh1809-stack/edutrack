@@ -37,3 +37,17 @@ export const refreshTokenFailure = (error) => ({
     type: types.REFRESH_TOKEN_FAILURE,
     payload: error
 });
+
+export const fetchProfileRequest = () => ({
+    type: types.FETCH_PROFILE_REQUEST
+});
+
+export const fetchProfileSuccess = (profileData) => ({
+    type: types.FETCH_PROFILE_SUCCESS,
+    payload: profileData
+});
+
+export const fetchProfileFailure = (error) => ({
+    type: types.FETCH_PROFILE_FAILURE,
+    payload: error
+});

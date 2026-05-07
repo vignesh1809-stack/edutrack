@@ -17,4 +17,7 @@ public interface StaffRepository extends JpaRepository<Staff, UUID> {
 
     @Query(value = "SELECT * FROM staffs WHERE institution_id = :instId AND phone = :phone", nativeQuery = true)
     Optional<Staff> findByPhoneNative(@Param("instId") UUID instId, @Param("phone") String phone);
+
+    @Query(value = "SELECT * FROM staffs WHERE id = :id", nativeQuery = true)
+    Optional<Staff> findByIdNative(@Param("id") UUID id);
 }

@@ -19,6 +19,8 @@ public class StaffDto {
     private String phone;
     private String avatar_url;
     private String responsibilities;
+    private String departmentName;
+    private UUID departmentId;
     private LocalDate last_login;
     private LocalDate created_at;
     

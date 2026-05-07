@@ -40,17 +40,18 @@ public class StudentSpecification {
                 predicates.add(cb.equal(root.get("status"), status));
             }
 
-            if (course != null || batchYear != null || section != null) {
+            if (course != null) {
                 Join<Student, Department> departmentJoin = root.join("department");
                 if (course != null && !course.isEmpty()) {
                     predicates.add(cb.like(cb.lower(departmentJoin.get("name")), "%" + course.toLowerCase() + "%"));
                 }
-                if (batchYear != null) {
-                    predicates.add(cb.equal(departmentJoin.get("batchYear"), batchYear));
-                }
-                if (section != null && !section.isEmpty()) {
-                    predicates.add(cb.equal(departmentJoin.get("section"), section));
-                }
+            }
+
+            if (batchYear != null) {
+                predicates.add(cb.equal(cb.function("YEAR", Integer.class, root.get("batchYear")), batchYear));
+            }
+            if (section != null && !section.isEmpty()) {
+                predicates.add(cb.equal(root.get("section"), section));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));

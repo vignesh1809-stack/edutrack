@@ -7,6 +7,7 @@ import StudentProfile from './pages/principal/StudentProfile';
 import Reports from './pages/principal/Reports';
 import Profile from './pages/principal/Profile';
 import TopPerformers from './pages/principal/TopPerformers';
+import Remarks from './pages/principal/Remarks';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import InstitutionSelection from './pages/InstitutionSelection';
@@ -39,9 +40,10 @@ function App() {
         {/* --- Principal --- */}
         <Route path="/principal/dashboard" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path="/principal/students" element={<ProtectedRoute><Students /></ProtectedRoute>} />
-        <Route path="/principal/student-profile" element={<ProtectedRoute><StudentProfile /></ProtectedRoute>} />
+        <Route path="/principal/student-profile/:id" element={<ProtectedRoute><StudentProfile /></ProtectedRoute>} />
         <Route path="/principal/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
         <Route path="/principal/top-performers" element={<ProtectedRoute><TopPerformers /></ProtectedRoute>} />
+        <Route path="/principal/remarks" element={<ProtectedRoute><Remarks /></ProtectedRoute>} />
         <Route path="/principal/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
         {/* --- Guardian --- */}

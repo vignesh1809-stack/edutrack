@@ -13,6 +13,8 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.example.edutrack.dto.PagedResponse;
+
 @RestController
 @RequestMapping("/students")
 @Data
@@ -21,8 +23,8 @@ public class StudentController {
     private final StudentService studentService;
 
     @GetMapping
-    public Page<Student> getAllStudents(Pageable pageable) {
-        return studentService.getAllStudents(pageable);
+    public PagedResponse<Student> getAllStudents(Pageable pageable) {
+        return PagedResponse.fromPage(studentService.getAllStudents(pageable));
     }
 
     @GetMapping("/{id}")

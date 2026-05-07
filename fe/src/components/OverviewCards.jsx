@@ -1,7 +1,9 @@
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 const OverviewCards = () => {
   const { data, loading } = useSelector((state) => state.dashboard);
+  const navigate = useNavigate();
 
   const Skeleton = () => (
     <div className="bg-surface-container-lowest p-5 rounded-2xl shadow-sm animate-pulse">
@@ -57,7 +59,10 @@ const OverviewCards = () => {
       </div>
 
       {/* Card 4: Remarks */}
-      <div className="bg-surface-container-lowest p-5 rounded-2xl shadow-sm transition-all hover:shadow-md">
+      <div 
+        onClick={() => navigate('/principal/remarks')}
+        className="bg-surface-container-lowest p-5 rounded-2xl shadow-sm transition-all hover:shadow-md cursor-pointer active:scale-95"
+      >
         <div className="flex justify-between items-start mb-3">
           <span className="material-symbols-outlined text-primary text-3xl">pending_actions</span>
           <span className="text-[10px] font-bold text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">

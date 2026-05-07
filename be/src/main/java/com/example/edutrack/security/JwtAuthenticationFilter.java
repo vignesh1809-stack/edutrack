@@ -54,7 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // including JpaSpecificationExecutor.findAll(Specification).
                 TenantContext.setCurrentTenant(institutionId.toString());
 
-                CustomUserDetails userDetails = new CustomUserDetails(id, null, phone, null, role, institutionId);
+                CustomUserDetails userDetails = new CustomUserDetails(id, null, phone, null, role, institutionId, null, null);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

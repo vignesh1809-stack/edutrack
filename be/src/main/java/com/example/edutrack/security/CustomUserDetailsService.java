@@ -50,13 +50,24 @@ public class CustomUserDetailsService implements UserDetailsService {
                 Optional<Student> studentOpt = studentRepository.findByPhoneNative(institutionId, phone);
                 if (studentOpt.isPresent()) {
                     Student student = studentOpt.get();
+                    String deptName = null;
+                    try {
+                        if (student.getDepartment() != null) {
+                            deptName = student.getDepartment().getName();
+                        }
+                    } catch (jakarta.persistence.EntityNotFoundException e) {
+                        deptName = null;
+                    }
+
                     return new CustomUserDetails(
                             student.getId(),
                             student.getFirstName() + " " + student.getLastName(),
                             student.getPhone(),
                             student.getPassword(),
                             "STUDENT",
-                            institutionId
+                            institutionId,
+                            deptName,
+                            student.getAvatarUrl()
                     );
                 }
                 throw new UsernameNotFoundException(
@@ -73,7 +84,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                             guardian.getPhone(),
                             guardian.getPassword(),
                             "GUARDIAN",
-                            institutionId
+                            institutionId,
+                            null,
+                            null
                     );
                 }
                 throw new UsernameNotFoundException(
@@ -89,13 +102,25 @@ public class CustomUserDetailsService implements UserDetailsService {
                         throw new UsernameNotFoundException(
                             "Staff account has no role assigned. Contact your administrator. Phone: " + phone);
                     }
+                    String deptName = null;
+                    try {
+                        if (staff.getDepartment() != null) {
+                            deptName = staff.getDepartment().getName();
+                        }
+                    } catch (jakarta.persistence.EntityNotFoundException e) {
+                        // Handle case where department_id exists in staffs but record is missing in departments
+                        deptName = null;
+                    }
+
                     return new CustomUserDetails(
                             staff.getId(),
                             staff.getFirstName() + " " + staff.getLastName(),
                             staff.getPhone(),
                             staff.getPassword(),
                             staff.getRole().name(),
-                            institutionId
+                            institutionId,
+                            deptName,
+                            staff.getAvatarUrl()
                     );
                 }
                 throw new UsernameNotFoundException(

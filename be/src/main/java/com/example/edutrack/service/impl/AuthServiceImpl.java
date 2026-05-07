@@ -67,6 +67,8 @@ public class AuthServiceImpl implements AuthService {
                 .phone(userDetails.getPhone())
                 .role(userDetails.getRole())
                 .institutionId(userDetails.getInstitutionId())
+                .departmentName(userDetails.getDepartmentName())
+                .avatarUrl(userDetails.getAvatarUrl())
                 .build();
 
         return AuthResponse.builder()

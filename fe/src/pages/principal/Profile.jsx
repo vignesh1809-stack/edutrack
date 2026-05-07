@@ -1,18 +1,39 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { logout } from '../../store/actions/authActions';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout, fetchProfileRequest } from '../../store/actions/authActions';
 import Sidebar from '../../components/Sidebar';
 import BottomNavBar from '../../components/BottomNavBar';
 
 const Profile = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { user, loading } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (!user?.responsibilities && !loading) {
+      dispatch(fetchProfileRequest());
+    }
+  }, [dispatch, user, loading]);
 
   const handleLogout = () => {
     dispatch(logout());
     navigate('/');
   };
+
+  if (loading && !user?.responsibilities) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  const responsibilities = user?.responsibilities || {};
+  const academic = responsibilities.academic || [];
+  const administrative = responsibilities.administrative || [];
+  const specializations = responsibilities.specializations || [];
+
   return (
     <>
       <Sidebar />
@@ -43,7 +64,7 @@ const Profile = () => {
               <img 
                 alt="Profile" 
                 className="w-40 h-40 rounded-3xl object-cover shadow-lg border-4 border-white" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFbIi42ymqpjUJ9AkxJTNZH0DIH6TVjJW_jwrrXAUgnzjkGl2r87Xtr-Y86yRoopHD4Mv8V48jarUxf5QtfwngH-Xggnu_1c65umke2pG6Y6n6Z5YfaW8rmuy_RNTncR8WLtu6-2AWhAjmZQZBc-fGDh_U9rMCOpT7Z_cjf_uSVweru9CrnBn4x5eQdlrxz30h31woaHGQV5NOw08-ZhUmnIEVOJ3alolJvmQ_FqUNRWKfMibEEB3GILyDQfp5VE1ZP8fLsBQyjYU"
+                src={user?.avatarUrl || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=2576&auto=format&fit=crop"}
               />
               <div className="absolute -bottom-2 -right-2 bg-primary text-on-primary p-2 rounded-xl shadow-lg border-2 border-white">
                 <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
@@ -51,24 +72,24 @@ const Profile = () => {
             </div>
             <div className="flex-1 text-center md:text-left z-10 w-full">
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-2">
-                <h2 className="text-4xl font-extrabold text-on-surface tracking-tight">Dr. Elena Sterling</h2>
+                <h2 className="text-4xl font-extrabold text-on-surface tracking-tight">{user?.firstName} {user?.lastName}</h2>
                 <span className="px-3 py-1 bg-tertiary-container text-on-tertiary-container text-xs font-bold rounded-full uppercase tracking-wider">Active</span>
               </div>
-              <p className="text-xl text-primary font-medium mb-4">Senior Faculty, Humanities Department</p>
+              <p className="text-xl text-primary font-medium mb-4">{(user?.role?.replace('_', ' ')) || 'Staff Member'} {user?.departmentName ? `, ${user.departmentName} Department` : ''}</p>
               <div className="flex flex-wrap justify-center md:justify-start gap-4">
                 <div className="flex items-center gap-2 text-on-surface-variant text-sm">
                   <span className="material-symbols-outlined text-primary/60 text-lg">pin_drop</span>
-                  Block B, Room 402
+                  {user?.campus || 'Main Campus'}
                 </div>
                 <div className="flex items-center gap-2 text-on-surface-variant text-sm">
                   <span className="material-symbols-outlined text-primary/60 text-lg">calendar_today</span>
-                  Joined Jan 2018
+                  Academic Member
                 </div>
               </div>
             </div>
             <div className="hidden lg:flex flex-col items-end gap-2 pb-2 shrink-0 z-10">
-              <p className="text-[10px] uppercase font-bold text-outline tracking-[0.2em]">Employee ID</p>
-              <p className="text-2xl font-headline font-bold text-on-surface">ED-HUM-284</p>
+              <p className="text-[10px] uppercase font-bold text-outline tracking-[0.2em]">User ID</p>
+              <p className="text-2xl font-headline font-bold text-on-surface">{user?.id?.substring(0, 8).toUpperCase() || 'ED-1029'}</p>
             </div>
           </section>
 
@@ -84,18 +105,18 @@ const Profile = () => {
                 </h3>
                 <div className="space-y-6">
                   <div>
-                    <p className="text-xs text-on-surface-variant font-medium mb-1">Designation</p>
-                    <p className="text-on-surface font-semibold">Senior Professor & Researcher</p>
+                    <p className="text-xs text-on-surface-variant font-medium mb-1">Role</p>
+                    <p className="text-on-surface font-semibold">{user?.role?.replace('_', ' ') || 'Faculty Member'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-on-surface-variant font-medium mb-1">Department</p>
-                    <p className="text-on-surface font-semibold">Humanities & Social Sciences</p>
+                    <p className="text-on-surface font-semibold">{user?.departmentName || 'Not Assigned'}</p>
                   </div>
                   <div>
                     <p className="text-xs text-on-surface-variant font-medium mb-1">Work Status</p>
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-primary"></div>
-                      <p className="text-on-surface font-semibold">Full-Time Permanent</p>
+                      <p className="text-on-surface font-semibold">{user?.workStatus || 'Full-Time'}</p>
                     </div>
                   </div>
                 </div>
@@ -108,24 +129,24 @@ const Profile = () => {
                   <span className="material-symbols-outlined text-primary">contact_page</span>
                 </h3>
                 <div className="space-y-4">
-                  <a className="flex items-center gap-4 group" href="#mailto">
-                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-all shadow-sm">
+                  <div className="flex items-center gap-4 group">
+                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary transition-all shadow-sm">
                       <span className="material-symbols-outlined">mail</span>
                     </div>
                     <div>
                       <p className="text-[10px] text-outline font-bold uppercase tracking-tight">Institutional Email</p>
-                      <p className="text-sm text-on-surface font-medium truncate">e.sterling@edutrack.edu</p>
+                      <p className="text-sm text-on-surface font-medium truncate">{user?.email || 'N/A'}</p>
                     </div>
-                  </a>
-                  <a className="flex items-center gap-4 group" href="#tel">
-                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-all shadow-sm">
+                  </div>
+                  <div className="flex items-center gap-4 group">
+                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary transition-all shadow-sm">
                       <span className="material-symbols-outlined">call</span>
                     </div>
                     <div>
-                      <p className="text-[10px] text-outline font-bold uppercase tracking-tight">Office Extension</p>
-                      <p className="text-sm text-on-surface font-medium">+1 (555) 0128-44</p>
+                      <p className="text-[10px] text-outline font-bold uppercase tracking-tight">Phone Number</p>
+                      <p className="text-sm text-on-surface font-medium">{user?.phone || 'N/A'}</p>
                     </div>
-                  </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -145,26 +166,21 @@ const Profile = () => {
                   <div className="p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container-high transition-colors">
                     <p className="text-sm font-bold text-on-surface-variant mb-2">Academic Taught</p>
                     <ul className="space-y-2">
-                      <li className="flex items-center gap-2 text-sm text-on-surface">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary/40"></span> Modern Ethics 401
-                      </li>
-                      <li className="flex items-center gap-2 text-sm text-on-surface">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary/40"></span> Sociological Theory
-                      </li>
-                      <li className="flex items-center gap-2 text-sm text-on-surface">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary/40"></span> Thesis Supervision
-                      </li>
+                      {academic.length > 0 ? academic.map((item, idx) => (
+                        <li key={idx} className="flex items-center gap-2 text-sm text-on-surface">
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary/40"></span> {item}
+                        </li>
+                      )) : <li className="text-sm text-on-surface-variant">General Education</li>}
                     </ul>
                   </div>
                   <div className="p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container-high transition-colors">
                     <p className="text-sm font-bold text-on-surface-variant mb-2">Administrative</p>
                     <ul className="space-y-2">
-                      <li className="flex items-center gap-2 text-sm text-on-surface">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary/40"></span> Curriculum Review Board
-                      </li>
-                      <li className="flex items-center gap-2 text-sm text-on-surface">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary/40"></span> Faculty Mentor Lead
-                      </li>
+                      {administrative.length > 0 ? administrative.map((item, idx) => (
+                        <li key={idx} className="flex items-center gap-2 text-sm text-on-surface">
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary/40"></span> {item}
+                        </li>
+                      )) : <li className="text-sm text-on-surface-variant">Faculty Support</li>}
                     </ul>
                   </div>
                 </div>
@@ -174,9 +190,9 @@ const Profile = () => {
                     Research Focus
                   </h4>
                   <div className="flex flex-wrap gap-2">
-                    <span className="px-4 py-2 bg-surface-container-low text-on-surface text-sm rounded-xl">Digital Ethics</span>
-                    <span className="px-4 py-2 bg-surface-container-low text-on-surface text-sm rounded-xl">Urban Sociology</span>
-                    <span className="px-4 py-2 bg-surface-container-low text-on-surface text-sm rounded-xl">Pedagogical Innovation</span>
+                    {specializations.length > 0 ? specializations.map((item, idx) => (
+                      <span key={idx} className="px-4 py-2 bg-surface-container-low text-on-surface text-sm rounded-xl">{item}</span>
+                    )) : <span className="px-4 py-2 bg-surface-container-low text-on-surface text-sm rounded-xl">General</span>}
                   </div>
                 </div>
               </div>

@@ -12,4 +12,6 @@ public class UserDto {
     private String phone;
     private String role;
     private UUID institutionId;
+    private String departmentName;
+    private String avatarUrl;
 }

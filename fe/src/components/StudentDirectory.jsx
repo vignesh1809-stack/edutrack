@@ -79,7 +79,7 @@ const StudentCard = ({ student, isExpanded, onToggle, viewMode }) => {
             <p className="text-xl font-bold text-on-surface">{student.avgMarks}</p>
           </div>
         </div>
-        <button onClick={(e) => { e.stopPropagation(); navigate('/principal/student-profile'); }} className={`mt-4 w-full py-2.5 rounded-xl text-sm font-bold opacity-100 transition-opacity ${styles.actionStyle}`}>
+        <button onClick={(e) => { e.stopPropagation(); navigate(`/principal/student-profile/${student.id}`); }} className={`mt-4 w-full py-2.5 rounded-xl text-sm font-bold opacity-100 transition-opacity ${styles.actionStyle}`}>
           {styles.actionBtn}
         </button>
       </div>
@@ -100,7 +100,7 @@ const StudentCard = ({ student, isExpanded, onToggle, viewMode }) => {
           <button className="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">expand_more</button>
         </div>
         <h3 className="font-manrope font-bold text-lg text-on-surface group-hover:text-primary transition-colors">{student.name}</h3>
-        <p className="text-xs font-medium text-slate-500 mb-4 tracking-tight">ID: #{student.id} • {student.courseDetails?.[0]}</p>
+        <p className="text-xs font-medium text-slate-500 mb-4 tracking-tight">ID: #{student.studentId} • {student.courseDetails?.[0]}</p>
         <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
           <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md ${styles.statusToken}`}>
             {student.status}
@@ -131,7 +131,7 @@ const StudentCard = ({ student, isExpanded, onToggle, viewMode }) => {
       </div>
       <div className="ml-5 flex-1">
         <h3 className="font-manrope font-bold text-on-surface group-hover:text-primary transition-colors">{student.name}</h3>
-        <p className="text-xs font-medium text-on-surface-variant">ID: #{student.id} • {student.courseDetails?.[0]}</p>
+        <p className="text-xs font-medium text-on-surface-variant">ID: #{student.studentId} • {student.courseDetails?.[0]}</p>
       </div>
       <div className="hidden md:flex flex-col items-end mr-8">
         <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400 mb-1">Status</span>

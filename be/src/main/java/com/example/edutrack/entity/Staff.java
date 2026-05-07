@@ -60,6 +60,10 @@ public class Staff extends BaseEntity {
     private String avatarUrl;
     private String responsibilities;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
+
     private boolean twoFactorEnabled;
     private LocalDateTime lastLogin;
     

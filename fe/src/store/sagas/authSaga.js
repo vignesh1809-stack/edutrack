@@ -1,6 +1,7 @@
 import { takeLatest, put, call } from 'redux-saga/effects';
 import * as types from '../types/authTypes';
 import * as actions from '../actions/authActions';
+import axiosInstance from '../../api/axiosInstance';
 
 // Helper for API calls
 const loginApi = async (credentials) => {
@@ -30,6 +31,11 @@ const refreshTokenApi = async (refreshToken) => {
     });
 
     return await handleAuthResponse(response);
+};
+
+const fetchProfileApi = async () => {
+    const response = await axiosInstance.get('/api/profile');
+    return response.data;
 };
 
 const handleAuthResponse = async (response) => {
@@ -85,6 +91,21 @@ function* handleRefreshToken(action) {
     }
 }
 
+function* handleFetchProfile() {
+    try {
+        const data = yield call(fetchProfileApi);
+        
+        // Update persisted user data
+        const currentUser = JSON.parse(localStorage.getItem('user')) || {};
+        const updatedUser = { ...currentUser, ...data };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        yield put(actions.fetchProfileSuccess(data));
+    } catch (error) {
+        yield put(actions.fetchProfileFailure(error.message));
+    }
+}
+
 function* handleLogout() {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
@@ -94,5 +115,6 @@ function* handleLogout() {
 export default function* authSaga() {
     yield takeLatest(types.LOGIN_REQUEST, handleLogin);
     yield takeLatest(types.REFRESH_TOKEN_REQUEST, handleRefreshToken);
+    yield takeLatest(types.FETCH_PROFILE_REQUEST, handleFetchProfile);
     yield takeLatest(types.LOGOUT, handleLogout);
 }

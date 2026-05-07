@@ -15,12 +15,25 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.edutrack.entity.Student;
 import com.example.edutrack.dto.StudentListProjection;
+import com.example.edutrack.dto.StudentProfileProjection;
 import java.util.UUID;
+import java.util.Map;
+import java.time.LocalDate;
 
 import com.example.edutrack.dto.StudentListDto;
+import com.example.edutrack.dto.StudentProfileDto;
 import com.example.edutrack.entity.enums.StudentStatus;
+import com.example.edutrack.entity.enums.AttendanceStatus;
+import com.example.edutrack.entity.enums.FeeStatus;
+import com.example.edutrack.entity.Assessment;
+import com.example.edutrack.entity.Attendance;
+import com.example.edutrack.entity.Fee;
+import com.example.edutrack.entity.Remarks;
+import com.example.edutrack.repository.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Arrays;
 
 @Service
 @Data
@@ -31,6 +44,18 @@ public class StudentServiceImpl implements StudentService {
 
     @Autowired
     private final com.example.edutrack.repository.DepartmentRepository departmentRepository;
+
+    @Autowired
+    private AssessmentRepository assessmentRepository;
+
+    @Autowired
+    private AttendanceRepository attendanceRepository;
+
+    @Autowired
+    private FeeRepository feeRepository;
+
+    @Autowired
+    private RemarksRepository remarksRepository;
 
     @Override
     public java.util.List<String> getFilterBranches(UUID institutionId) {
@@ -54,7 +79,8 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<StudentListDto> getPrincipalStudentList(UUID institutionId, String search, StudentStatus status, String course, Integer batchYear, String section, Pageable pageable) {
+    public Page<StudentListDto> getPrincipalStudentList(UUID institutionId, String search, StudentStatus status,
+            String course, Integer batchYear, String section, Pageable pageable) {
         String searchPattern = (search != null && !search.isBlank()) ? "%" + search.toLowerCase() + "%" : null;
         String courseLike = (course != null && !course.isBlank()) ? "%" + course.toLowerCase() + "%" : null;
         String statusStr = (status != null) ? status.name() : null;
@@ -66,27 +92,26 @@ public class StudentServiceImpl implements StudentService {
                 courseLike,
                 batchYear,
                 section,
-                pageable
-        ).map(this::convertProjectionToDto);
+                pageable).map(this::convertProjectionToDto);
     }
 
     private StudentListDto convertProjectionToDto(StudentListProjection proj) {
-        String statusLabel = proj.getStatus() != null ? 
-            capitalize(proj.getStatus().replace("_", " ")) : "Good";
+        String statusLabel = proj.getStatus() != null ? capitalize(proj.getStatus().replace("_", " ")) : "Good";
 
-        String studentId = proj.getStudentId() != null ? proj.getStudentId() : proj.getId().toString();
+        String studentId = proj.getStudentId() != null ? proj.getStudentId() : "N/A";
         String roll = studentId.length() >= 4 ? studentId.substring(studentId.length() - 4) : studentId;
 
         return StudentListDto.builder()
-                .id(studentId)
+                .id(proj.getId().toString()) // UUID for navigation
+                .studentId(studentId) // Human readable ID
                 .name(proj.getFirstName() + " " + proj.getLastName())
                 .roll(roll)
                 .image("female".equalsIgnoreCase(proj.getGender()) ? FEMALE_IMAGE : MALE_IMAGE)
                 .status(statusLabel)
                 .courseDetails(Arrays.asList(
-                        proj.getDepartmentName() + " | " + proj.getBatchYear() + " Year",
-                        "Section " + proj.getSection()
-                ))
+                        proj.getDepartmentName() + " | Sem "
+                                + (proj.getCurrentSemester() != null ? proj.getCurrentSemester() : 1),
+                        "Section " + proj.getSection()))
                 .attendance(calculateAttendancePlaceholder())
                 .avgMarks(proj.getCGPA() != null ? proj.getCGPA().toString() : "0.0")
                 .cgpa(proj.getCGPA() != null ? proj.getCGPA().toString() : "0.0")
@@ -102,7 +127,8 @@ public class StudentServiceImpl implements StudentService {
     }
 
     private String capitalize(String str) {
-        if (str == null || str.isEmpty()) return str;
+        if (str == null || str.isEmpty())
+            return str;
         return Arrays.stream(str.toLowerCase().split(" "))
                 .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1))
                 .collect(Collectors.joining(" "));
@@ -112,7 +138,131 @@ public class StudentServiceImpl implements StudentService {
     @Transactional(readOnly = true)
     @Cacheable(value = "students", keyGenerator = "tenantKeyGenerator")
     public Student getStudentById(UUID id) {
-        return studentRepository.findActiveById(id).orElse(null);
+        String instId = TenantContext.getCurrentTenant();
+        return studentRepository.findActiveById(id.toString(), instId).orElse(null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public StudentProfileDto getStudentProfile(UUID institutionId, UUID studentId) {
+        System.out.println(
+                "[PROFILE] Fetching profile for studentId: " + studentId + " in institutionId: " + institutionId);
+
+        StudentProfileProjection student = studentRepository.findProfileProjection(studentId.toString(), institutionId.toString())
+                .orElseThrow(() -> new RuntimeException(
+                        "Student not found with UUID: " + studentId));
+
+        // Get entity for related data lookups
+        Student studentEntity = studentRepository.findActiveById(studentId.toString(), institutionId.toString()).orElse(null);
+
+        // 1. Identity
+        StudentProfileDto.StudentIdentity identity = StudentProfileDto.StudentIdentity.builder()
+                .id(UUID.fromString(student.getId()))
+                .studentId(student.getStudentId())
+                .firstName(student.getFirstName())
+                .lastName(student.getLastName())
+                .status(student.getStatus() != null ? student.getStatus() : "ACTIVE")
+                .avatarUrl("female".equalsIgnoreCase(student.getGender()) ? FEMALE_IMAGE : MALE_IMAGE)
+                .major(student.getDepartmentName() != null ? student.getDepartmentName() : "General")
+                .section(student.getSection())
+                .currentSemester(student.getCurrentSemester())
+                .build();
+
+        // 2. Performance (Sem-wise)
+        List<Assessment> assessments = assessmentRepository.findByStudentId(studentId);
+        Map<Integer, List<Assessment>> bySem = assessments.stream()
+                .filter(a -> a.getCourse() != null)
+                .collect(Collectors.groupingBy(a -> a.getCourse().getSemester()));
+
+        List<StudentProfileDto.SemesterPerformance> performance = bySem.entrySet().stream()
+                .map((Map.Entry<Integer, List<Assessment>> entry) -> {
+                    double avg = entry.getValue().stream()
+                            .mapToDouble(a -> a.getMarksObtained().doubleValue() / a.getMaxScore().doubleValue() * 100)
+                            .average().orElse(0.0);
+                    return StudentProfileDto.SemesterPerformance.builder()
+                            .label("Sem " + entry.getKey())
+                            .score(Math.round(avg * 10) / 10.0)
+                            .height(Math.round(avg) + "%")
+                            .build();
+                })
+                .sorted(Comparator.comparing(StudentProfileDto.SemesterPerformance::getLabel))
+                .collect(Collectors.toList());
+
+        // 3. Attendance
+        List<Attendance> attendanceRecords = attendanceRepository.findByStudentId(studentId);
+        long presents = attendanceRecords.stream().filter(a -> a.getAttendanceStatus() == AttendanceStatus.PRESENT)
+                .count();
+        double attendancePct = attendanceRecords.isEmpty() ? 0.0 : (double) presents / attendanceRecords.size() * 100;
+
+        StudentProfileDto.AttendanceSummary attendance = StudentProfileDto.AttendanceSummary.builder()
+                .percentage(Math.round(attendancePct * 10) / 10.0)
+                .presents((int) presents)
+                .totalDays(attendanceRecords.size())
+                .build();
+
+        // 4. Financials
+        List<Fee> unpaidFees = feeRepository.findByStudentIdAndStatusNot(studentId, FeeStatus.PAID);
+        BigDecimal totalPending = unpaidFees.stream()
+                .map(f -> f.getTotalAmount().add(f.getFineAmount() != null ? f.getFineAmount() : BigDecimal.ZERO))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        LocalDate earliestDue = unpaidFees.stream()
+                .map(Fee::getDueDate)
+                .min(LocalDate::compareTo).orElse(null);
+
+        StudentProfileDto.FinancialSummary financials = StudentProfileDto.FinancialSummary.builder()
+                .pendingAmount(totalPending)
+                .dueDate(earliestDue)
+                .build();
+
+        // 5. Remarks
+        List<Remarks> remarksList = remarksRepository.findByTargetStudentId(studentId);
+        List<StudentProfileDto.RemarkDto> remarks = remarksList.stream()
+                .map((Remarks r) -> {
+                    String authorName = "System";
+                    String authorRole = "Automated";
+                    String type = "Staff";
+
+                    if (r.getAuthorStaff() != null) {
+                        authorName = r.getAuthorStaff().getFirstName() + " " + r.getAuthorStaff().getLastName();
+                        authorRole = r.getAuthorStaff().getRole() != null ? r.getAuthorStaff().getRole().name()
+                                : "Staff";
+                        type = "Staff";
+                    } else if (r.getAuthorStudent() != null) {
+                        authorName = r.getAuthorStudent().getFirstName() + " " + r.getAuthorStudent().getLastName();
+                        authorRole = "Student";
+                        type = "Peer";
+                    }
+
+                    return StudentProfileDto.RemarkDto.builder()
+                            .authorName(authorName)
+                            .authorRole(authorRole)
+                            .content(r.getContent())
+                            .date(r.getCreatedAt().toLocalDate())
+                            .type(type)
+                            .build();
+                })
+                .limit(5) // Just top 5
+                .collect(Collectors.toList());
+
+        // 6. Contact
+        StudentProfileDto.ContactDetails contact = StudentProfileDto.ContactDetails.builder()
+                .phone(student.getPhone())
+                .email(student.getEmail())
+                .address(student.getAddress())
+                .guardianName(studentEntity != null && studentEntity.getGuardians() != null && !studentEntity.getGuardians().isEmpty() ? 
+                        studentEntity.getGuardians().get(0).getName() : "N/A")
+                .guardianRelation(studentEntity != null && studentEntity.getGuardians() != null && !studentEntity.getGuardians().isEmpty() ? 
+                        "Guardian" : "N/A")
+                .build();
+
+        return StudentProfileDto.builder()
+                .identity(identity)
+                .performance(performance)
+                .attendance(attendance)
+                .financials(financials)
+                .remarks(remarks)
+                .contact(contact)
+                .build();
     }
 
     @Override
@@ -138,4 +288,3 @@ public class StudentServiceImpl implements StudentService {
         studentRepository.softDelete(id);
     }
 }
-

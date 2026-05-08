@@ -152,4 +152,26 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
 
     @Query("SELECT a FROM Attendance a WHERE a.student.id = :studentId")
     List<Attendance> findByStudentId(@Param("studentId") UUID studentId);
+
+    @Query(value = """
+            SELECT 
+                BIN_TO_UUID(s.id) AS studentId,
+                s.first_name AS firstName,
+                s.last_name AS lastName,
+                COUNT(a.id) AS totalDays,
+                SUM(CASE WHEN a.attendance_status = 'PRESENT' THEN 1 ELSE 0 END) AS presents,
+                ROUND((SUM(CASE WHEN a.attendance_status = 'PRESENT' THEN 1 ELSE 0 END) * 100.0) / NULLIF(COUNT(a.id), 0), 2) AS percentage,
+                SUM(CASE WHEN DATE_FORMAT(a.record_date, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m') AND a.attendance_status = 'PRESENT' THEN 1 ELSE 0 END) AS month0,
+                SUM(CASE WHEN DATE_FORMAT(a.record_date, '%Y-%m') = DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 MONTH), '%Y-%m') AND a.attendance_status = 'PRESENT' THEN 1 ELSE 0 END) AS month1,
+                SUM(CASE WHEN DATE_FORMAT(a.record_date, '%Y-%m') = DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 2 MONTH), '%Y-%m') AND a.attendance_status = 'PRESENT' THEN 1 ELSE 0 END) AS month2,
+                SUM(CASE WHEN DATE_FORMAT(a.record_date, '%Y-%m') = DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 3 MONTH), '%Y-%m') AND a.attendance_status = 'PRESENT' THEN 1 ELSE 0 END) AS month3,
+                SUM(CASE WHEN DATE_FORMAT(a.record_date, '%Y-%m') = DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 4 MONTH), '%Y-%m') AND a.attendance_status = 'PRESENT' THEN 1 ELSE 0 END) AS month4,
+                SUM(CASE WHEN DATE_FORMAT(a.record_date, '%Y-%m') = DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 5 MONTH), '%Y-%m') AND a.attendance_status = 'PRESENT' THEN 1 ELSE 0 END) AS month5
+            FROM students s
+            LEFT JOIN attendances a ON s.id = a.student_id
+            WHERE s.id = UUID_TO_BIN(:studentId) 
+              AND s.institution_id = UUID_TO_BIN(:instId)
+            GROUP BY s.id, s.first_name, s.last_name
+            """, nativeQuery = true)
+    com.example.edutrack.dto.StudentAttendanceProjection findStudentAttendanceTrend(@Param("studentId") String studentId, @Param("instId") String instId);
 }

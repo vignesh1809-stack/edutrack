@@ -32,6 +32,7 @@ public class Assessment extends BaseEntity {
     private Institution institution;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.BINARY)
     @JoinColumn(name = "course_id", nullable = false, columnDefinition = "BINARY(16)")
     private Courses course;
 
@@ -39,6 +40,7 @@ public class Assessment extends BaseEntity {
     private String type;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.BINARY)
     @JoinColumn(name = "student_id", nullable = false, columnDefinition = "BINARY(16)")
     private Student student;
 

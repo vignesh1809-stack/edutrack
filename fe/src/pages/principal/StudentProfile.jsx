@@ -165,13 +165,24 @@ const StudentProfile = () => {
             <div>
               <h3 className="font-headline font-bold text-xl text-on-surface mb-6">Attendance Overview</h3>
               <div className="flex items-center gap-5">
-                <div className="relative w-24 h-24 shrink-0 flex items-center justify-center">
+                <div className="relative w-20 h-20 shrink-0 flex items-center justify-center">
                   <svg className="w-full h-full transform -rotate-90 absolute">
-                    <circle className="text-slate-100" cx="48" cy="48" fill="transparent" r="42" stroke="currentColor" strokeWidth="10"></circle>
-                    <circle className="text-blue-600" cx="48" cy="48" fill="transparent" r="42" stroke="currentColor" strokeDasharray="263.89" strokeDashoffset="75.5" strokeWidth="10" strokeLinecap="round"></circle>
+                    <circle className="text-slate-100" cx="40" cy="40" fill="transparent" r="34" stroke="currentColor" strokeWidth="8"></circle>
+                    <circle 
+                      className="text-blue-600 transition-all duration-1000 ease-out" 
+                      cx="40" 
+                      cy="40" 
+                      fill="transparent" 
+                      r="34" 
+                      stroke="currentColor" 
+                      strokeDasharray="213.6" 
+                      strokeDashoffset={213.6 * (1 - (attendance.percentage || 0) / 100)} 
+                      strokeWidth="8" 
+                      strokeLinecap="round"
+                    ></circle>
                   </svg>
-                  <div className="flex flex-col items-center justify-center z-10 w-full h-full rounded-full shadow-inner bg-white bg-opacity-50">
-                     <span className="font-extrabold text-2xl text-slate-800">{attendance.percentage}%</span>
+                  <div className="flex flex-col items-center justify-center z-10">
+                     <span className="font-bold text-lg text-slate-800">{(attendance.percentage || 0).toFixed(0)}%</span>
                   </div>
                 </div>
                 <div>
@@ -183,20 +194,43 @@ const StudentProfile = () => {
             
             {/* 6-Month Trend Visual */}
             <div className="mt-8">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">6-Month Trend</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">6-Month Trend (Presents)</p>
               <div className="flex items-end justify-between h-20 gap-1 px-2 border-b-2 border-slate-100 pb-2">
-                <div className="w-3 bg-blue-200 rounded-t-full h-[80%] hover:bg-blue-400 transition-colors"></div>
-                <div className="w-3 bg-blue-200 rounded-t-full h-[90%] hover:bg-blue-400 transition-colors"></div>
-                <div className="w-3 bg-blue-200 rounded-t-full h-[85%] hover:bg-blue-400 transition-colors"></div>
-                <div className="w-3 bg-blue-200 rounded-t-full h-[95%] hover:bg-blue-400 transition-colors"></div>
-                <div className="w-3 bg-error-container rounded-t-full h-[40%] group relative cursor-pointer">
-                  <span className="absolute -top-7 left-1/2 -translate-x-1/2 bg-error text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">72%</span>
-                </div>
-                <div className="w-3 bg-blue-200 rounded-t-full h-[75%] hover:bg-blue-400 transition-colors"></div>
+                {attendance.monthlyTrend && attendance.monthlyTrend.map((count, idx) => {
+                  // Assume max 25 working days for visual scaling
+                  const height = Math.min(100, (count / 25) * 100);
+                  const isLow = count < 15;
+                  
+                  // Get month name for this bar
+                  const d = new Date();
+                  d.setMonth(d.getMonth() - (5 - idx));
+                  const monthName = d.toLocaleString('default', { month: 'long' });
+
+                  return (
+                    <div key={idx} className="group relative flex-1 flex flex-col items-center justify-end h-full">
+                      <div 
+                        className={`w-3 rounded-t-full transition-all duration-500 ${isLow ? 'bg-error-container hover:bg-error' : 'bg-blue-200 hover:bg-blue-400'}`}
+                        style={{ height: `${height}%` }}
+                      ></div>
+                      <span className="absolute -top-7 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-[9px] font-bold px-2 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none">
+                        {monthName}: {count} Days
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
               <div className="flex justify-between mt-2 text-[9px] font-bold text-slate-400 uppercase px-1">
-                <span>Jun</span>
-                <span>Nov</span>
+                {(() => {
+                  const labels = [];
+                  for (let i = 5; i >= 0; i--) {
+                    const d = new Date();
+                    d.setMonth(d.getMonth() - i);
+                    labels.push(d.toLocaleString('default', { month: 'short' }));
+                  }
+                  return labels.map((label, idx) => (
+                    <span key={idx} className="flex-1 text-center">{label}</span>
+                  ));
+                })()}
               </div>
             </div>
           </div>

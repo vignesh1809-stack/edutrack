@@ -50,6 +50,7 @@ public class StudentProfileDto {
         private double percentage;
         private int presents;
         private int totalDays;
+        private List<Integer> monthlyTrend; // Last 6 months (0 = current month)
     }
 
     @Data

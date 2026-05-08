@@ -17,6 +17,7 @@ import java.util.UUID;
 public abstract class BaseEntity {
 
     @TenantId
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.BINARY)
     @Column(name = "institution_id", columnDefinition = "BINARY(16)", nullable = false)
     private UUID institutionId;
 

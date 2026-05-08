@@ -33,18 +33,22 @@ public class Remarks extends BaseEntity {
     private Institution institution;
     
     @ManyToOne(fetch = FetchType.LAZY)
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.BINARY)
     @JoinColumn(name = "target_student_id", referencedColumnName = "id", columnDefinition = "BINARY(16)")
     private Student targetStudent;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.BINARY)
     @JoinColumn(name = "target_staff_id", referencedColumnName = "id", columnDefinition = "BINARY(16)")
     private Staff targetStaff;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.BINARY)
     @JoinColumn(name = "author_staff_id", referencedColumnName = "id", columnDefinition = "BINARY(16)")
     private Staff authorStaff;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.BINARY)
     @JoinColumn(name = "author_student_id", referencedColumnName = "id", columnDefinition = "BINARY(16)")
     private Student authorStudent;
 

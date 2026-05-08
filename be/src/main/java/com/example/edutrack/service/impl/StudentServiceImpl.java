@@ -145,6 +145,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     @Transactional(readOnly = true)
     public StudentProfileDto getStudentProfile(UUID institutionId, UUID studentId) {
+        TenantContext.setCurrentTenant(institutionId.toString());
         System.out.println(
                 "[PROFILE] Fetching profile for studentId: " + studentId + " in institutionId: " + institutionId);
 
@@ -188,31 +189,48 @@ public class StudentServiceImpl implements StudentService {
                 .sorted(Comparator.comparing(StudentProfileDto.SemesterPerformance::getLabel))
                 .collect(Collectors.toList());
 
-        // 3. Attendance
-        List<Attendance> attendanceRecords = attendanceRepository.findByStudentId(studentId);
-        long presents = attendanceRecords.stream().filter(a -> a.getAttendanceStatus() == AttendanceStatus.PRESENT)
-                .count();
-        double attendancePct = attendanceRecords.isEmpty() ? 0.0 : (double) presents / attendanceRecords.size() * 100;
+        // 3. Attendance (Using optimized native query)
+        com.example.edutrack.dto.StudentAttendanceProjection attProj = attendanceRepository.findStudentAttendanceTrend(studentId.toString(), institutionId.toString());
+        
+        StudentProfileDto.AttendanceSummary attendance;
+        if (attProj != null) {
+            attendance = StudentProfileDto.AttendanceSummary.builder()
+                    .percentage(attProj.getPercentage() != null ? attProj.getPercentage() : 0.0)
+                    .presents(attProj.getPresents() != null ? attProj.getPresents() : 0)
+                    .totalDays(attProj.getTotalDays() != null ? attProj.getTotalDays() : 0)
+                    .monthlyTrend(Arrays.asList(
+                            attProj.getMonth5() != null ? attProj.getMonth5() : 0,
+                            attProj.getMonth4() != null ? attProj.getMonth4() : 0,
+                            attProj.getMonth3() != null ? attProj.getMonth3() : 0,
+                            attProj.getMonth2() != null ? attProj.getMonth2() : 0,
+                            attProj.getMonth1() != null ? attProj.getMonth1() : 0,
+                            attProj.getMonth0() != null ? attProj.getMonth0() : 0
+                    ))
+                    .build();
+        } else {
+            attendance = StudentProfileDto.AttendanceSummary.builder()
+                    .percentage(0.0)
+                    .presents(0)
+                    .totalDays(0)
+                    .monthlyTrend(Arrays.asList(0, 0, 0, 0, 0, 0))
+                    .build();
+        }
 
-        StudentProfileDto.AttendanceSummary attendance = StudentProfileDto.AttendanceSummary.builder()
-                .percentage(Math.round(attendancePct * 10) / 10.0)
-                .presents((int) presents)
-                .totalDays(attendanceRecords.size())
-                .build();
-
-        // 4. Financials
-        List<Fee> unpaidFees = feeRepository.findByStudentIdAndStatusNot(studentId, FeeStatus.PAID);
-        BigDecimal totalPending = unpaidFees.stream()
-                .map(f -> f.getTotalAmount().add(f.getFineAmount() != null ? f.getFineAmount() : BigDecimal.ZERO))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        LocalDate earliestDue = unpaidFees.stream()
-                .map(Fee::getDueDate)
-                .min(LocalDate::compareTo).orElse(null);
-
-        StudentProfileDto.FinancialSummary financials = StudentProfileDto.FinancialSummary.builder()
-                .pendingAmount(totalPending)
-                .dueDate(earliestDue)
-                .build();
+        // 4. Financials (Using optimized native query)
+        com.example.edutrack.dto.StudentFinancialProjection finProj = feeRepository.findStudentFinancialSummary(studentId.toString(), institutionId.toString());
+        
+        StudentProfileDto.FinancialSummary financials;
+        if (finProj != null) {
+            financials = StudentProfileDto.FinancialSummary.builder()
+                    .pendingAmount(finProj.getPendingAmount() != null ? finProj.getPendingAmount() : BigDecimal.ZERO)
+                    .dueDate(finProj.getDueDate())
+                    .build();
+        } else {
+            financials = StudentProfileDto.FinancialSummary.builder()
+                    .pendingAmount(BigDecimal.ZERO)
+                    .dueDate(null)
+                    .build();
+        }
 
         // 5. Remarks
         List<Remarks> remarksList = remarksRepository.findByTargetStudentId(studentId);

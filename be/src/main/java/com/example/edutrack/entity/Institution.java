@@ -19,6 +19,7 @@ public class Institution {
 
     @Id
     @UuidGenerator
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.BINARY)
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 

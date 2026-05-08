@@ -44,6 +44,7 @@ public class Fee extends BaseEntity {
 
     
     @ManyToOne
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.BINARY)
     @JoinColumn(name = "student_id", nullable = false, columnDefinition = "BINARY(16)")
     private Student student;
 

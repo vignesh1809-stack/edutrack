@@ -12,6 +12,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -46,6 +48,7 @@ public class Attendance extends BaseEntity {
     private Institution institution;
 
     @ManyToOne
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.BINARY)
     @JoinColumn(name = "student_id", nullable = false, columnDefinition = "BINARY(16)")
     private Student student;
 
@@ -54,6 +57,8 @@ public class Attendance extends BaseEntity {
     private Courses course;
 
     private LocalDate recordDate;
+
+    @Enumerated(EnumType.STRING)
     private AttendanceStatus attendanceStatus;
     
 }

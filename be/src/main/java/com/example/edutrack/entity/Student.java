@@ -11,7 +11,10 @@ import lombok.NoArgsConstructor;
 import com.example.edutrack.entity.enums.StudentStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.SqlTypes;
 
 import lombok.EqualsAndHashCode;
 
@@ -29,9 +32,10 @@ import lombok.EqualsAndHashCode;
 public class Student extends BaseEntity {
     @Id
     @UuidGenerator(style = UuidGenerator.Style.TIME)
-    @Column(columnDefinition = "BINARY(16)")
+    @JdbcTypeCode(SqlTypes.BINARY)
+    @Column(columnDefinition = "BINARY(16)", nullable = false, updatable = false)
     private UUID id;
-
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "institution_id", insertable = false, updatable = false)
     @JsonIgnore
@@ -42,6 +46,7 @@ public class Student extends BaseEntity {
     private String lastName;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JdbcTypeCode(SqlTypes.BINARY)
     @JoinColumn(name = "department_id", nullable = false, columnDefinition = "BINARY(16)")
     private Department department;
 

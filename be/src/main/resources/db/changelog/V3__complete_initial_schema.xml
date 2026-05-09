@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- 
+      Comprehensive Schema Setup
+      Author: Antigravity
+      Description: Core tables for Student Management, Staff, Attendance, Fees, and more.
+    -->
+
+    <!-- Staff Table -->
+    <changeSet id="5-create-staffs" author="antigravity">
+        <createTable tableName="staffs">
+            <column name="id" type="BINARY(16)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="institution_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(255)"/>
+            <column name="last_name" type="VARCHAR(255)"/>
+            <column name="role" type="VARCHAR(50)"/>
+            <column name="password" type="VARCHAR(255)"/>
+            <column name="email" type="VARCHAR(255)"/>
+            <column name="phone" type="VARCHAR(20)"/>
+            <column name="avatar_url" type="VARCHAR(255)"/>
+            <column name="responsibilities" type="TEXT"/>
+            <column name="department_id" type="BINARY(16)"/>
+            <column name="two_factor_enabled" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="last_login" type="DATETIME"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="institution_id" baseTableName="staffs" constraintName="fk_staff_institution" referencedColumnNames="id" referencedTableName="institutions"/>
+        <addForeignKeyConstraint baseColumnNames="department_id" baseTableName="staffs" constraintName="fk_staff_department" referencedColumnNames="id" referencedTableName="departments"/>
+        <createIndex indexName="idx_staff_institution" tableName="staffs">
+            <column name="institution_id"/>
+            <column name="id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Buses Table -->
+    <changeSet id="6-create-buses" author="antigravity">
+        <createTable tableName="buses">
+            <column name="id" type="BINARY(16)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="institution_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bus_number" type="VARCHAR(50)"/>
+            <column name="driver_name" type="VARCHAR(255)"/>
+            <column name="route" type="VARCHAR(255)"/>
+            <column name="total_students" type="INT" defaultValueNumeric="0"/>
+            <column name="incharge_id" type="BINARY(16)"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="incharge_id" baseTableName="buses" constraintName="fk_bus_incharge" referencedColumnNames="id" referencedTableName="staffs"/>
+    </changeSet>
+
+    <!-- Guardians Table -->
+    <changeSet id="7-create-guardians" author="antigravity">
+        <createTable tableName="guardians">
+            <column name="id" type="BINARY(16)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="institution_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="phone" type="VARCHAR(20)"/>
+            <column name="email" type="VARCHAR(255)"/>
+            <column name="password" type="VARCHAR(255)"/>
+            <column name="address" type="VARCHAR(255)"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Students Table -->
+    <changeSet id="8-create-students" author="antigravity">
+        <createTable tableName="students">
+            <column name="id" type="BINARY(16)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="institution_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="student_id" type="VARCHAR(50)"/>
+            <column name="first_name" type="VARCHAR(255)"/>
+            <column name="last_name" type="VARCHAR(255)"/>
+            <column name="department_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(50)"/>
+            <column name="password" type="VARCHAR(255)"/>
+            <column name="avatar_url" type="VARCHAR(255)"/>
+            <column name="phone" type="VARCHAR(20)"/>
+            <column name="address" type="VARCHAR(255)"/>
+            <column name="email" type="VARCHAR(255)"/>
+            <column name="gender" type="VARCHAR(20)"/>
+            <column name="date_of_birth" type="DATE"/>
+            <column name="is_hosteller" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="cgpa" type="DECIMAL(4,2)"/>
+            <column name="batch_year" type="DATE"/>
+            <column name="section" type="VARCHAR(10)"/>
+            <column name="current_semester" type="INT"/>
+            <column name="bus_id" type="BINARY(16)"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="department_id" baseTableName="students" constraintName="fk_student_department" referencedColumnNames="id" referencedTableName="departments"/>
+        <addForeignKeyConstraint baseColumnNames="bus_id" baseTableName="students" constraintName="fk_student_bus" referencedColumnNames="id" referencedTableName="buses"/>
+        <createIndex indexName="idx_student_lookup" tableName="students">
+            <column name="institution_id"/>
+            <column name="id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Student-Guardian Mapping Table -->
+    <changeSet id="9-create-student-guardian-map" author="antigravity">
+        <createTable tableName="student_guardian_map">
+            <column name="student_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="guardian_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey columnNames="student_id, guardian_id" tableName="student_guardian_map"/>
+        <addForeignKeyConstraint baseColumnNames="student_id" baseTableName="student_guardian_map" constraintName="fk_map_student" referencedColumnNames="id" referencedTableName="students"/>
+        <addForeignKeyConstraint baseColumnNames="guardian_id" baseTableName="student_guardian_map" constraintName="fk_map_guardian" referencedColumnNames="id" referencedTableName="guardians"/>
+    </changeSet>
+
+    <!-- Courses Table -->
+    <changeSet id="10-create-courses" author="antigravity">
+        <createTable tableName="courses">
+            <column name="id" type="BINARY(16)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="institution_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="department_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="course_name" type="VARCHAR(255)"/>
+            <column name="semester" type="INT"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="department_id" baseTableName="courses" constraintName="fk_course_department" referencedColumnNames="id" referencedTableName="departments"/>
+    </changeSet>
+
+    <!-- Attendance Table -->
+    <changeSet id="11-create-attendances" author="antigravity">
+        <createTable tableName="attendances">
+            <column name="id" type="BINARY(16)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="institution_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="student_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="course_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="record_date" type="DATE"/>
+            <column name="attendance_status" type="VARCHAR(50)"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="student_id" baseTableName="attendances" constraintName="fk_attendance_student" referencedColumnNames="id" referencedTableName="students"/>
+        <addForeignKeyConstraint baseColumnNames="course_id" baseTableName="attendances" constraintName="fk_attendance_course" referencedColumnNames="id" referencedTableName="courses"/>
+        <createIndex indexName="idx_attendance_main" tableName="attendances">
+            <column name="institution_id"/>
+            <column name="student_id"/>
+            <column name="record_date"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Fees Table -->
+    <changeSet id="12-create-fees" author="antigravity">
+        <createTable tableName="fees">
+            <column name="id" type="BINARY(16)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="institution_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="student_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="fee_type" type="VARCHAR(50)"/>
+            <column name="academic_year" type="VARCHAR(20)"/>
+            <column name="term" type="VARCHAR(20)"/>
+            <column name="fine_amount" type="DECIMAL(10,2)"/>
+            <column name="total_amount" type="DECIMAL(10,2)"/>
+            <column name="due_date" type="DATE"/>
+            <column name="status" type="VARCHAR(50)"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="student_id" baseTableName="fees" constraintName="fk_fee_student" referencedColumnNames="id" referencedTableName="students"/>
+    </changeSet>
+
+    <!-- Payments Table -->
+    <changeSet id="13-create-payments" author="antigravity">
+        <createTable tableName="payments">
+            <column name="id" type="BINARY(16)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="institution_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="fee_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount_paid" type="DECIMAL(10,2)"/>
+            <column name="payment_date" type="DATE"/>
+            <column name="payment_method" type="VARCHAR(50)"/>
+            <column name="transaction_id" type="VARCHAR(255)"/>
+            <column name="payment_status" type="VARCHAR(50)"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="fee_id" baseTableName="payments" constraintName="fk_payment_fee" referencedColumnNames="id" referencedTableName="fees"/>
+    </changeSet>
+
+    <!-- Assessments Table -->
+    <changeSet id="14-create-assessments" author="antigravity">
+        <createTable tableName="assessments">
+            <column name="id" type="BINARY(16)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="institution_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="course_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="student_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(20)"/>
+            <column name="max_score" type="DECIMAL(5,2)"/>
+            <column name="marks_obtained" type="DECIMAL(5,2)"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="course_id" baseTableName="assessments" constraintName="fk_assessment_course" referencedColumnNames="id" referencedTableName="courses"/>
+        <addForeignKeyConstraint baseColumnNames="student_id" baseTableName="assessments" constraintName="fk_assessment_student" referencedColumnNames="id" referencedTableName="students"/>
+    </changeSet>
+
+    <!-- Remarks Table -->
+    <changeSet id="15-create-remarks" author="antigravity">
+        <createTable tableName="remarks">
+            <column name="id" type="BINARY(16)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="institution_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_student_id" type="BINARY(16)"/>
+            <column name="target_staff_id" type="BINARY(16)"/>
+            <column name="author_staff_id" type="BINARY(16)"/>
+            <column name="author_student_id" type="BINARY(16)"/>
+            <column name="content" type="TEXT"/>
+            <column name="remark_target" type="VARCHAR(50)"/>
+            <column name="remark_category" type="VARCHAR(50)"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="target_student_id" baseTableName="remarks" constraintName="fk_remark_target_student" referencedColumnNames="id" referencedTableName="students"/>
+        <addForeignKeyConstraint baseColumnNames="target_staff_id" baseTableName="remarks" constraintName="fk_remark_target_staff" referencedColumnNames="id" referencedTableName="staffs"/>
+        <addForeignKeyConstraint baseColumnNames="author_staff_id" baseTableName="remarks" constraintName="fk_remark_author_staff" referencedColumnNames="id" referencedTableName="staffs"/>
+        <addForeignKeyConstraint baseColumnNames="author_student_id" baseTableName="remarks" constraintName="fk_remark_author_student" referencedColumnNames="id" referencedTableName="students"/>
+    </changeSet>
+
+    <!-- Buses Logs Table -->
+    <changeSet id="16-create-buses-logs" author="antigravity">
+        <createTable tableName="buses_logs">
+            <column name="id" type="BINARY(16)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="institution_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bus_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="arrival_time" type="DATETIME"/>
+            <column name="departure_time" type="DATETIME"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="bus_id" baseTableName="buses_logs" constraintName="fk_log_bus" referencedColumnNames="id" referencedTableName="buses"/>
+    </changeSet>
+
+</databaseChangeLog>

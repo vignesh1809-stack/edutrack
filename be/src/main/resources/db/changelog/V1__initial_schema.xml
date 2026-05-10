@@ -12,6 +12,9 @@
     -->
 
     <changeSet id="1-create-institutions" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="institutions"/></not>
+        </preConditions>
         <createTable tableName="institutions">
             <column name="id" type="BINARY(16)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -42,6 +45,9 @@
     </changeSet>
 
     <changeSet id="2-create-departments" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="departments"/></not>
+        </preConditions>
         <createTable tableName="departments">
             <column name="id" type="BINARY(16)">
                 <constraints primaryKey="true" nullable="false"/>

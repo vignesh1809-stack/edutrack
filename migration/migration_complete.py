@@ -50,7 +50,10 @@ def create_institutions(cursor):
         address = fake.address()
         email = fake.company_email()
         phone = fake.phone_number()[:20]
-        data.append((inst_id, address, email, 0, name, phone, slug))
+        level = random.choice(['SECONDARY', 'HIGHER_SECONDARY', 'UNDERGRADUATE', 'POSTGRADUATE', 'SCHOOL', 'COLLEGE', 'UNIVERSITY'])
+        data.append((inst_id, address, email, 0, name, phone, slug, level))
+
+
         institutions.append(inst_id)
         # Initialize containers for this institution
         departments_by_inst[inst_id] = []
@@ -61,9 +64,10 @@ def create_institutions(cursor):
         guardians_by_inst[inst_id] = []
         
     cursor.executemany("""
-        INSERT INTO institutions (id, created_at, address, email, is_deleted, name, phone, slug)
-        VALUES (%s, NOW(), %s, %s, %s, %s, %s, %s)
+        INSERT INTO institutions (id, created_at, address, email, is_deleted, name, phone, slug, level)
+        VALUES (%s, NOW(), %s, %s, %s, %s, %s, %s, %s)
     """, data)
+
 
 def create_departments(cursor):
     print("Creating departments...")
@@ -71,17 +75,18 @@ def create_departments(cursor):
     for inst in institutions:
         for _ in range(5):
             dept_id = uuid_bin()
-            batch_year = random.randint(2020, 2026)
             code = fake.word().upper()[:10]
             name = fake.job()[:50]
-            section = random.choice(['A', 'B', 'C'])
-            data.append((dept_id, inst, 0, batch_year, code, name, section))
+            data.append((dept_id, inst, 0, code, name))
+
+
             departments_by_inst[inst].append(dept_id)
             
     cursor.executemany("""
-        INSERT INTO departments (id, created_at, institution_id, is_deleted, batch_year, code, name, section)
-        VALUES (%s, NOW(), %s, %s, %s, %s, %s, %s)
+        INSERT INTO departments (id, created_at, institution_id, is_deleted, code, name)
+        VALUES (%s, NOW(), %s, %s, %s, %s)
     """, data)
+
 
 def create_staffs(cursor):
     print("Creating staffs...")
@@ -154,13 +159,19 @@ def create_students(cursor):
             status = random.choice(STATUS_CHOICES)
             student_id_str = fake.bothify(text='STU-####')
             cgpa = round(random.uniform(2.0, 4.0), 2)
-            data.append((sid, inst, 0, cgpa, email, fname, lname, is_hosteller, status, student_id_str, bus, dept))
+            batch_year = f"{random.randint(2020, 2026)}-01-01"
+            section = random.choice(['A', 'B', 'C'])
+            sem = random.randint(1, 8)
+            data.append((sid, inst, 0, cgpa, email, fname, lname, is_hosteller, status, student_id_str, bus, dept, batch_year, section, sem))
+
+
             students_by_inst[inst].append(sid)
             
     cursor.executemany("""
-        INSERT INTO students (id, created_at, institution_id, is_deleted, cgpa, email, first_name, last_name, is_hosteller, status, student_id, bus_id, department_id)
-        VALUES (%s, NOW(), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO students (id, created_at, institution_id, is_deleted, cgpa, email, first_name, last_name, is_hosteller, status, student_id, bus_id, department_id, batch_year, section, current_semester)
+        VALUES (%s, NOW(), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, data)
+
 
 def create_courses(cursor):
     print("Creating courses...")
@@ -207,9 +218,10 @@ def create_payments(cursor):
         if f_status != 'DUE':
             pid = uuid_bin()
             paid = float(total) if f_status == 'PAID' else round(float(total) / 2, 2)
-            method = "Credit Card"
-            p_status = 1
+            method = random.choice(["Credit Card", "Bank Transfer", "UPI", "Cash"])
+            p_status = 'PAID' if f_status == 'PAID' else 'PARTIAL'
             data.append((pid, inst, 0, paid, method, p_status, fid))
+
             
     cursor.executemany("""
         INSERT INTO payments (id, created_at, institution_id, is_deleted, amount_paid, payment_method, payment_status, fee_id)
@@ -289,9 +301,10 @@ def create_addons(cursor):
             
     if rem_data:
         cursor.executemany("""
-            INSERT INTO remarks (id, created_at, institution_id, is_deleted, content, staff_id, student_id)
-            VALUES (%s, NOW(), %s, %s, %s, %s, %s)
+            INSERT INTO remarks (id, created_at, institution_id, is_deleted, content, author_staff_id, target_student_id, remark_target)
+            VALUES (%s, NOW(), %s, %s, %s, %s, %s, 'STUDENT')
         """, rem_data)
+
 
     # 4. Buses Logs
     log_data = []

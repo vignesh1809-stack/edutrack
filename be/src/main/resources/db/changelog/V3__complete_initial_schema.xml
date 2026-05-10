@@ -13,6 +13,9 @@
 
     <!-- Staff Table -->
     <changeSet id="5-create-staffs" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="staffs"/></not>
+        </preConditions>
         <createTable tableName="staffs">
             <column name="id" type="BINARY(16)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -49,6 +52,9 @@
 
     <!-- Buses Table -->
     <changeSet id="6-create-buses" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="buses"/></not>
+        </preConditions>
         <createTable tableName="buses">
             <column name="id" type="BINARY(16)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -74,6 +80,9 @@
 
     <!-- Guardians Table -->
     <changeSet id="7-create-guardians" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="guardians"/></not>
+        </preConditions>
         <createTable tableName="guardians">
             <column name="id" type="BINARY(16)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -98,6 +107,9 @@
 
     <!-- Students Table -->
     <changeSet id="8-create-students" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="students"/></not>
+        </preConditions>
         <createTable tableName="students">
             <column name="id" type="BINARY(16)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -143,6 +155,9 @@
 
     <!-- Student-Guardian Mapping Table -->
     <changeSet id="9-create-student-guardian-map" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="student_guardian_map"/></not>
+        </preConditions>
         <createTable tableName="student_guardian_map">
             <column name="student_id" type="BINARY(16)">
                 <constraints nullable="false"/>
@@ -158,6 +173,9 @@
 
     <!-- Courses Table -->
     <changeSet id="10-create-courses" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="courses"/></not>
+        </preConditions>
         <createTable tableName="courses">
             <column name="id" type="BINARY(16)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -183,6 +201,9 @@
 
     <!-- Attendance Table -->
     <changeSet id="11-create-attendances" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="attendances"/></not>
+        </preConditions>
         <createTable tableName="attendances">
             <column name="id" type="BINARY(16)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -217,6 +238,9 @@
 
     <!-- Fees Table -->
     <changeSet id="12-create-fees" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="fees"/></not>
+        </preConditions>
         <createTable tableName="fees">
             <column name="id" type="BINARY(16)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -247,6 +271,9 @@
 
     <!-- Payments Table -->
     <changeSet id="13-create-payments" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="payments"/></not>
+        </preConditions>
         <createTable tableName="payments">
             <column name="id" type="BINARY(16)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -275,6 +302,9 @@
 
     <!-- Assessments Table -->
     <changeSet id="14-create-assessments" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="assessments"/></not>
+        </preConditions>
         <createTable tableName="assessments">
             <column name="id" type="BINARY(16)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -305,6 +335,9 @@
 
     <!-- Remarks Table -->
     <changeSet id="15-create-remarks" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="remarks"/></not>
+        </preConditions>
         <createTable tableName="remarks">
             <column name="id" type="BINARY(16)">
                 <constraints primaryKey="true" nullable="false"/>
@@ -335,6 +368,9 @@
 
     <!-- Buses Logs Table -->
     <changeSet id="16-create-buses-logs" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="buses_logs"/></not>
+        </preConditions>
         <createTable tableName="buses_logs">
             <column name="id" type="BINARY(16)">
                 <constraints primaryKey="true" nullable="false"/>

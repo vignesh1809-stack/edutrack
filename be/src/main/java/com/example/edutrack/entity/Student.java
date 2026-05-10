@@ -62,7 +62,10 @@ public class Student extends BaseEntity {
     private String email;
     private String gender;
     private LocalDate dateOfBirth;
+    @Column(columnDefinition = "TINYINT(1) DEFAULT 0")
     private boolean isHosteller;
+
+
     private BigDecimal CGPA;
     private LocalDate batchYear;
     private String section;

@@ -77,9 +77,11 @@ def generate_data():
                     status = 'PRESENT' if random.random() > 0.12 else 'ABSENT'
                     attendance_data.append((uuid_bin(), inst_id, sid, course_id, dt, status, 0))
 
+
             # C. Pending Fee
             due_date = end_date + timedelta(days=30)
-            fees_data.append((uuid_bin(), inst_id, sid, 'TUITION', '2024-25', 'TERM-1', 5000.00, 0.00, due_date, 'PENDING', 0))
+            fees_data.append((uuid_bin(), inst_id, sid, 'TUITION', '2024-25', 'TERM-1', 5000.00, 0.00, due_date, 'DUE', 0))
+
 
             # D. Staff Remark
             if inst_id in staff_by_inst:

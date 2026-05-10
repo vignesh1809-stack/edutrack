@@ -64,7 +64,9 @@ public class Staff extends BaseEntity {
     @JoinColumn(name = "department_id")
     private Department department;
 
+    @Column(columnDefinition = "TINYINT(1) DEFAULT 0")
     private boolean twoFactorEnabled;
+
     private LocalDateTime lastLogin;
     
 

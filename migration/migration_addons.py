@@ -107,9 +107,10 @@ def generate_addons(cursor):
             
     if rem_data:
         cursor.executemany("""
-            INSERT INTO remarks (id, created_at, institution_id, is_deleted, content, staff_id, student_id)
-            VALUES (%s, NOW(), %s, %s, %s, %s, %s)
+            INSERT INTO remarks (id, created_at, institution_id, is_deleted, content, author_staff_id, target_student_id, remark_target)
+            VALUES (%s, NOW(), %s, %s, %s, %s, %s, 'STUDENT')
         """, rem_data)
+
 
     # 4. Extra Fee Payments
     print("Generating extra fee payments...")
@@ -120,8 +121,9 @@ def generate_addons(cursor):
         if random.random() > 0.5:
             p_id = uuid_bin()
             paid = round(float(total) * random.uniform(0.1, 0.5), 2)
-            method = random.choice(["Credit Card", "Bank Transfer", "Cash"])
-            p_status = random.choice([0, 1, 2])
+            method = random.choice(["Credit Card", "Bank Transfer", "Cash", "UPI"])
+            p_status = random.choice(['PAID', 'PARTIAL', 'REFUNDED'])
+
             pay_date = fake.date_between(start_date='-60d', end_date='today')
             tx_id = fake.uuid4()[:16]
             pay_data.append((p_id, inst_id, 0, paid, pay_date, method, p_status, tx_id, f_id))

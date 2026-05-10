@@ -40,5 +40,7 @@ public class FeePayment extends BaseEntity {
     private LocalDate paymentDate;
     private String paymentMethod;
     private String transactionId;
+    @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
+
 }

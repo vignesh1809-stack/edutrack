@@ -20,10 +20,12 @@ import GuardianChat from './pages/guardian/GuardianChat';
 import StudentDashboard from './pages/student/StudentDashboard';
 import StudentRemarks from './pages/student/StudentRemarks';
 import SubmitFeedback from './pages/student/SubmitFeedback';
+import StudentOwnProfile from './pages/student/StudentProfile';
 import TransportDashboard from './pages/transport-incharge/TransportDashboard';
 import TransportStaffDirectory from './pages/transport-incharge/TransportStaffDirectory';
 import TransportRoutes from './pages/transport-incharge/TransportRoutes';
 import AddTransportStaff from './pages/transport-incharge/AddTransportStaff';
+import AddTransportLog from './pages/transport-incharge/AddTransportLog';
 import TransportProfile from './pages/transport-incharge/TransportProfile';
 
 function App() {
@@ -57,12 +59,14 @@ function App() {
         <Route path="/student/dashboard" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
         <Route path="/student/remarks" element={<ProtectedRoute><StudentRemarks /></ProtectedRoute>} />
         <Route path="/student/submit-feedback" element={<ProtectedRoute><SubmitFeedback /></ProtectedRoute>} />
+        <Route path="/student/profile" element={<ProtectedRoute><StudentOwnProfile /></ProtectedRoute>} />
 
         {/* --- Transport Incharge --- */}
         <Route path="/transport/dashboard" element={<ProtectedRoute><TransportDashboard /></ProtectedRoute>} />
         <Route path="/transport/staff" element={<ProtectedRoute><TransportStaffDirectory /></ProtectedRoute>} />
         <Route path="/transport/routes" element={<ProtectedRoute><TransportRoutes /></ProtectedRoute>} />
         <Route path="/transport/add-staff" element={<ProtectedRoute><AddTransportStaff /></ProtectedRoute>} />
+        <Route path="/transport/add-log" element={<ProtectedRoute><AddTransportLog /></ProtectedRoute>} />
         <Route path="/transport/profile" element={<ProtectedRoute><TransportProfile /></ProtectedRoute>} />
       </Routes>
     </Router>

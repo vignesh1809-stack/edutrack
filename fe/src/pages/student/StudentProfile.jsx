@@ -69,56 +69,72 @@ const StudentProfile = () => {
                             {/* Personal & Contact Info (Asymmetric Bento) */}
                             <div className="lg:col-span-2 space-y-8">
                                 {/* Personal Information */}
-                                <div className="bg-surface-container-lowest p-8 rounded-[24px] shadow-[0px_10px_30px_rgba(42,52,57,0.04)]">
-                                    <div className="flex items-center gap-3 mb-8">
-                                        <div className="w-10 h-10 rounded-xl bg-primary-container/30 flex items-center justify-center text-primary">
-                                            <span className="material-symbols-outlined">person</span>
-                                        </div>
-                                        <h3 className="text-xl font-headline font-bold text-on-surface">Personal Information</h3>
+                                <div className="bg-white p-8 rounded-[32px] shadow-[0px_20px_50px_rgba(42,52,57,0.04)] relative overflow-hidden border border-slate-100">
+                                    <div className="absolute bottom-0 right-0 opacity-60 -mr-10 -mb-10 pointer-events-none">
+                                        <span className="material-symbols-outlined text-[180px] text-blue-100/80">person</span>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-12">
-                                        <div className="space-y-1">
-                                            <p className="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase">Date of Birth</p>
-                                            <p className="text-on-surface font-semibold text-lg">May 14, 2007</p>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <p className="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase">Gender</p>
-                                            <p className="text-on-surface font-semibold text-lg">Male</p>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <p className="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase">Blood Group</p>
-                                            <div className="flex items-center gap-2">
-                                                <span className="w-2 h-2 rounded-full bg-error"></span>
-                                                <p className="text-on-surface font-semibold text-lg">A+ Positive</p>
+                                    <div className="relative z-10">
+                                        <div className="flex items-center gap-4 mb-10">
+                                            <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center border border-blue-100">
+                                                <span className="material-symbols-outlined text-blue-600">fingerprint</span>
                                             </div>
+                                            <h3 className="text-2xl font-headline font-bold text-slate-900">Personal Information</h3>
                                         </div>
-                                        <div className="space-y-1">
-                                            <p className="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase">Nationality</p>
-                                            <p className="text-on-surface font-semibold text-lg">British</p>
+                                        
+                                        <div className="space-y-6">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="border-b border-slate-100 pb-4">
+                                                    <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1">Date of Birth</p>
+                                                    <p className="font-bold text-lg text-slate-800">May 14, 2007</p>
+                                                </div>
+                                                <div className="border-b border-slate-100 pb-4">
+                                                    <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1">Gender</p>
+                                                    <p className="font-bold text-lg text-slate-800">Male</p>
+                                                </div>
+                                                <div className="border-b border-slate-100 pb-4">
+                                                    <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1">Blood Group</p>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]"></span>
+                                                        <p className="font-bold text-lg text-slate-800">A+ Positive</p>
+                                                    </div>
+                                                </div>
+                                                <div className="border-b border-slate-100 pb-4">
+                                                    <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1">Nationality</p>
+                                                    <p className="font-bold text-lg text-slate-800">British</p>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Contact Information */}
-                                <div className="bg-surface-container-low p-8 rounded-[24px]">
-                                    <div className="flex items-center gap-3 mb-8">
-                                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
-                                            <span className="material-symbols-outlined">call</span>
-                                        </div>
-                                        <h3 className="text-xl font-headline font-bold text-on-surface">Contact Information</h3>
+                                <div className="bg-blue-100/50 backdrop-blur-xl p-8 rounded-[32px] shadow-[0px_20px_50px_rgba(42,52,57,0.04)] relative overflow-hidden border border-white/60">
+                                    <div className="absolute bottom-0 right-0 opacity-60 -mr-10 -mb-10 pointer-events-none">
+                                        <span className="material-symbols-outlined text-[180px] text-blue-200/60">alternate_email</span>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <div className="p-6 bg-white rounded-2xl shadow-sm">
-                                            <p className="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase mb-2">Phone</p>
-                                            <p className="text-on-surface font-bold text-base">+44 20 7946 0123</p>
+                                    <div className="relative z-10">
+                                        <div className="flex items-center gap-4 mb-10">
+                                            <div className="w-12 h-12 rounded-2xl bg-white/60 backdrop-blur-md flex items-center justify-center border border-white/80 shadow-sm">
+                                                <span className="material-symbols-outlined text-blue-600">contact_support</span>
+                                            </div>
+                                            <h3 className="text-2xl font-headline font-bold text-slate-900">Contact Information</h3>
                                         </div>
-                                        <div className="p-6 bg-white rounded-2xl shadow-sm">
-                                            <p className="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase mb-2">Email</p>
-                                            <p className="text-on-surface font-bold text-base">a.sterling@academy.edu</p>
-                                        </div>
-                                        <div className="md:col-span-2 p-6 bg-white rounded-2xl shadow-sm">
-                                            <p className="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase mb-2">Permanent Address</p>
-                                            <p className="text-on-surface font-bold text-base">221B Baker Street, London NW1 6XE, United Kingdom</p>
+
+                                        <div className="space-y-6">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="border-b border-blue-100/50 pb-4">
+                                                    <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1">Primary Phone</p>
+                                                    <p className="font-bold text-lg text-slate-800">+44 20 7946 0123</p>
+                                                </div>
+                                                <div className="border-b border-blue-100/50 pb-4">
+                                                    <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1">Email Address</p>
+                                                    <p className="font-bold text-lg text-slate-800">a.sterling@academy.edu</p>
+                                                </div>
+                                            </div>
+                                            <div className="pt-2">
+                                                <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1">Residential Address</p>
+                                                <p className="font-bold text-lg text-slate-800 leading-relaxed">221B Baker Street, London NW1 6XE, United Kingdom</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -127,27 +143,33 @@ const StudentProfile = () => {
                             {/* Sidebar Info (School & Guardian) */}
                             <div className="space-y-8">
                                 {/* School Information */}
-                                <div className="bg-primary text-white p-8 rounded-[24px] shadow-xl relative overflow-hidden">
-                                    <div className="absolute bottom-0 right-0 opacity-10 -mr-10 -mb-10">
-                                        <span className="material-symbols-outlined text-[160px]">school</span>
+                                <div className="bg-blue-700 text-white p-8 rounded-[32px] shadow-xl relative overflow-hidden">
+                                    <div className="absolute bottom-0 right-0 opacity-10 -mr-10 -mb-10 pointer-events-none">
+                                        <span className="material-symbols-outlined text-[180px] text-white">school</span>
                                     </div>
                                     <div className="relative z-10">
-                                        <h3 className="text-xl font-headline font-bold mb-8">School Information</h3>
+                                        <div className="flex items-center gap-4 mb-10">
+                                            <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
+                                                <span className="material-symbols-outlined text-white">account_balance</span>
+                                            </div>
+                                            <h3 className="text-2xl font-headline font-bold tracking-tight">School Information</h3>
+                                        </div>
+
                                         <div className="space-y-6">
-                                            <div className="border-b border-white/20 pb-4">
-                                                <p className="text-[10px] font-bold text-primary-container tracking-widest uppercase mb-1">Student ID</p>
+                                            <div className="border-b border-white/10 pb-4">
+                                                <p className="text-[10px] font-bold text-blue-100 tracking-widest uppercase mb-1">Student ID</p>
                                                 <p className="font-bold text-lg">STU-2021-0842</p>
                                             </div>
-                                            <div className="border-b border-white/20 pb-4">
-                                                <p className="text-[10px] font-bold text-primary-container tracking-widest uppercase mb-1">Branch</p>
-                                                <p className="font-bold text-lg">Natural Sciences</p>
+                                            <div className="border-b border-white/10 pb-4">
+                                                <p className="text-[10px] font-bold text-blue-100 tracking-widest uppercase mb-1">Department / Branch</p>
+                                                <p className="font-bold text-lg">Natural Sciences & Technology</p>
                                             </div>
-                                            <div className="border-b border-white/20 pb-4">
-                                                <p className="text-[10px] font-bold text-primary-container tracking-widest uppercase mb-1">Enrollment Year</p>
-                                                <p className="font-bold text-lg">2021</p>
+                                            <div className="border-b border-white/10 pb-4">
+                                                <p className="text-[10px] font-bold text-blue-100 tracking-widest uppercase mb-1">Enrollment Year</p>
+                                                <p className="font-bold text-lg">2021 (Spring Intake)</p>
                                             </div>
                                             <div>
-                                                <p className="text-[10px] font-bold text-primary-container tracking-widest uppercase mb-1">Current Semester</p>
+                                                <p className="text-[10px] font-bold text-blue-100 tracking-widest uppercase mb-1">Current Academic Level</p>
                                                 <p className="font-bold text-lg">Semester 2, Year 3</p>
                                             </div>
                                         </div>
@@ -155,28 +177,42 @@ const StudentProfile = () => {
                                 </div>
 
                                 {/* Guardian Details */}
-                                <div className="bg-surface-container-highest p-8 rounded-[24px]">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-600">
-                                            <span className="material-symbols-outlined">family_restroom</span>
-                                        </div>
-                                        <h3 className="text-xl font-headline font-bold text-on-surface">Guardian Details</h3>
+                                <div className="bg-white p-8 rounded-[32px] shadow-[0px_20px_50px_rgba(42,52,57,0.04)] relative overflow-hidden border border-slate-100">
+                                    <div className="absolute bottom-0 right-0 opacity-60 -mr-10 -mb-10 pointer-events-none">
+                                        <span className="material-symbols-outlined text-[180px] text-blue-100/80">family_restroom</span>
                                     </div>
-                                    <div className="space-y-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">ES</div>
-                                            <div>
-                                                <p className="text-on-surface font-bold">Elizabeth Sterling</p>
-                                                <p className="text-xs text-on-surface-variant">Mother</p>
+                                    <div className="relative z-10">
+                                        <div className="flex items-center gap-4 mb-8">
+                                            <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center border border-blue-100">
+                                                <span className="material-symbols-outlined text-blue-600">diversity_3</span>
                                             </div>
+                                            <h3 className="text-2xl font-headline font-bold text-slate-900">Guardian Details</h3>
                                         </div>
-                                        <div className="pt-4 border-t border-slate-200">
-                                            <p className="text-[10px] font-bold text-on-surface-variant tracking-widest uppercase mb-1">Contact Number</p>
-                                            <p className="text-on-surface font-bold">+44 20 7946 0987</p>
+                                        
+                                        <div className="space-y-6">
+                                            <div className="flex items-center gap-5 p-4 bg-slate-50/80 backdrop-blur-sm rounded-2xl border border-blue-50">
+                                                <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-xl shadow-lg">ES</div>
+                                                <div>
+                                                    <p className="text-xl font-bold text-slate-900">Elizabeth Sterling</p>
+                                                    <p className="text-xs text-blue-600 font-bold uppercase tracking-wider">Mother • Primary Contact</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="space-y-4">
+                                                <div className="border-b border-slate-100 pb-4">
+                                                    <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1">Contact Number</p>
+                                                    <p className="font-bold text-lg text-slate-800">+44 20 7946 0987</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1">Occupation</p>
+                                                    <p className="font-bold text-lg text-slate-800">Senior Software Architect</p>
+                                                </div>
+                                            </div>
+
+                                            <button className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold text-sm hover:bg-blue-700 transition-all active:scale-[0.98] shadow-lg shadow-blue-600/20">
+                                                View Full History
+                                            </button>
                                         </div>
-                                        <button className="w-full py-3 bg-white text-on-surface border border-slate-200 rounded-xl font-semibold text-sm hover:bg-slate-50 transition-colors">
-                                            View Full History
-                                        </button>
                                     </div>
                                 </div>
                             </div>

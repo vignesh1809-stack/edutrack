@@ -78,7 +78,7 @@ const AddTransportLog = () => {
 
                     {/* Right Column: Form Fields */}
                     <div className="lg:col-span-8 w-full max-w-2xl mx-auto lg:max-w-none space-y-6">
-                        <div className="bg-white md:p-8 lg:p-10 rounded-[2rem] md:shadow-sm md:border md:border-surface-container">
+                        <div className="bg-white p-6 md:p-8 lg:p-10 rounded-[2rem] md:shadow-sm md:border md:border-surface-container">
                             <div className="space-y-8">
                                 {/* Transport Logistics Setup */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -141,14 +141,14 @@ const AddTransportLog = () => {
                                     <label className="font-headline font-bold text-xs text-on-surface-variant ml-1 uppercase tracking-widest">Relevant Personnel</label>
                                     <div className="bg-surface-container-low rounded-2xl p-2 border border-surface-container/50">
                                         <div className="flex items-center gap-4 p-3 bg-surface-container-lowest rounded-xl shadow-sm cursor-pointer hover:bg-surface transition-colors">
-                                            <div className="w-12 h-12 rounded-full overflow-hidden bg-primary-fixed flex items-center justify-center ring-2 ring-white">
+                                            <div className="w-12 h-12 flex-shrink-0 rounded-full overflow-hidden bg-primary-fixed flex items-center justify-center ring-2 ring-white">
                                                 <img alt="Marcus Reeves" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVdzzQhftJ0plq-ADj5Q6y779JLGl0kAKvHJCaNAS5H1cXQSvI9VhNTzVScG8aw6sG2GA2eF_DH_6elCBpZVJGBAPWLu62az4FObkKRsg8ggx386ImHJNvGACa4eZOalsC4Ciu-FtG9rFnr7qke9dJFSCYcRvYVf20NZSkqT2jLcenhbMbkJCVYpYvWjNbbeLSJvPbYpsDFIlOcnEFgQp7UFICmMP0L6kwsBgm-zUTRwAAcW6F4I7M92Atr5iGYwHkCMFR6g7NqGA"/>
                                             </div>
-                                            <div className="flex-1">
-                                                <p className="font-body text-sm font-bold text-on-surface">Marcus Reeves</p>
-                                                <p className="font-body text-[11px] text-on-surface-variant font-medium">Primary Driver • ID: #DR-4029</p>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-body text-sm font-bold text-on-surface truncate">Marcus Reeves</p>
+                                                <p className="font-body text-[11px] text-on-surface-variant font-medium truncate">Primary Driver • ID: #DR-4029</p>
                                             </div>
-                                            <span className="material-symbols-outlined text-outline">expand_more</span>
+                                            <span className="material-symbols-outlined text-outline flex-shrink-0">expand_more</span>
                                         </div>
                                     </div>
                                 </div>
@@ -161,13 +161,13 @@ const AddTransportLog = () => {
                             </div>
 
                             {/* Submission Card for Mobile/Tablet (Visible when not using desktop sidebar logic) */}
-                            <div className="mt-8 lg:hidden bg-surface-container-low rounded-2xl p-6 flex items-center justify-between border border-surface-container">
+                            <div className="mt-8 lg:hidden bg-surface-container-low rounded-2xl p-6 flex flex-wrap items-center justify-between gap-4 border border-surface-container">
                                 <div className="flex flex-col">
                                     <span className="text-[10px] uppercase tracking-tighter text-outline font-bold">Log Status</span>
                                     <span className="font-headline font-bold text-primary">Pending Submission</span>
                                 </div>
-                                <div className="h-8 w-px bg-surface-container-high mx-4"></div>
-                                <div className="flex flex-col text-right">
+                                <div className="hidden sm:block h-8 w-px bg-surface-container-high"></div>
+                                <div className="flex flex-col text-right ml-auto">
                                     <span className="text-[10px] uppercase tracking-tighter text-outline font-bold">Safety Check</span>
                                     <span className="font-headline font-bold text-on-surface">Verified</span>
                                 </div>

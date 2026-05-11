@@ -4,7 +4,6 @@ import { NavLink } from 'react-router-dom';
 const StudentSidebar = () => {
   const navItems = [
     { name: 'Dashboard', icon: 'dashboard', path: '/student/dashboard' },
-    { name: 'Academic', icon: 'school', path: '/student/academic' },
     { name: 'Remarks', icon: 'rate_review', path: '/student/remarks' },
     { name: 'Profile', icon: 'person', path: '/student/profile' }
   ];

@@ -78,6 +78,10 @@ public class Staff extends BaseEntity {
     @JsonIgnore
     private List<Remarks> remarks;
 
+    @OneToMany(mappedBy = "staff", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Courses> courses;
+
 
 
     

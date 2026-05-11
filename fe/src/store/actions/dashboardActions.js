@@ -123,3 +123,18 @@ export const fetchDepartmentAveragesFailure = (error) => ({
     type: types.FETCH_DEPARTMENT_AVERAGES_FAILURE,
     payload: error,
 });
+
+export const fetchLeastPerformedStaffRequest = (filters) => ({
+    type: types.FETCH_LEAST_PERFORMED_STAFF_REQUEST,
+    payload: filters,
+});
+
+export const fetchLeastPerformedStaffSuccess = (data) => ({
+    type: types.FETCH_LEAST_PERFORMED_STAFF_SUCCESS,
+    payload: data,
+});
+
+export const fetchLeastPerformedStaffFailure = (error) => ({
+    type: types.FETCH_LEAST_PERFORMED_STAFF_FAILURE,
+    payload: error,
+});

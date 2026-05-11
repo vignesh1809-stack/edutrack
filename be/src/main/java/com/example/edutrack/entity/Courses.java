@@ -37,6 +37,10 @@ public class Courses extends BaseEntity {
     private String courseName;
 
     private int semester;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "staff_id")
+    private Staff staff;
 
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
     @JsonIgnore

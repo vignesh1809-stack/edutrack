@@ -98,6 +98,8 @@ export function* studentWatcherSaga() {
     yield takeLatest(FETCH_STUDENTS_REQUEST, fetchStudentsWorker);
     yield takeLatest(FETCH_FILTERS_REQUEST, fetchFiltersWorker);
     yield takeLatest(FETCH_TOP_PERFORMERS_REQUEST, fetchTopPerformersWorker);
-    // Also trigger fetch when filters, sort or page changes
-    yield takeLatest([SET_STUDENT_FILTER, SET_STUDENT_SORT, SET_STUDENT_PAGE], handleFilterOrPageChange);
+    
+    // Only trigger fetch automatically for page changes, and maybe debounce it
+    yield takeLatest(SET_STUDENT_PAGE, handleFilterOrPageChange);
 }
+

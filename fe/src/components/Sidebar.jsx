@@ -6,17 +6,20 @@ const navItems = [
   { name: 'Students', icon: 'group', path: '/principal/students' },
   { name: 'Reports', icon: 'analytics', path: '/principal/reports' },
   { name: 'Profile', icon: 'account_circle', path: '/principal/profile' },
-  { name: 'Attendance', icon: 'calendar_today', path: '/attendance' },
-  { name: 'Settings', icon: 'settings', path: '/settings' },
 ];
+
 
 const Sidebar = () => {
   return (
     <aside className="hidden md:flex fixed left-0 top-0 h-full w-54 bg-gradient-to-b from-blue-50/80 to-white/60 backdrop-blur-xl border-r border-white/60 shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex-col p-4 z-40 transition-all duration-200 ease-in-out">
-      <div className="mb-10 px-4 py-6">
-        <h2 className="font-headline font-extrabold text-blue-700 text-xl">EduTrack Horizon</h2>
-        <p className="text-slate-500 text-xs font-medium uppercase tracking-widest mt-1">Main Campus</p>
+      <div className="mb-10 px-4 py-8">
+        <h2 className="font-headline font-black text-blue-700 text-2xl tracking-tighter leading-tight">EduTrack<br/>Horizon</h2>
+        <div className="flex items-center gap-2 mt-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">Main Campus</p>
+        </div>
       </div>
+
       <nav className="space-y-2 flex-grow">
         {navItems.map((item) => (
           <NavLink

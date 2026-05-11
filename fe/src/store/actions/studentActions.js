@@ -3,7 +3,9 @@ import {
     FETCH_STUDENTS_SUCCESS,
     FETCH_STUDENTS_FAILURE,
     SET_STUDENT_FILTER,
+    SET_STUDENT_MULTIPLE_FILTERS,
     SET_STUDENT_SORT,
+
     SET_STUDENT_PAGE,
     RESET_STUDENT_FILTERS,
     FETCH_FILTERS_REQUEST,
@@ -61,6 +63,12 @@ export const setStudentFilter = (filterKey, filterValue) => ({
     type: SET_STUDENT_FILTER,
     payload: { filterKey, filterValue }
 });
+
+export const setStudentMultipleFilters = (filters) => ({
+    type: SET_STUDENT_MULTIPLE_FILTERS,
+    payload: filters
+});
+
 
 export const setStudentSort = (sort) => ({
     type: SET_STUDENT_SORT,

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="17-add-staff-id-to-courses" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="courses" columnName="staff_id"/></not>
+        </preConditions>
+        <addColumn tableName="courses">
+            <column name="staff_id" type="BINARY(16)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="18-add-fk-course-staff" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><foreignKeyConstraintExists foreignKeyTableName="courses" foreignKeyName="fk_course_staff"/></not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="staff_id" 
+                                 baseTableName="courses" 
+                                 constraintName="fk_course_staff" 
+                                 referencedColumnNames="id" 
+                                 referencedTableName="staffs"/>
+    </changeSet>
+
+    <changeSet id="19-add-index-course-staff" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><indexExists tableName="courses" indexName="idx_course_staff"/></not>
+        </preConditions>
+        <createIndex indexName="idx_course_staff" tableName="courses">
+            <column name="staff_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

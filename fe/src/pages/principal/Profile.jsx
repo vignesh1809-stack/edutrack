@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout, fetchProfileRequest } from '../../store/actions/authActions';
 import Sidebar from '../../components/Sidebar';
+import TopAppBar from '../../components/TopAppBar';
 import BottomNavBar from '../../components/BottomNavBar';
+
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -37,25 +39,21 @@ const Profile = () => {
   return (
     <>
       <Sidebar />
-      <main className="flex-1 flex flex-col min-h-screen relative md:pl-72">
-        
-        {/* Top App Bar */}
-        <header className="flex justify-between items-center px-6 h-16 w-full bg-slate-50/70 dark:bg-slate-900/70 backdrop-blur-xl sticky top-0 z-40 shadow-[0px_20px_40px_rgba(42,52,57,0.06)]">
-          <div className="flex items-center gap-4">
+      <div className="flex-1 flex flex-col min-h-screen relative md:pl-72">
+        <TopAppBar 
+          title="Staff Profile" 
+          showBack={true}
+          actions={
             <button className="text-blue-600 dark:text-blue-400 hover:bg-slate-200/50 p-2 rounded-full transition-colors active:scale-90">
-              <span className="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+              <span className="material-symbols-outlined">edit</span>
             </button>
-            <h1 className="font-headline font-bold text-lg tracking-tight text-on-surface">Staff Profile</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="text-blue-600 dark:text-blue-400 hover:bg-slate-200/50 p-2 rounded-full transition-colors active:scale-90">
-              <span className="material-symbols-outlined" data-icon="edit">edit</span>
-            </button>
-          </div>
-        </header>
+          }
+        />
+
 
         {/* Content Canvas */}
-        <div className="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full mb-24 md:mb-0">
+        <main className="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full mb-24 md:mb-0">
+
           
           {/* Focus Plate: Profile Header */}
           <section className="bg-surface-container-lowest rounded-[24px] p-8 mb-8 flex flex-col md:flex-row gap-8 items-center md:items-end relative overflow-hidden">
@@ -218,8 +216,11 @@ const Profile = () => {
               
             </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
+
+
+
 
       <BottomNavBar />
     </>

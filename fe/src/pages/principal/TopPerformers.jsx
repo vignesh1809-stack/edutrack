@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchStudentsRequest, setStudentFilter, setStudentSort, setStudentPage } from '../../store/actions/studentActions';
+import { fetchStudentsRequest, setStudentMultipleFilters, setStudentPage } from '../../store/actions/studentActions';
 
 const TopPerformers = () => {
     const navigate = useNavigate();
@@ -12,25 +12,17 @@ const TopPerformers = () => {
     const receivedFilters = location.state || {};
 
     useEffect(() => {
-        // Apply filters from navigation state
-        if (receivedFilters.branch && receivedFilters.branch !== 'All Branches') {
-            dispatch(setStudentFilter('course', receivedFilters.branch));
-        } else {
-            dispatch(setStudentFilter('course', ''));
-        }
+        dispatch(setStudentMultipleFilters({
+            course: (receivedFilters.branch && receivedFilters.branch !== 'All Branches') ? receivedFilters.branch : '',
+            year: receivedFilters.year || ''
+        }));
 
-        if (receivedFilters.year) {
-            dispatch(setStudentFilter('year', receivedFilters.year));
-        } else {
-            dispatch(setStudentFilter('year', ''));
-        }
 
-        // Set sort to CGPA descending
-        dispatch(setStudentSort('cgpa,desc'));
         
-        // Fetch students
+        // Fetch students directly after setting filters
         dispatch(fetchStudentsRequest());
     }, [dispatch, receivedFilters.branch, receivedFilters.year]);
+
 
     const handlePrevPage = () => {
         if (!pagination.first) {

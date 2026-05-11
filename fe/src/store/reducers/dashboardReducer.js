@@ -38,6 +38,11 @@ const initialState = {
         data: [],
         loading: false,
         error: null,
+    },
+    leastPerformedStaff: {
+        data: [],
+        loading: false,
+        error: null,
     }
 };
 
@@ -173,6 +178,34 @@ const dashboardReducer = (state = initialState, action) => {
                 ...state,
                 departmentAverages: {
                     ...state.departmentAverages,
+                    loading: false,
+                    error: action.payload,
+                },
+            };
+        case types.FETCH_LEAST_PERFORMED_STAFF_REQUEST:
+            return {
+                ...state,
+                leastPerformedStaff: {
+                    ...state.leastPerformedStaff,
+                    loading: true,
+                    error: null,
+                },
+            };
+        case types.FETCH_LEAST_PERFORMED_STAFF_SUCCESS:
+            return {
+                ...state,
+                leastPerformedStaff: {
+                    ...state.leastPerformedStaff,
+                    data: action.payload || [],
+                    loading: false,
+                    error: null,
+                },
+            };
+        case types.FETCH_LEAST_PERFORMED_STAFF_FAILURE:
+            return {
+                ...state,
+                leastPerformedStaff: {
+                    ...state.leastPerformedStaff,
                     loading: false,
                     error: action.payload,
                 },

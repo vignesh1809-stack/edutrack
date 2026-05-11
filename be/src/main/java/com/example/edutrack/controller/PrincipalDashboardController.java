@@ -1,6 +1,8 @@
 package com.example.edutrack.controller;
 
 import com.example.edutrack.dto.PrincipalDashboardDto;
+import com.example.edutrack.dto.StaffPerformanceDto;
+import com.example.edutrack.dto.DepartmentAverageDto;
 import com.example.edutrack.security.CustomUserDetails;
 import com.example.edutrack.service.PrincipalDashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/principal/dashboard")
@@ -46,12 +49,24 @@ public class PrincipalDashboardController {
 
     @GetMapping("/department-averages")
     @PreAuthorize("hasAuthority('Principal')")
-    public ResponseEntity<java.util.List<com.example.edutrack.dto.DepartmentAverageDto>> getDepartmentAverages(
+    public ResponseEntity<List<DepartmentAverageDto>> getDepartmentAverages(
             @AuthenticationPrincipal CustomUserDetails principal,
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) String section) {
         
         java.util.List<com.example.edutrack.dto.DepartmentAverageDto> data = dashboardService.getDepartmentAverages(principal.getInstitutionId(), year, section);
+        return ResponseEntity.ok(data);
+    }
+
+    @GetMapping("/least-performed-staff")
+    @PreAuthorize("hasAuthority('Principal')")
+    public ResponseEntity<List<StaffPerformanceDto>> getLeastPerformedStaff(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) String section,
+            @RequestParam(required = false) String branch) {
+        
+        java.util.List<com.example.edutrack.dto.StaffPerformanceDto> data = dashboardService.getLeastPerformedStaff(principal.getInstitutionId(), year, section, branch);
         return ResponseEntity.ok(data);
     }
 }

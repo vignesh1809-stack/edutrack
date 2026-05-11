@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchFiltersRequest, fetchTopPerformersRequest } from '../../store/actions/studentActions';
-import { fetchPrincipalDashboardRequest, fetchAttendanceTrendsRequest, fetchDepartmentAveragesRequest } from '../../store/actions/dashboardActions';
+import { fetchPrincipalDashboardRequest, fetchAttendanceTrendsRequest, fetchDepartmentAveragesRequest, fetchLeastPerformedStaffRequest } from '../../store/actions/dashboardActions';
 import Sidebar from '../../components/Sidebar';
 import TopAppBar from '../../components/TopAppBar';
 import BottomNavBar from '../../components/BottomNavBar';
@@ -37,7 +37,7 @@ const Reports = () => {
   const branches = useSelector(state => state.students?.branches || []);
   const years = useSelector(state => state.students?.years || []);
   const { data: topPerformers, loading: topPerformersLoading } = useSelector(state => state.students?.topPerformers || { data: [], loading: false });
-  const { data: dashboardData, loading: dashboardLoading, attendanceTrends, departmentAverages } = useSelector(state => state.dashboard);
+  const { data: dashboardData, loading: dashboardLoading, attendanceTrends, departmentAverages, leastPerformedStaff } = useSelector(state => state.dashboard);
   
   const [selectedBranch, setSelectedBranch] = useState('All Branches');
   const [selectedYear, setSelectedYear] = useState('All Years');
@@ -49,6 +49,7 @@ const Reports = () => {
     dispatch(fetchTopPerformersRequest({ branch: 'All Branches', year: 'All Years' }));
     dispatch(fetchAttendanceTrendsRequest({ branch: 'All Branches', year: 'All Years' }));
     dispatch(fetchDepartmentAveragesRequest({ year: 'All Years' }));
+    dispatch(fetchLeastPerformedStaffRequest({ branch: 'All Branches', year: 'All Years' }));
   }, [dispatch]);
 
   const handleApplyFilters = () => {
@@ -60,6 +61,7 @@ const Reports = () => {
     dispatch(fetchTopPerformersRequest(filters));
     dispatch(fetchAttendanceTrendsRequest(filters));
     dispatch(fetchDepartmentAveragesRequest({ year: filters.year }));
+    dispatch(fetchLeastPerformedStaffRequest(filters));
   };
 
   // Close dropdown on click outside
@@ -79,8 +81,10 @@ const Reports = () => {
   return (
     <>
       <Sidebar />
-      <TopAppBar />
-      <main className="pt-24 pb-32 md:pb-10 px-6 md:pl-72 max-w-7xl mx-auto min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen relative md:pl-72">
+        <TopAppBar title="Analytics Reports" />
+        <main className="flex-1 p-6 md:p-10 mb-24 md:mb-0 max-w-7xl mx-auto w-full">
+
         {/* Filter Header Section */}
         <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
@@ -192,43 +196,68 @@ const Reports = () => {
 
         {/* Bento Grid Layout */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          
-          {/* Academic Performance Distribution (Large Card) */}
-          <div className="md:col-span-12 lg:col-span-8 bg-surface-container-lowest rounded-[24px] p-8 shadow-[0px_20px_40px_rgba(42,52,57,0.06)] flex flex-col gap-8">
-            <div className="flex justify-between items-center">
-              <h3 className="text-xl font-bold">Academic Performance Distribution</h3>
-              <span className="text-xs font-medium text-on-surface-variant bg-surface-container-low px-3 py-1 rounded-full uppercase tracking-wider">Internal Assessment</span>
-            </div>
-            <div className="flex items-end justify-between h-64 gap-3 px-1 sm:px-4">
-              <div className="flex-1 group relative flex flex-col items-center h-full justify-end">
-                <div className="absolute -top-8 mb-2 opacity-0 group-hover:opacity-100 transition-opacity bg-on-surface text-surface text-xs px-2 py-1 rounded">12%</div>
-                <div className="bg-surface-container-low w-full rounded-t-xl hover:bg-tertiary-container transition-colors" style={{ height: '24%' }}></div>
-                <div className="text-[10px] font-bold text-center mt-3 text-on-surface-variant">F (&lt;40)</div>
-              </div>
-              <div className="flex-1 group relative flex flex-col items-center h-full justify-end">
-                <div className="absolute -top-8 mb-2 opacity-0 group-hover:opacity-100 transition-opacity bg-on-surface text-surface text-xs px-2 py-1 rounded">18%</div>
-                <div className="bg-surface-container-low w-full rounded-t-xl hover:bg-tertiary-container transition-colors" style={{ height: '36%' }}></div>
-                <div className="text-[10px] font-bold text-center mt-3 text-on-surface-variant">C (40-59)</div>
-              </div>
-              <div className="flex-1 group relative flex flex-col items-center h-full justify-end">
-                <div className="absolute -top-8 mb-2 opacity-0 group-hover:opacity-100 transition-opacity bg-on-surface text-surface text-xs px-2 py-1 rounded">25%</div>
-                <div className="bg-surface-container-low w-full rounded-t-xl hover:bg-tertiary-container transition-colors" style={{ height: '50%' }}></div>
-                <div className="text-[10px] font-bold text-center mt-3 text-on-surface-variant">B (60-74)</div>
-              </div>
-              <div className="flex-1 group relative flex flex-col items-center h-full justify-end">
-                <div className="absolute -top-8 mb-2 opacity-0 group-hover:opacity-100 transition-opacity bg-on-surface text-surface text-xs px-2 py-1 rounded">32%</div>
-                <div className="bg-primary/20 w-full rounded-t-xl hover:bg-primary/40 transition-colors" style={{ height: '64%' }}></div>
-                <div className="text-[10px] font-bold text-center mt-3 text-on-surface-variant">A (75-89)</div>
-              </div>
-              <div className="flex-1 group relative flex flex-col items-center h-full justify-end">
-                <div className="absolute -top-8 mb-2 opacity-0 group-hover:opacity-100 transition-opacity bg-on-surface text-surface text-xs px-2 py-1 rounded">13%</div>
-                <div className="bg-primary w-full rounded-t-xl relative overflow-hidden" style={{ height: '85%' }}>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
+                 {/* Staff Performance Review (Enterprise Card) */}
+          <div className="md:col-span-12 lg:col-span-8 bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl rounded-[32px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-white/40 dark:border-slate-800/40 flex flex-col gap-6 transition-all hover:shadow-[0_20px_60px_rgba(0,0,0,0.08)]">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+                  <h3 className="text-lg font-black tracking-tight text-slate-900 dark:text-slate-100">Performance At-Risk</h3>
                 </div>
-                <div className="text-[10px] font-bold text-center mt-3 text-primary">A+ (90+)</div>
+                <p className="text-xs text-slate-500 font-medium">Lowest performing faculty members based on course assessment averages.</p>
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {leastPerformedStaff?.loading ? (
+                <div className="col-span-3 flex justify-center py-10">
+                  <div className="w-8 h-8 border-4 border-error border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : leastPerformedStaff?.data?.length > 0 ? (
+                leastPerformedStaff.data.map((staff, idx) => (
+                  <div key={staff.staffId || idx} className="group p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800/50 shadow-sm hover:shadow-md hover:bg-white dark:hover:bg-slate-800 transition-all duration-300">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl ${idx === 0 ? 'bg-error/10 text-error' : idx === 1 ? 'bg-amber-500/10 text-amber-500' : 'bg-slate-500/10 text-slate-500'} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                          <span className="material-symbols-outlined text-2xl">
+                            {idx === 0 ? 'warning' : idx === 1 ? 'assignment_late' : 'person'}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-900 dark:text-slate-100 line-clamp-1">{staff.staffName}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest line-clamp-1">{staff.subject}</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-end">
+                        <span className="text-[11px] font-bold text-slate-500">Performance Score</span>
+                        <span className={`text-lg font-black ${staff.performanceScore < 60 ? 'text-error' : 'text-amber-500'}`}>{staff.performanceScore}%</span>
+                      </div>
+                      <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full bg-gradient-to-r ${staff.performanceScore < 60 ? 'from-error to-error/60' : 'from-amber-500 to-amber-500/60'} rounded-full`} 
+                          style={{ width: `${staff.performanceScore}%` }}
+                        ></div>
+                      </div>
+                      <button className="w-full py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[10px] font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors uppercase tracking-widest">Schedule Review</button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-3 flex flex-col items-center justify-center py-10 opacity-50">
+                  <span className="material-symbols-outlined text-4xl mb-2">check_circle</span>
+                  <p className="text-xs font-bold uppercase tracking-widest text-slate-500">All staff meeting targets</p>
+                </div>
+              )}
             </div>
           </div>
+
+
+
+
+
 
           {/* Top Performers (Side Panel) */}
           <div className="md:col-span-12 lg:col-span-4 bg-surface-container-lowest rounded-[24px] p-8 shadow-[0px_20px_40px_rgba(42,52,57,0.06)] flex flex-col">
@@ -417,7 +446,9 @@ const Reports = () => {
           </div>
         </div>
       </main>
+      </div>
       <BottomNavBar />
+
     </>
   );
 };

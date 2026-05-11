@@ -22,8 +22,11 @@ const Home = () => {
   return (
     <>
       <Sidebar />
-      <TopAppBar />
-      <main className="pt-24 md:pt-10 mb-28 md:mb-10 px-4 md:pl-72 space-y-6 max-w-7xl mx-auto">
+      <div className="flex-1 flex flex-col min-h-screen relative md:pl-72">
+        <TopAppBar title="Principal Dashboard" />
+        <main className="flex-1 p-6 md:p-10 mb-28 md:mb-10 space-y-6 max-w-7xl mx-auto w-full">
+
+
         <FilterSection />
         {error && (
             <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
@@ -44,7 +47,9 @@ const Home = () => {
         <ChartsSection />
         <ActivityList />
       </main>
+      </div>
       <BottomNavBar />
+
       <FloatingActionButton />
     </>
   );

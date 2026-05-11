@@ -3,7 +3,9 @@ import {
     FETCH_STUDENTS_SUCCESS,
     FETCH_STUDENTS_FAILURE,
     SET_STUDENT_FILTER,
+    SET_STUDENT_MULTIPLE_FILTERS,
     SET_STUDENT_SORT,
+
     SET_STUDENT_PAGE,
     RESET_STUDENT_FILTERS,
     FETCH_FILTERS_REQUEST,
@@ -84,6 +86,21 @@ const studentReducer = (state = initialState, action) => {
                     page: 0
                 }
             };
+        case SET_STUDENT_MULTIPLE_FILTERS:
+            return {
+                ...state,
+                filters: {
+                    ...state.filters,
+                    ...action.payload
+                },
+                pagination: {
+                    ...state.pagination,
+                    page: 0
+                }
+            };
+
+
+
         case SET_STUDENT_SORT:
             return {
                 ...state,

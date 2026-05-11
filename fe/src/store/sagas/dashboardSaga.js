@@ -155,6 +155,29 @@ function* handleFetchDepartmentAverages(action) {
     }
 }
 
+function* handleFetchLeastPerformedStaff(action) {
+    try {
+        const filters = action.payload || {};
+        let url = '/api/principal/dashboard/least-performed-staff?';
+        
+        const params = new URLSearchParams();
+        if (filters.year && filters.year !== 'All Years') {
+            params.append('year', filters.year);
+        }
+        if (filters.section && filters.section !== 'All Sections') {
+            params.append('section', filters.section);
+        }
+        if (filters.branch && filters.branch !== 'All Branches') {
+            params.append('branch', filters.branch);
+        }
+
+        const response = yield call(axiosInstance.get, url + params.toString());
+        yield put(actions.fetchLeastPerformedStaffSuccess(response.data));
+    } catch (error) {
+        yield put(actions.fetchLeastPerformedStaffFailure(error.message));
+    }
+}
+
 export default function* dashboardSaga() {
     yield takeLatest(types.FETCH_PRINCIPAL_DASHBOARD_REQUEST, handleFetchDashboard);
     yield takeLatest(types.FETCH_STAFF_ATTENDANCE_GRAPH_REQUEST, handleFetchStaffAttendanceGraph);
@@ -164,4 +187,5 @@ export default function* dashboardSaga() {
     yield takeLatest(types.FETCH_MARKS_DISTRIBUTION_REQUEST, handleFetchMarksDistribution);
     yield takeLatest(types.FETCH_ATTENDANCE_TRENDS_REQUEST, handleFetchAttendanceTrends);
     yield takeLatest(types.FETCH_DEPARTMENT_AVERAGES_REQUEST, handleFetchDepartmentAverages);
+    yield takeLatest(types.FETCH_LEAST_PERFORMED_STAFF_REQUEST, handleFetchLeastPerformedStaff);
 }

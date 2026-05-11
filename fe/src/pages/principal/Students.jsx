@@ -2,7 +2,8 @@ import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { fetchStudentsRequest, fetchFiltersRequest } from '../../store/actions/studentActions';
 import Sidebar from '../../components/Sidebar';
-import StudentHeader from '../../components/StudentHeader';
+import TopAppBar from '../../components/TopAppBar';
+
 import SearchPlate from '../../components/SearchPlate';
 import StudentDirectory from '../../components/StudentDirectory';
 import BottomNavBar from '../../components/BottomNavBar';
@@ -18,11 +19,14 @@ const Students = () => {
   return (
     <>
       <Sidebar />
-      <StudentHeader />
-      <main className="pt-24 pb-32 md:pb-10 px-6 md:pl-72 max-w-7xl mx-auto min-h-screen">
-        <SearchPlate />
-        <StudentDirectory />
-      </main>
+      <div className="flex-1 flex flex-col min-h-screen relative md:pl-72">
+        <TopAppBar title="Student Directory" />
+        <main className="flex-1 p-6 md:p-10 mb-24 md:mb-0 max-w-7xl mx-auto w-full">
+          <SearchPlate />
+          <StudentDirectory />
+        </main>
+      </div>
+
       
       <BottomNavBar />
     </>

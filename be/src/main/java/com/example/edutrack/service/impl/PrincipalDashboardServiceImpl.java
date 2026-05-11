@@ -5,6 +5,8 @@ import com.example.edutrack.dto.DepartmentAverageDto;
 import com.example.edutrack.dto.DepartmentAverageProjection;
 import com.example.edutrack.dto.PrincipalDashboardDto;
 import com.example.edutrack.dto.PrincipalDashboardDto.RemarkSummaryDto;
+import com.example.edutrack.dto.StaffPerformanceDto;
+import com.example.edutrack.repository.AssessmentRepository;
 import com.example.edutrack.repository.AttendanceRepository;
 import com.example.edutrack.repository.BusesLogsRepository;
 import com.example.edutrack.repository.RemarksRepository;
@@ -29,6 +31,7 @@ public class PrincipalDashboardServiceImpl implements PrincipalDashboardService 
     @Autowired private AttendanceRepository attendanceRepository;
     @Autowired private BusesLogsRepository  busesLogsRepository;
     @Autowired private RemarksRepository    remarksRepository;
+    @Autowired private AssessmentRepository assessmentRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -165,5 +168,25 @@ public class PrincipalDashboardServiceImpl implements PrincipalDashboardService 
         }
 
         return results;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<StaffPerformanceDto> getLeastPerformedStaff(UUID institutionId, Integer year, String section, String branch) {
+        TenantContext.setCurrentTenant(institutionId.toString());
+        
+        String branchFilter = (branch == null || branch.equals("All Branches")) ? null : branch;
+
+        return assessmentRepository.findLeastPerformedStaff(institutionId, year, section, branchFilter)
+                .stream()
+                .map(proj -> StaffPerformanceDto.builder()
+                        .staffId(proj.getStaffId())
+                        .staffName(proj.getStaffName())
+                        .subject(proj.getSubject())
+                        .department(proj.getDepartment())
+                        .performanceScore(Math.round(proj.getPerformanceScore() * 10.0) / 10.0)
+                        .role(proj.getRole())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

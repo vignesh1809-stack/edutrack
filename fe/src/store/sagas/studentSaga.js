@@ -3,8 +3,10 @@ import axiosInstance from '../../api/axiosInstance';
 import {
     FETCH_STUDENTS_REQUEST,
     SET_STUDENT_FILTER,
+    SET_STUDENT_MULTIPLE_FILTERS,
     SET_STUDENT_SORT,
     SET_STUDENT_PAGE,
+    RESET_STUDENT_FILTERS,
     FETCH_FILTERS_REQUEST,
     FETCH_TOP_PERFORMERS_REQUEST
 } from '../types/studentTypes';
@@ -99,7 +101,13 @@ export function* studentWatcherSaga() {
     yield takeLatest(FETCH_FILTERS_REQUEST, fetchFiltersWorker);
     yield takeLatest(FETCH_TOP_PERFORMERS_REQUEST, fetchTopPerformersWorker);
     
-    // Only trigger fetch automatically for page changes, and maybe debounce it
-    yield takeLatest(SET_STUDENT_PAGE, handleFilterOrPageChange);
+    // Trigger fetch automatically for page, filter, or sort changes
+    yield takeLatest([
+        SET_STUDENT_PAGE, 
+        SET_STUDENT_FILTER, 
+        SET_STUDENT_MULTIPLE_FILTERS,
+        SET_STUDENT_SORT,
+        RESET_STUDENT_FILTERS
+    ], handleFilterOrPageChange);
 }
 

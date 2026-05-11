@@ -16,7 +16,7 @@ import lombok.EqualsAndHashCode;
 @AllArgsConstructor
 @Entity
 @Table(name = "remarks", indexes = {
-    @Index(name = "idx_remarks_student", columnList = "institution_id, student_id")
+    @Index(name = "idx_remarks_student", columnList = "institution_id, target_student_id")
 })
 @EqualsAndHashCode(callSuper = true)
 public class Remarks extends BaseEntity {

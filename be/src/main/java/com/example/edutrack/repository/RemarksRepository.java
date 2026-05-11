@@ -95,6 +95,12 @@ public interface RemarksRepository extends JpaRepository<Remarks, UUID> {
                                              @Param("section") String section,
                                              Pageable pageable);
 
-    @Query("SELECT r FROM Remarks r WHERE r.targetStudent.id = :studentId AND r.isDeleted = false ORDER BY r.createdAt DESC")
-    java.util.List<Remarks> findByTargetStudentId(@Param("studentId") java.util.UUID studentId);
+    @Query(value = """
+            SELECT * FROM remarks 
+            WHERE target_student_id = :studentId 
+              AND institution_id    = :instId 
+              AND is_deleted         = false 
+            ORDER BY created_at DESC
+            """, nativeQuery = true)
+    java.util.List<Remarks> findByTargetStudentId(@Param("studentId") UUID studentId, @Param("instId") UUID instId);
 }

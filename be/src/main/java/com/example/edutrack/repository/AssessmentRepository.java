@@ -43,8 +43,18 @@ public interface AssessmentRepository extends JpaRepository<Assessment, UUID> {
                                                @Param("type") String type,
                                                @Param("year") Integer year,
                                                @Param("section") String section);
-    @Query("SELECT a FROM Assessment a WHERE a.student.id = :studentId")
-    List<Assessment> findByStudentId(@Param("studentId") UUID studentId);
+    @Query(value = """
+            SELECT 
+                c.semester as semester,
+                AVG(a.marks_obtained / a.max_score * 100) as averageScore
+            FROM assessments a
+            JOIN courses c ON c.id = a.course_id
+            WHERE a.student_id = :studentId
+              AND a.is_deleted = false
+            GROUP BY c.semester
+            ORDER BY c.semester ASC
+            """, nativeQuery = true)
+    List<com.example.edutrack.dto.StudentPerformanceProjection> findSemesterPerformanceByStudentId(@Param("studentId") UUID studentId);
 
     @Query(value = """
             SELECT 

@@ -6,9 +6,6 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
     <changeSet id="4-create-patients" author="antigravity">
-        <preConditions onFail="MARK_RAN">
-            <not><tableExists tableName="patients"/></not>
-        </preConditions>
         <createTable tableName="patients">
             <column name="id" type="BINARY(16)">
                 <constraints primaryKey="true" nullable="false"/>

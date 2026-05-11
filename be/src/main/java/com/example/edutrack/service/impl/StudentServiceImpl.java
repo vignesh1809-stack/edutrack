@@ -18,6 +18,13 @@ import com.example.edutrack.dto.StudentListProjection;
 import com.example.edutrack.dto.StudentProfileProjection;
 import java.util.UUID;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.stream.Collectors;
+import java.math.BigDecimal;
+import com.example.edutrack.entity.Assessment;
 import java.time.LocalDate;
 
 import com.example.edutrack.dto.StudentListDto;
@@ -169,25 +176,27 @@ public class StudentServiceImpl implements StudentService {
                 .currentSemester(student.getCurrentSemester())
                 .build();
 
-        // 2. Performance (Sem-wise)
-        List<Assessment> assessments = assessmentRepository.findByStudentId(studentId);
-        Map<Integer, List<Assessment>> bySem = assessments.stream()
-                .filter(a -> a.getCourse() != null)
-                .collect(Collectors.groupingBy(a -> a.getCourse().getSemester()));
-
-        List<StudentProfileDto.SemesterPerformance> performance = bySem.entrySet().stream()
-                .map((Map.Entry<Integer, List<Assessment>> entry) -> {
-                    double avg = entry.getValue().stream()
-                            .mapToDouble(a -> a.getMarksObtained().doubleValue() / a.getMaxScore().doubleValue() * 100)
-                            .average().orElse(0.0);
-                    return StudentProfileDto.SemesterPerformance.builder()
-                            .label("Sem " + entry.getKey())
-                            .score(Math.round(avg * 10) / 10.0)
-                            .height(Math.round(avg) + "%")
-                            .build();
-                })
-                .sorted(Comparator.comparing(StudentProfileDto.SemesterPerformance::getLabel))
-                .collect(Collectors.toList());
+        // 2. Performance (Sem-wise Aggregated)
+        List<com.example.edutrack.dto.StudentPerformanceProjection> perfProjs = assessmentRepository.findSemesterPerformanceByStudentId(studentId);
+        
+        // Map to DTO and ensure all semesters up to current are present
+        List<StudentProfileDto.SemesterPerformance> performance = new ArrayList<>();
+        int currentSem = student.getCurrentSemester();
+        
+        for (int i = 1; i <= currentSem; i++) {
+            final int sem = i;
+            double score = perfProjs.stream()
+                    .filter(p -> p.getSemester() != null && p.getSemester() == sem)
+                    .mapToDouble(p -> p.getAverageScore() != null ? p.getAverageScore() : 0.0)
+                    .findFirst()
+                    .orElse(0.0);
+            
+            performance.add(StudentProfileDto.SemesterPerformance.builder()
+                    .label("Sem " + sem)
+                    .score(Math.round(score * 10) / 10.0)
+                    .height(Math.round(score) + "%")
+                    .build());
+        }
 
         // 3. Attendance (Using optimized native query)
         com.example.edutrack.dto.StudentAttendanceProjection attProj = attendanceRepository.findStudentAttendanceTrend(studentId.toString(), institutionId.toString());
@@ -233,33 +242,37 @@ public class StudentServiceImpl implements StudentService {
         }
 
         // 5. Remarks
-        List<Remarks> remarksList = remarksRepository.findByTargetStudentId(studentId);
+        List<Remarks> remarksList = remarksRepository.findByTargetStudentId(studentId, institutionId);
         List<StudentProfileDto.RemarkDto> remarks = remarksList.stream()
                 .map((Remarks r) -> {
                     String authorName = "System";
                     String authorRole = "Automated";
                     String type = "Staff";
 
-                    if (r.getAuthorStaff() != null) {
-                        authorName = r.getAuthorStaff().getFirstName() + " " + r.getAuthorStaff().getLastName();
-                        authorRole = r.getAuthorStaff().getRole() != null ? r.getAuthorStaff().getRole().name()
-                                : "Staff";
-                        type = "Staff";
-                    } else if (r.getAuthorStudent() != null) {
-                        authorName = r.getAuthorStudent().getFirstName() + " " + r.getAuthorStudent().getLastName();
-                        authorRole = "Student";
-                        type = "Peer";
+                    try {
+                        if (r.getAuthorStaff() != null) {
+                            authorName = r.getAuthorStaff().getFirstName() + " " + r.getAuthorStaff().getLastName();
+                            authorRole = r.getAuthorStaff().getRole() != null ? r.getAuthorStaff().getRole().name() : "Staff";
+                            type = "Staff";
+                        } else if (r.getAuthorStudent() != null) {
+                            authorName = r.getAuthorStudent().getFirstName() + " " + r.getAuthorStudent().getLastName();
+                            authorRole = "Student";
+                            type = "Peer";
+                        }
+                    } catch (jakarta.persistence.EntityNotFoundException | org.hibernate.ObjectNotFoundException e) {
+                        authorName = "Unknown Author";
+                        authorRole = "Restricted";
                     }
 
                     return StudentProfileDto.RemarkDto.builder()
                             .authorName(authorName)
                             .authorRole(authorRole)
                             .content(r.getContent())
-                            .date(r.getCreatedAt().toLocalDate())
+                            .date(r.getCreatedAt() != null ? r.getCreatedAt().toLocalDate() : LocalDate.now())
                             .type(type)
                             .build();
                 })
-                .limit(5) // Just top 5
+                .limit(5)
                 .collect(Collectors.toList());
 
         // 6. Contact
@@ -287,29 +300,44 @@ public class StudentServiceImpl implements StudentService {
     @Override
     @Transactional(readOnly = true)
     public List<StudentProfileDto.RemarkDto> getStudentRemarks(UUID studentId) {
-        List<Remarks> remarksList = remarksRepository.findByTargetStudentId(studentId);
+        String tenantStr = com.example.edutrack.config.TenantContext.getCurrentTenant();
+        UUID institutionId;
+        try {
+            institutionId = (tenantStr != null && !tenantStr.equals("DEFAULT")) 
+                ? UUID.fromString(tenantStr) 
+                : UUID.fromString("00000000-0000-0000-0000-000000000000");
+        } catch (Exception e) {
+            institutionId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+        }
+
+        List<Remarks> remarksList = remarksRepository.findByTargetStudentId(studentId, institutionId);
         return remarksList.stream()
                 .map((Remarks r) -> {
                     String authorName = "System";
                     String authorRole = "Automated";
                     String type = "Staff";
 
-                    if (r.getAuthorStaff() != null) {
-                        authorName = r.getAuthorStaff().getFirstName() + " " + r.getAuthorStaff().getLastName();
-                        authorRole = r.getAuthorStaff().getRole() != null ? r.getAuthorStaff().getRole().name()
-                                : "Staff";
-                        type = "Staff";
-                    } else if (r.getAuthorStudent() != null) {
-                        authorName = r.getAuthorStudent().getFirstName() + " " + r.getAuthorStudent().getLastName();
-                        authorRole = "Student";
-                        type = "Peer";
+                    try {
+                        if (r.getAuthorStaff() != null) {
+                            authorName = r.getAuthorStaff().getFirstName() + " " + r.getAuthorStaff().getLastName();
+                            authorRole = r.getAuthorStaff().getRole() != null ? r.getAuthorStaff().getRole().name() : "Staff";
+                            type = "Staff";
+                        } else if (r.getAuthorStudent() != null) {
+                            authorName = r.getAuthorStudent().getFirstName() + " " + r.getAuthorStudent().getLastName();
+                            authorRole = "Student";
+                            type = "Peer";
+                        }
+                    } catch (jakarta.persistence.EntityNotFoundException | org.hibernate.ObjectNotFoundException e) {
+                        // Fallback if the author belongs to a different tenant or was deleted
+                        authorName = "Unknown Author";
+                        authorRole = "Restricted";
                     }
 
                     return StudentProfileDto.RemarkDto.builder()
                             .authorName(authorName)
                             .authorRole(authorRole)
                             .content(r.getContent())
-                            .date(r.getCreatedAt().toLocalDate())
+                            .date(r.getCreatedAt() != null ? r.getCreatedAt().toLocalDate() : LocalDate.now())
                             .type(type)
                             .build();
                 })

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="20-add-missing-institution-fks" author="antigravity">
+        <!-- Buses -->
+        <addForeignKeyConstraint baseColumnNames="institution_id" baseTableName="buses" constraintName="fk_bus_institution" referencedColumnNames="id" referencedTableName="institutions"/>
+        
+        <!-- Guardians -->
+        <addForeignKeyConstraint baseColumnNames="institution_id" baseTableName="guardians" constraintName="fk_guardian_institution" referencedColumnNames="id" referencedTableName="institutions"/>
+        
+        <!-- Students -->
+        <addForeignKeyConstraint baseColumnNames="institution_id" baseTableName="students" constraintName="fk_student_institution" referencedColumnNames="id" referencedTableName="institutions"/>
+        
+        <!-- Courses -->
+        <addForeignKeyConstraint baseColumnNames="institution_id" baseTableName="courses" constraintName="fk_course_institution" referencedColumnNames="id" referencedTableName="institutions"/>
+        
+        <!-- Attendances -->
+        <addForeignKeyConstraint baseColumnNames="institution_id" baseTableName="attendances" constraintName="fk_attendance_institution" referencedColumnNames="id" referencedTableName="institutions"/>
+        
+        <!-- Fees -->
+        <addForeignKeyConstraint baseColumnNames="institution_id" baseTableName="fees" constraintName="fk_fee_institution" referencedColumnNames="id" referencedTableName="institutions"/>
+        
+        <!-- Payments -->
+        <addForeignKeyConstraint baseColumnNames="institution_id" baseTableName="payments" constraintName="fk_payment_institution" referencedColumnNames="id" referencedTableName="institutions"/>
+        
+        <!-- Assessments -->
+        <addForeignKeyConstraint baseColumnNames="institution_id" baseTableName="assessments" constraintName="fk_assessment_institution" referencedColumnNames="id" referencedTableName="institutions"/>
+        
+        <!-- Remarks -->
+        <addForeignKeyConstraint baseColumnNames="institution_id" baseTableName="remarks" constraintName="fk_remark_institution" referencedColumnNames="id" referencedTableName="institutions"/>
+        
+        <!-- Buses Logs -->
+        <addForeignKeyConstraint baseColumnNames="institution_id" baseTableName="buses_logs" constraintName="fk_log_institution" referencedColumnNames="id" referencedTableName="institutions"/>
+    </changeSet>
+
+</databaseChangeLog>

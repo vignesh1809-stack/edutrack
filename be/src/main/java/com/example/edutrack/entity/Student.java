@@ -64,7 +64,8 @@ public class Student extends BaseEntity {
     private LocalDate dateOfBirth;
     @Column(columnDefinition = "TINYINT(1) DEFAULT 0")
     private boolean isHosteller;
-
+    @Column(columnDefinition = "TINYINT(1) DEFAULT 0")
+    private boolean twoFactorEnabled;
 
     private BigDecimal CGPA;
     private LocalDate batchYear;

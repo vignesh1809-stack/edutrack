@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Aligning column types to match Liquibase source of truth and JPA EnumType.STRING -->
+
+    <changeSet id="align-institution-level" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="institutions"/>
+        </preConditions>
+        <modifyDataType tableName="institutions" columnName="level" newDataType="VARCHAR(50)"/>
+    </changeSet>
+
+    <changeSet id="align-payment-status" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="payments"/>
+        </preConditions>
+        <modifyDataType tableName="payments" columnName="payment_status" newDataType="VARCHAR(50)"/>
+    </changeSet>
+
+    <changeSet id="align-attendance-status" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="attendances"/>
+        </preConditions>
+        <modifyDataType tableName="attendances" columnName="attendance_status" newDataType="VARCHAR(50)"/>
+    </changeSet>
+
+    <changeSet id="align-student-status" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="students"/>
+        </preConditions>
+        <modifyDataType tableName="students" columnName="status" newDataType="VARCHAR(50)"/>
+    </changeSet>
+
+    <changeSet id="align-fee-status" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="fees"/>
+        </preConditions>
+        <modifyDataType tableName="fees" columnName="status" newDataType="VARCHAR(50)"/>
+    </changeSet>
+
+    <changeSet id="align-fee-type" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="fees"/>
+        </preConditions>
+        <modifyDataType tableName="fees" columnName="fee_type" newDataType="VARCHAR(50)"/>
+    </changeSet>
+
+</databaseChangeLog>

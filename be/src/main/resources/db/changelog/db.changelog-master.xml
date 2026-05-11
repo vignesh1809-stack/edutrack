@@ -6,6 +6,7 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
     <include file="db/changelog/V1__initial_schema.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/V1.2__align_schema_types.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/V2__add_patient_table.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/V3__complete_initial_schema.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/V4__add_staff_to_courses.xml" relativeToChangelogFile="false"/>

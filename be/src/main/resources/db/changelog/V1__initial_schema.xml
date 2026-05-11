@@ -80,6 +80,15 @@
             <dropTable tableName="departments"/>
         </rollback>
     </changeSet>
+    
+    <changeSet id="1.1-ensure-level-is-varchar" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="institutions"/>
+        </preConditions>
+        <modifyDataType tableName="institutions"
+                        columnName="level"
+                        newDataType="VARCHAR(50)"/>
+    </changeSet>
 
     <changeSet id="3-seed-initial-institution" author="antigravity">
         <insert tableName="institutions">

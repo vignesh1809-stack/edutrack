@@ -7,7 +7,9 @@ const StudentProfile = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [studentData, setStudentData] = useState(null);
+  const [remarks, setRemarks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [remarksLoading, setRemarksLoading] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -20,7 +22,20 @@ const StudentProfile = () => {
         setLoading(false);
       }
     };
+
+    const fetchRemarks = async () => {
+      try {
+        const response = await axiosInstance.get(`/api/principal/students/${id}/remarks`);
+        setRemarks(response.data);
+      } catch (error) {
+        console.error("Error fetching remarks:", error);
+      } finally {
+        setRemarksLoading(false);
+      }
+    };
+
     fetchProfile();
+    fetchRemarks();
   }, [id]);
 
   if (loading) {
@@ -35,7 +50,7 @@ const StudentProfile = () => {
     return <div className="flex items-center justify-center min-h-screen font-bold text-error">Student not found</div>;
   }
 
-  const { identity, performance, attendance, financials, remarks, contact } = studentData;
+  const { identity, performance, attendance, financials, contact } = studentData;
   const averageMark = performance.length > 0 ? (performance.reduce((acc, curr) => acc + curr.score, 0) / performance.length).toFixed(1) : "0.0";
 
   return (
@@ -245,7 +260,11 @@ const StudentProfile = () => {
               </button>
             </div>
             <div className="space-y-6">
-              {remarks.length > 0 ? remarks.map((remark, idx) => (
+              {remarksLoading ? (
+                <div className="flex justify-center py-10">
+                   <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : remarks.length > 0 ? remarks.map((remark, idx) => (
                 <div key={idx} className="flex gap-4 p-4 rounded-2xl bg-surface-container-low/50 hover:bg-surface-container-low transition-colors group">
                   <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-50 flex-shrink-0 flex items-center justify-center text-blue-500 font-bold border-2 border-white shadow-sm">
                     {remark.authorName.split(' ').map(n => n[0]).join('')}

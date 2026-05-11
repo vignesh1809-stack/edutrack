@@ -283,6 +283,39 @@ public class StudentServiceImpl implements StudentService {
                 .build();
     }
 
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<StudentProfileDto.RemarkDto> getStudentRemarks(UUID studentId) {
+        List<Remarks> remarksList = remarksRepository.findByTargetStudentId(studentId);
+        return remarksList.stream()
+                .map((Remarks r) -> {
+                    String authorName = "System";
+                    String authorRole = "Automated";
+                    String type = "Staff";
+
+                    if (r.getAuthorStaff() != null) {
+                        authorName = r.getAuthorStaff().getFirstName() + " " + r.getAuthorStaff().getLastName();
+                        authorRole = r.getAuthorStaff().getRole() != null ? r.getAuthorStaff().getRole().name()
+                                : "Staff";
+                        type = "Staff";
+                    } else if (r.getAuthorStudent() != null) {
+                        authorName = r.getAuthorStudent().getFirstName() + " " + r.getAuthorStudent().getLastName();
+                        authorRole = "Student";
+                        type = "Peer";
+                    }
+
+                    return StudentProfileDto.RemarkDto.builder()
+                            .authorName(authorName)
+                            .authorRole(authorRole)
+                            .content(r.getContent())
+                            .date(r.getCreatedAt().toLocalDate())
+                            .type(type)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
     @Override
     @Transactional
     public Student create(Student student) {

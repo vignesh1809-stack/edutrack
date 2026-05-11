@@ -16,8 +16,9 @@ public interface StudentService {
         java.util.List<String> getFilterBranches(UUID institutionId);
         java.util.List<Integer> getFilterYears(UUID institutionId);
         Student getStudentById(UUID id);
-        StudentProfileDto getStudentProfile(UUID institutionId, UUID studentId);
-        Student create(Student student);
+    StudentProfileDto getStudentProfile(UUID institutionId, UUID studentId);
+    java.util.List<StudentProfileDto.RemarkDto> getStudentRemarks(UUID studentId);
+    Student create(Student student);
         Student update(UUID id, Student student);
         void delete(UUID id);
 }

@@ -54,6 +54,14 @@ public class PrincipalStudentController {
         return ResponseEntity.ok(studentService.getStudentProfile(principal.getInstitutionId(), studentId));
     }
 
+    @GetMapping("/{studentId}/remarks")
+    @PreAuthorize("hasAuthority('Principal')")
+    public ResponseEntity<java.util.List<StudentProfileDto.RemarkDto>> getStudentRemarks(
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @PathVariable UUID studentId) {
+        return ResponseEntity.ok(studentService.getStudentRemarks(studentId));
+    }
+
     @GetMapping("/filters/branches")
     @PreAuthorize("hasAuthority('Principal')")
     public ResponseEntity<java.util.List<String>> getFilterBranches(@AuthenticationPrincipal CustomUserDetails principal) {

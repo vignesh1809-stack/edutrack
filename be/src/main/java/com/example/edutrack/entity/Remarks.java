@@ -5,6 +5,9 @@ import org.hibernate.annotations.UuidGenerator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.example.edutrack.entity.enums.RemarkCategory;
 import com.example.edutrack.entity.enums.RemarkTarget;
+import com.example.edutrack.entity.enums.RemarkStatus;
+import com.example.edutrack.entity.enums.RemarkPriority;
+import java.time.LocalDateTime;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -61,4 +64,17 @@ public class Remarks extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "remark_category")
     private RemarkCategory category;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "remark_status")
+    private RemarkStatus status = RemarkStatus.PENDING;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "remark_priority")
+    private RemarkPriority priority = RemarkPriority.LOW;
+
+    @Column(length = 1000)
+    private String principalAction;
+
+    private LocalDateTime resolvedAt;
 }

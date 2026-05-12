@@ -12,5 +12,6 @@
     <include file="db/changelog/V4__add_staff_to_courses.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/V5__add_missing_institution_fks.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/V6__add_two_factor_to_students.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/V7__add_remarks_management_fields.xml" relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

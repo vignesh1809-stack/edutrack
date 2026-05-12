@@ -15,6 +15,7 @@ import com.example.edutrack.entity.enums.StudentStatus;
 import com.example.edutrack.dto.StudentListProjection;
 import com.example.edutrack.dto.StudentProfileProjection;
 import com.example.edutrack.dto.DepartmentAverageProjection;
+import com.example.edutrack.dto.StudentDashboardRankProjection;
 
 import com.example.edutrack.entity.Student;
 
@@ -142,4 +143,70 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
                         @Param("instId") UUID instId,
                         @Param("batchYear") Integer batchYear,
                         @Param("section") String section);
+
+        @Query(value = """
+                        SELECT ranked.rank_position AS rankPosition, ranked.cohort_size AS cohortSize
+                        FROM (
+                            SELECT
+                                s.id,
+                                DENSE_RANK() OVER (ORDER BY COALESCE(s.cgpa, 0) DESC) AS rank_position,
+                                COUNT(*) OVER () AS cohort_size
+                            FROM students s
+                            WHERE s.institution_id = :instId
+                              AND s.is_deleted = false
+                              AND s.department_id = (
+                                  SELECT s2.department_id FROM students s2
+                                  WHERE s2.id = :studentId AND s2.institution_id = :instId LIMIT 1
+                              )
+                              AND s.section = (
+                                  SELECT s2.section FROM students s2
+                                  WHERE s2.id = :studentId AND s2.institution_id = :instId LIMIT 1
+                              )
+                              AND YEAR(s.batch_year) = (
+                                  SELECT YEAR(s2.batch_year) FROM students s2
+                                  WHERE s2.id = :studentId AND s2.institution_id = :instId LIMIT 1
+                              )
+                        ) ranked
+                        WHERE ranked.id = :studentId
+                        """, nativeQuery = true)
+        StudentDashboardRankProjection findMarksRankForStudentDashboard(
+                        @Param("instId") UUID instId,
+                        @Param("studentId") UUID studentId);
+
+        @Query(value = """
+                        SELECT ranked.rank_position AS rankPosition, ranked.cohort_size AS cohortSize
+                        FROM (
+                            SELECT
+                                s.id,
+                                DENSE_RANK() OVER (
+                                    ORDER BY COALESCE((
+                                        SELECT (SUM(CASE WHEN a.attendance_status = 'PRESENT' THEN 1 ELSE 0 END) * 100.0) / NULLIF(COUNT(a.id), 0)
+                                        FROM attendances a
+                                        WHERE a.institution_id = s.institution_id
+                                          AND a.student_id = s.id
+                                          AND a.is_deleted = false
+                                    ), 0) DESC
+                                ) AS rank_position,
+                                COUNT(*) OVER () AS cohort_size
+                            FROM students s
+                            WHERE s.institution_id = :instId
+                              AND s.is_deleted = false
+                              AND s.department_id = (
+                                  SELECT s2.department_id FROM students s2
+                                  WHERE s2.id = :studentId AND s2.institution_id = :instId LIMIT 1
+                              )
+                              AND s.section = (
+                                  SELECT s2.section FROM students s2
+                                  WHERE s2.id = :studentId AND s2.institution_id = :instId LIMIT 1
+                              )
+                              AND YEAR(s.batch_year) = (
+                                  SELECT YEAR(s2.batch_year) FROM students s2
+                                  WHERE s2.id = :studentId AND s2.institution_id = :instId LIMIT 1
+                              )
+                        ) ranked
+                        WHERE ranked.id = :studentId
+                        """, nativeQuery = true)
+        StudentDashboardRankProjection findAttendanceRankForStudentDashboard(
+                        @Param("instId") UUID instId,
+                        @Param("studentId") UUID studentId);
 }

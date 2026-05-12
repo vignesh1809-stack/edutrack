@@ -22,11 +22,24 @@ public class PrincipalRemarksService {
     @Autowired
     private RemarksRepository remarksRepository;
 
-    public PrincipalRemarksSummaryDto getDashboardSummary(UUID instId) {
-        long totalRemarks = remarksRepository.countByInstitutionIdAndIsDeletedFalse(instId);
-        long resolvedRemarks = remarksRepository.countByInstitutionIdAndStatusAndIsDeletedFalse(instId, RemarkStatus.RESOLVED);
-        long staffRemarks = remarksRepository.countPendingStaffRemarksNative(instId);
-        long campusRemarks = remarksRepository.countPendingCampusRemarksNative(instId);
+    public PrincipalRemarksSummaryDto getDashboardSummary(UUID instId, Integer year, String section) {
+        boolean hasFilters = year != null || section != null;
+
+        long totalRemarks = hasFilters
+                ? remarksRepository.countTotalRemarksForResolutionFiltered(instId, year, section)
+                : remarksRepository.countByInstitutionIdAndIsDeletedFalse(instId);
+
+        long resolvedRemarks = hasFilters
+                ? remarksRepository.countResolvedRemarksFiltered(instId, year, section)
+                : remarksRepository.countByInstitutionIdAndStatusAndIsDeletedFalse(instId, RemarkStatus.RESOLVED);
+
+        long staffRemarks = hasFilters
+                ? remarksRepository.countPendingStaffRemarksNativeFiltered(instId, year, section)
+                : remarksRepository.countPendingStaffRemarksNative(instId);
+
+        long campusRemarks = hasFilters
+                ? remarksRepository.countPendingCampusRemarksNativeFiltered(instId, year, section)
+                : remarksRepository.countPendingCampusRemarksNative(instId);
 
         double resolutionRate = totalRemarks == 0 ? 0 : (double) resolvedRemarks / totalRemarks * 100;
 
@@ -38,12 +51,18 @@ public class PrincipalRemarksService {
                 .build();
     }
 
-    public Page<PrincipalRemarkFeedItemDto> getRemarksFeed(UUID instId, RemarkTarget target, Pageable pageable) {
+    public Page<PrincipalRemarkFeedItemDto> getRemarksFeed(UUID instId, RemarkTarget target, Integer year, String section, Pageable pageable) {
         Page<PrincipalRemarkFeedProjection> results;
+        boolean hasFilters = year != null || section != null;
+
         if (target == RemarkTarget.CAMPUS) {
-            results = remarksRepository.findCampusRemarksNative(instId, pageable);
+            results = hasFilters
+                    ? remarksRepository.findCampusRemarksNativeFiltered(instId, year, section, pageable)
+                    : remarksRepository.findCampusRemarksNative(instId, pageable);
         } else {
-            results = remarksRepository.findStaffRemarksNative(instId, pageable);
+            results = hasFilters
+                    ? remarksRepository.findStaffRemarksNativeFiltered(instId, year, section, pageable)
+                    : remarksRepository.findStaffRemarksNative(instId, pageable);
         }
         return results.map(this::convertProjectionToDto);
     }

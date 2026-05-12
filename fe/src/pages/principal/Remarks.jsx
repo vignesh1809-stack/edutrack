@@ -16,6 +16,7 @@ const Remarks = () => {
     const { summary, summaryLoading, feed, feedLoading, scope, resolving } = useSelector(
         (state) => state.remarks
     );
+    const dashboardFilters = useSelector((state) => state.dashboard.filters);
 
     // Local modal state only
     const [resolveModal, setResolveModal] = useState({ isOpen: false, remarkId: null });
@@ -23,12 +24,12 @@ const Remarks = () => {
 
     // On mount: fetch summary + feed
     useEffect(() => {
-        dispatch(fetchRemarksSummaryRequest());
-    }, []);
+        dispatch(fetchRemarksSummaryRequest({ filters: dashboardFilters }));
+    }, [dispatch, dashboardFilters]);
 
     useEffect(() => {
-        dispatch(fetchRemarksFeedRequest(scope));
-    }, [scope]);
+        dispatch(fetchRemarksFeedRequest({ scope, filters: dashboardFilters }));
+    }, [dispatch, scope, dashboardFilters]);
 
     const toggleContext = (type) => {
         dispatch(setRemarksScope(type));

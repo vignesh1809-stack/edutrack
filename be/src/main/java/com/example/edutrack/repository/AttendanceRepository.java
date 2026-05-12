@@ -1,6 +1,8 @@
 package com.example.edutrack.repository;
 
 import com.example.edutrack.entity.Attendance;
+import com.example.edutrack.dto.StudentDashboardAttendanceSummaryProjection;
+import com.example.edutrack.dto.StudentDashboardDayAttendanceProjection;
 import com.example.edutrack.entity.enums.AttendanceStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -174,4 +176,58 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
             GROUP BY s.id, s.first_name, s.last_name
             """, nativeQuery = true)
     com.example.edutrack.dto.StudentAttendanceProjection findStudentAttendanceTrend(@Param("studentId") String studentId, @Param("instId") String instId);
+
+    @Query(value = """
+            SELECT
+                ROUND((SUM(CASE WHEN a.attendance_status = 'PRESENT' THEN 1 ELSE 0 END) * 100.0) / NULLIF(COUNT(a.id), 0), 2) AS semesterPercent,
+                (
+                    SELECT ROUND((SUM(CASE WHEN a2.attendance_status = 'PRESENT' THEN 1 ELSE 0 END) * 100.0) / NULLIF(COUNT(a2.id), 0), 2)
+                    FROM attendances a2
+                    WHERE a2.institution_id = :instId
+                      AND a2.student_id = :studentId
+                      AND a2.is_deleted = false
+                      AND DATE_FORMAT(a2.record_date, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')
+                ) AS currentMonthPercent,
+                (
+                    SELECT ROUND((SUM(CASE WHEN a3.attendance_status = 'PRESENT' THEN 1 ELSE 0 END) * 100.0) / NULLIF(COUNT(a3.id), 0), 2)
+                    FROM attendances a3
+                    WHERE a3.institution_id = :instId
+                      AND a3.student_id = :studentId
+                      AND a3.is_deleted = false
+                      AND DATE_FORMAT(a3.record_date, '%Y-%m') = DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 MONTH), '%Y-%m')
+                ) AS previousMonthPercent
+            FROM attendances a
+            JOIN courses c ON c.id = a.course_id
+            WHERE a.institution_id = :instId
+              AND a.student_id = :studentId
+              AND a.is_deleted = false
+              AND (:semester IS NULL OR c.semester = :semester)
+            """, nativeQuery = true)
+    StudentDashboardAttendanceSummaryProjection findStudentDashboardAttendanceSummary(
+            @Param("instId") UUID instId,
+            @Param("studentId") UUID studentId,
+            @Param("semester") Integer semester);
+
+    @Query(value = """
+            SELECT
+                CASE DAYOFWEEK(a.record_date)
+                    WHEN 2 THEN 'MON'
+                    WHEN 3 THEN 'TUE'
+                    WHEN 4 THEN 'WED'
+                    WHEN 5 THEN 'THU'
+                    WHEN 6 THEN 'FRI'
+                    WHEN 7 THEN 'SAT'
+                    WHEN 1 THEN 'SUN'
+                END AS dayKey,
+                ROUND((SUM(CASE WHEN a.attendance_status = 'PRESENT' THEN 1 ELSE 0 END) * 100.0) / NULLIF(COUNT(a.id), 0), 2) AS percent
+            FROM attendances a
+            WHERE a.institution_id = :instId
+              AND a.student_id = :studentId
+              AND a.is_deleted = false
+              AND a.record_date >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+            GROUP BY DAYOFWEEK(a.record_date)
+            """, nativeQuery = true)
+    List<StudentDashboardDayAttendanceProjection> findStudentDashboardWeeklyBars(
+            @Param("instId") UUID instId,
+            @Param("studentId") UUID studentId);
 }

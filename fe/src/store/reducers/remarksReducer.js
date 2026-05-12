@@ -44,8 +44,30 @@ const remarksReducer = (state = initialState, action) => {
         // Resolution
         case types.RESOLVE_REMARK_REQUEST:
             return { ...state, resolving: true, resolveError: null };
-        case types.RESOLVE_REMARK_SUCCESS:
-            return { ...state, resolving: false };
+        case types.RESOLVE_REMARK_SUCCESS: {
+            const resolvedRemarkId = action.payload?.remarkId;
+            const resolvedRemark = state.feed.find((item) => item.id === resolvedRemarkId);
+            const nextFeed = resolvedRemarkId
+                ? state.feed.filter((item) => item.id !== resolvedRemarkId)
+                : state.feed;
+
+            const nextSummary = { ...state.summary };
+            if (resolvedRemark) {
+                const isStaffRemark = Boolean(resolvedRemark.targetStaffName);
+                if (isStaffRemark) {
+                    nextSummary.staffRemarksCount = Math.max(0, (nextSummary.staffRemarksCount || 0) - 1);
+                } else {
+                    nextSummary.campusRemarksCount = Math.max(0, (nextSummary.campusRemarksCount || 0) - 1);
+                }
+            }
+
+            return {
+                ...state,
+                resolving: false,
+                feed: nextFeed,
+                summary: nextSummary,
+            };
+        }
         case types.RESOLVE_REMARK_FAILURE:
             return { ...state, resolving: false, resolveError: action.payload };
 

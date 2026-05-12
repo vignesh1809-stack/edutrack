@@ -27,8 +27,10 @@ public class PrincipalRemarksController {
     @GetMapping("/dashboard-summary")
     @PreAuthorize("hasAuthority('Principal')")
     public ResponseEntity<PrincipalRemarksSummaryDto> getDashboardSummary(
-            @AuthenticationPrincipal CustomUserDetails principal) {
-        return ResponseEntity.ok(principalRemarksService.getDashboardSummary(principal.getInstitutionId()));
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) String section) {
+        return ResponseEntity.ok(principalRemarksService.getDashboardSummary(principal.getInstitutionId(), year, section));
     }
 
     @GetMapping("/feed")
@@ -36,8 +38,10 @@ public class PrincipalRemarksController {
     public ResponseEntity<Page<PrincipalRemarkFeedItemDto>> getRemarksFeed(
             @AuthenticationPrincipal CustomUserDetails principal,
             @RequestParam RemarkTarget scope,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) String section,
             Pageable pageable) {
-        return ResponseEntity.ok(principalRemarksService.getRemarksFeed(principal.getInstitutionId(), scope, pageable));
+        return ResponseEntity.ok(principalRemarksService.getRemarksFeed(principal.getInstitutionId(), scope, year, section, pageable));
     }
 
     @PostMapping("/{id}/resolve")

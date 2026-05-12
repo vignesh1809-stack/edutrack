@@ -2,6 +2,7 @@ package com.example.edutrack.repository;
 
 import com.example.edutrack.entity.Assessment;
 import com.example.edutrack.dto.StaffPerformanceProjection;
+import com.example.edutrack.dto.StudentDashboardAcademicProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -85,4 +86,23 @@ public interface AssessmentRepository extends JpaRepository<Assessment, UUID> {
             @Param("year") Integer year,
             @Param("section") String section,
             @Param("branch") String branch);
+
+    @Query(value = """
+            SELECT
+                c.course_name AS courseName,
+                ROUND(AVG((a.marks_obtained / NULLIF(a.max_score, 0)) * 100), 2) AS scorePercent
+            FROM assessments a
+            JOIN courses c ON c.id = a.course_id
+            WHERE a.institution_id = :instId
+              AND a.student_id = :studentId
+              AND a.is_deleted = false
+              AND (:semester IS NULL OR c.semester = :semester)
+            GROUP BY c.id, c.course_name
+            ORDER BY scorePercent DESC
+            LIMIT 3
+            """, nativeQuery = true)
+    List<StudentDashboardAcademicProjection> findTopSubjectsForStudentDashboard(
+            @Param("instId") UUID instId,
+            @Param("studentId") UUID studentId,
+            @Param("semester") Integer semester);
 }

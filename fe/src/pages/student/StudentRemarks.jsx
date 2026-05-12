@@ -16,7 +16,7 @@ const StudentRemarks = () => {
                         <div className="w-8 h-8 rounded-full overflow-hidden md:hidden">
                             <img alt="student profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpsvuMcvBD_soJ9wlesX-Epemify8XgF9QGCIeTJSD3Pe6X_GG22KZFtIQ6lQffzBg2e_Hga-ZW2Azig4iAhU-GhNJqHz72DOzVfFouhhM33165N2IAyBP4VdWmR5N2Y6NIDkOXfEhtgDznuNuu5kJeTaZyv-DmfXRUuZGRDWN2lo2RJov4LRxl5hipAI9j9SvgegsyvBL_xdKM9dxk-64h-Y-07aBHWKgWrcd9axVXk5VaFgepUisY0EZxkPpqlwMRmR6uGDEUA0" />
                         </div>
-                        <span className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight font-manrope">EduTrack Remarks</span>
+                        <span className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight font-manrope">Pending Remarks</span>
                     </div>
                     <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 md:bg-transparent md:hover:bg-slate-200/50 transition-colors scale-95 active:transition-transform">
                         <span className="material-symbols-outlined text-slate-500">notifications</span>
@@ -30,7 +30,7 @@ const StudentRemarks = () => {
                             <div className="w-6 h-[2px] bg-primary"></div>
                             <p className="text-primary font-bold text-[10px] tracking-widest uppercase">Progress Journals</p>
                         </div>
-                        <h1 className="font-headline text-4xl md:text-5xl font-extrabold tracking-tight text-on-surface leading-tight">Remarks & <br className="md:hidden" />Guidance</h1>
+                        <h1 className="font-headline text-4xl md:text-5xl font-extrabold tracking-tight text-on-surface leading-tight">Pending <br className="md:hidden" />Remarks</h1>
                         <p className="text-on-surface-variant text-sm md:text-base font-medium leading-relaxed max-w-2xl pt-2">
                             A curated view of feedback from your dedicated circle of educators and guardians. Every note is a step toward mastery.
                         </p>

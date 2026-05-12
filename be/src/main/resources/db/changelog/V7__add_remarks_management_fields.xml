@@ -6,6 +6,11 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
 
     <changeSet id="add-remarks-management-fields" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="remarks" columnName="remark_status"/>
+            </not>
+        </preConditions>
         <addColumn tableName="remarks">
             <column name="remark_status" type="VARCHAR(50)" defaultValue="PENDING">
                 <constraints nullable="false"/>

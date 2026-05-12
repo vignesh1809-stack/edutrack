@@ -197,11 +197,10 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
                       AND DATE_FORMAT(a3.record_date, '%Y-%m') = DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 MONTH), '%Y-%m')
                 ) AS previousMonthPercent
             FROM attendances a
-            JOIN courses c ON c.id = a.course_id
             WHERE a.institution_id = :instId
               AND a.student_id = :studentId
               AND a.is_deleted = false
-              AND (:semester IS NULL OR c.semester = :semester)
+              AND (:semester IS NULL OR a.semester = :semester)
             """, nativeQuery = true)
     StudentDashboardAttendanceSummaryProjection findStudentDashboardAttendanceSummary(
             @Param("instId") UUID instId,
@@ -210,22 +209,15 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
 
     @Query(value = """
             SELECT
-                CASE DAYOFWEEK(a.record_date)
-                    WHEN 2 THEN 'MON'
-                    WHEN 3 THEN 'TUE'
-                    WHEN 4 THEN 'WED'
-                    WHEN 5 THEN 'THU'
-                    WHEN 6 THEN 'FRI'
-                    WHEN 7 THEN 'SAT'
-                    WHEN 1 THEN 'SUN'
-                END AS dayKey,
+                CONCAT('W', 6 - (FLOOR(DATEDIFF(CURDATE(), a.record_date) / 7))) AS dayKey,
                 ROUND((SUM(CASE WHEN a.attendance_status = 'PRESENT' THEN 1 ELSE 0 END) * 100.0) / NULLIF(COUNT(a.id), 0), 2) AS percent
             FROM attendances a
             WHERE a.institution_id = :instId
               AND a.student_id = :studentId
               AND a.is_deleted = false
-              AND a.record_date >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-            GROUP BY DAYOFWEEK(a.record_date)
+              AND a.record_date >= DATE_SUB(CURDATE(), INTERVAL 6 WEEK)
+            GROUP BY dayKey
+            ORDER BY MIN(a.record_date) ASC
             """, nativeQuery = true)
     List<StudentDashboardDayAttendanceProjection> findStudentDashboardWeeklyBars(
             @Param("instId") UUID instId,

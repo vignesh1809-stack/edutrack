@@ -66,18 +66,11 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
         List<StudentDashboardDayAttendanceProjection> weeklyRows = attendanceRepository
                 .findStudentDashboardWeeklyBars(institutionId, studentId);
-        Map<String, Double> weeklyMap = new HashMap<>();
-        for (StudentDashboardDayAttendanceProjection row : weeklyRows) {
-            if (row.getDayKey() != null) {
-                weeklyMap.put(row.getDayKey(), row.getPercent() != null ? row.getPercent() : 0.0);
-            }
-        }
 
-        List<String> dayOrder = Arrays.asList("MON", "TUE", "WED", "THU", "FRI");
-        List<StudentDashboardDto.AttendanceBar> bars = dayOrder.stream()
-                .map(day -> StudentDashboardDto.AttendanceBar.builder()
-                        .day(day)
-                        .percent(weeklyMap.getOrDefault(day, 0.0))
+        List<StudentDashboardDto.AttendanceBar> bars = weeklyRows.stream()
+                .map(row -> StudentDashboardDto.AttendanceBar.builder()
+                        .day(row.getDayKey())
+                        .percent(row.getPercent() != null ? row.getPercent() : 0.0)
                         .build())
                 .toList();
 

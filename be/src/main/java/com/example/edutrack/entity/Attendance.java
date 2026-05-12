@@ -50,11 +50,9 @@ public class Attendance extends BaseEntity {
     @JoinColumn(name = "student_id", nullable = false, columnDefinition = "BINARY(16)")
     private Student student;
 
-    @ManyToOne
-    @JoinColumn(name = "course_id", nullable = false, columnDefinition = "BINARY(16)")
-    private Courses course;
-
     private LocalDate recordDate;
+
+    private Integer semester;
 
     @Enumerated(EnumType.STRING)
     private AttendanceStatus attendanceStatus;

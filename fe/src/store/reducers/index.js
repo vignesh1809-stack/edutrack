@@ -4,6 +4,7 @@ import authReducer from './authReducer';
 import dashboardReducer from './dashboardReducer';
 import studentReducer from './studentReducer';
 import remarksReducer from './remarksReducer';
+import studentDashboardReducer from './studentDashboardReducer';
 
 const rootReducer = combineReducers({
   institutions: institutionReducer,
@@ -11,6 +12,7 @@ const rootReducer = combineReducers({
   dashboard: dashboardReducer,
   students: studentReducer,
   remarks: remarksReducer,
+  studentDashboard: studentDashboardReducer,
 });
 
 export default rootReducer;

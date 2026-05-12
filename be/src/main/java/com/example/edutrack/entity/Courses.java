@@ -45,9 +45,5 @@ public class Courses extends BaseEntity {
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
     @JsonIgnore
     List<Assessment> assessments;
-
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
-    @JsonIgnore
-    List<Attendance> attendance;
     
 }

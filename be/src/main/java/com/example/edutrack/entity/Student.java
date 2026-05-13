@@ -62,13 +62,15 @@ public class Student extends BaseEntity {
     private String email;
     private String gender;
     private LocalDate dateOfBirth;
+    private String bloodGroup;
     @Column(columnDefinition = "TINYINT(1) DEFAULT 0")
     private boolean isHosteller;
     @Column(columnDefinition = "TINYINT(1) DEFAULT 0")
     private boolean twoFactorEnabled;
 
     private BigDecimal CGPA;
-    private LocalDate batchYear;
+    @Column(columnDefinition = "YEAR")
+    private Integer batchYear;
     private String section;
     private int currentSemester;
 

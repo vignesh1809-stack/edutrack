@@ -99,7 +99,6 @@ public interface AssessmentRepository extends JpaRepository<Assessment, UUID> {
               AND (:semester IS NULL OR c.semester = :semester)
             GROUP BY c.id, c.course_name
             ORDER BY scorePercent DESC
-            LIMIT 3
             """, nativeQuery = true)
     List<StudentDashboardAcademicProjection> findTopSubjectsForStudentDashboard(
             @Param("instId") UUID instId,

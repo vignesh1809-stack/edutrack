@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- 
+      Performance Optimization Indexes
+      Author: Antigravity
+      Description: Targeting Principal Dashboard latency by enabling index-only scans for metrics.
+    -->
+
+    <changeSet id="11-dashboard-indexes" author="antigravity">
+        <!-- Index for Students count and filtering -->
+        <createIndex indexName="idx_students_dashboard_perf" tableName="students">
+            <column name="institution_id"/>
+            <column name="is_deleted"/>
+            <column name="batch_year"/>
+            <column name="section"/>
+        </createIndex>
+
+        <!-- Index for Attendance counts by date (Today's metrics) -->
+        <createIndex indexName="idx_attendance_dashboard_perf" tableName="attendances">
+            <column name="institution_id"/>
+            <column name="record_date"/>
+            <column name="is_deleted"/>
+            <column name="attendance_status"/>
+        </createIndex>
+
+        <!-- Index for Remarks feed and counts -->
+        <createIndex indexName="idx_remarks_dashboard_perf" tableName="remarks">
+            <column name="institution_id"/>
+            <column name="remark_status"/>
+            <column name="remark_target"/>
+            <column name="is_deleted"/>
+            <column name="created_at"/>
+        </createIndex>
+
+        <!-- Index for Buses count -->
+        <createIndex indexName="idx_buses_dashboard_perf" tableName="buses">
+            <column name="institution_id"/>
+            <column name="is_deleted"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

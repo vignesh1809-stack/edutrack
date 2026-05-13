@@ -1,10 +1,18 @@
 package com.example.edutrack.service.impl;
 
+import com.example.edutrack.config.TenantContext;
 import com.example.edutrack.dto.*;
+import com.example.edutrack.entity.Remarks;
 import com.example.edutrack.repository.AssessmentRepository;
 import com.example.edutrack.repository.AttendanceRepository;
 import com.example.edutrack.repository.RemarksRepository;
 import com.example.edutrack.repository.StudentRepository;
+import com.example.edutrack.repository.StaffRepository;
+import com.example.edutrack.entity.enums.RemarkTarget;
+import com.example.edutrack.entity.enums.RemarkCategory;
+import com.example.edutrack.entity.Staff;
+import com.example.edutrack.entity.Student;
+import com.example.edutrack.entity.Institution;
 import com.example.edutrack.service.StudentDashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +35,9 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
     @Autowired
     private RemarksRepository remarksRepository;
+
+    @Autowired
+    private StaffRepository staffRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -107,7 +118,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                                 .build())
                         .academicSummary(StudentDashboardDto.AcademicSummary.builder()
                                 .semester(effectiveSemester)
-                                .gpa(null)
+                                .gpa(profile.getCgpa() != null ? profile.getCgpa().doubleValue() : 0.0)
                                 .topSubjects(topSubjects)
                                 .build())
                         .attendance(StudentDashboardDto.AttendanceSummary.builder()
@@ -134,6 +145,141 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                 .build();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<StudentRemarkDto> getStudentRemarks(UUID institutionId, UUID studentId) {
+        com.example.edutrack.config.TenantContext.setCurrentTenant(institutionId.toString());
+
+        List<Remarks> remarksList = remarksRepository.findByTargetStudentId(studentId, institutionId);
+
+        return remarksList.stream().map(remark -> {
+            String authorName = "System";
+            String authorRole = "External";
+            String avatarUrl = null;
+
+            try {
+                if (remark.getAuthorStaff() != null) {
+                    authorName = remark.getAuthorStaff().getFirstName() + " " + remark.getAuthorStaff().getLastName();
+                    authorRole = remark.getAuthorStaff().getRole() != null ? remark.getAuthorStaff().getRole().toString() : "Faculty";
+                    avatarUrl = remark.getAuthorStaff().getAvatarUrl();
+                } else if (remark.getAuthorGuardian() != null) {
+                    authorName = remark.getAuthorGuardian().getName();
+                    authorRole = "Guardian";
+                } else if (remark.getAuthorStudent() != null) {
+                    authorName = remark.getAuthorStudent().getFirstName() + " " + remark.getAuthorStudent().getLastName();
+                    authorRole = "Student Peer";
+                    avatarUrl = remark.getAuthorStudent().getAvatarUrl();
+                }
+            } catch (Exception e) {
+                // Fallback for broken foreign key references
+                authorName = "Educator";
+                authorRole = "Faculty";
+            }
+
+            StudentRemarkDto.AuthorInfo author = StudentRemarkDto.AuthorInfo.builder()
+                    .name(authorName)
+                    .role(authorRole)
+                    .avatarUrl(avatarUrl)
+                    .build();
+
+            StudentRemarkDto.AiSuggestionInfo aiSuggestion = null;
+            if (remark.getAiSuggestion() != null) {
+                aiSuggestion = StudentRemarkDto.AiSuggestionInfo.builder()
+                        .type(remark.getAiSuggestionType() != null ? remark.getAiSuggestionType() : "NEXT_STEPS")
+                        .text(remark.getAiSuggestion())
+                        .build();
+            }
+
+            String title = "Note";
+            if (remark.getCategory() != null) {
+                title = switch (remark.getCategory()) {
+                    case ACADEMIC -> "Academic Staff";
+                    case BEHAVIORAL -> "Behavioral Note";
+                    case ATTENDANCE -> "Attendance Alert";
+                    default -> "Staff Insight";
+                };
+            }
+            if (remark.getAuthorGuardian() != null) title = "Guardian Note";
+
+            return StudentRemarkDto.builder()
+                    .id(remark.getId())
+                    .title(title)
+                    .date(remark.getCreatedAt())
+                    .content(remark.getContent())
+                    .author(author)
+                    .aiSuggestion(aiSuggestion)
+                    .isLatest(remarksList.indexOf(remark) == 0)
+                    .build();
+        }).collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public StudentPortalProfileDto getStudentProfile(UUID institutionId, UUID studentId) {
+        com.example.edutrack.config.TenantContext.setCurrentTenant(institutionId.toString());
+        
+        com.example.edutrack.dto.StudentProfileProjection student = studentRepository
+                .findProfileProjection(studentId.toString(), institutionId.toString())
+                .orElseThrow(() -> new RuntimeException("Student not found for profile"));
+
+        String fullName = (student.getFirstName() + " " + student.getLastName()).trim();
+        String currentLevel = "Semester " + student.getCurrentSemester();
+        
+        // Calculate Grade (Dummy logic for now, using Year 1, Year 2 etc)
+        String gradeSection = "YEAR " + ((student.getCurrentSemester() + 1) / 2) + ", SECTION " + student.getSection();
+
+        StudentPortalProfileDto.HeaderInfo header = StudentPortalProfileDto.HeaderInfo.builder()
+                .fullName(fullName)
+                .gradeSection(gradeSection)
+                .location(student.getAddress())
+                .avatarUrl(student.getAvatarUrl())
+                .build();
+
+        StudentPortalProfileDto.PersonalInfo personal = StudentPortalProfileDto.PersonalInfo.builder()
+                .dateOfBirth(student.getDateOfBirth())
+                .gender(student.getGender())
+                .bloodGroup(student.getBloodGroup() != null ? student.getBloodGroup() : "Not Specified")
+                .nationality("Indian") // Hardcoded as per user request
+                .build();
+
+        StudentPortalProfileDto.ContactInfo contact = StudentPortalProfileDto.ContactInfo.builder()
+                .primaryPhone(student.getPhone())
+                .emailAddress(student.getEmail())
+                .residentialAddress(student.getAddress())
+                .build();
+
+        StudentPortalProfileDto.SchoolInfo school = StudentPortalProfileDto.SchoolInfo.builder()
+                .studentId(student.getStudentId())
+                .departmentName(student.getDepartmentName() != null ? student.getDepartmentName() : "N/A")
+                .enrollmentYear(student.getBatchYear())
+                .currentLevel(currentLevel)
+                .build();
+
+        // Still need entity for guardians if not projection-mapped
+        com.example.edutrack.entity.Student studentEntity = studentRepository
+                .findActiveById(studentId.toString(), institutionId.toString())
+                .orElse(null);
+
+        com.example.edutrack.entity.Guardian primaryGuardian = (studentEntity != null && studentEntity.getGuardians() != null && !studentEntity.getGuardians().isEmpty())
+                ? studentEntity.getGuardians().get(0)
+                : null;
+
+        StudentPortalProfileDto.GuardianInfo guardian = StudentPortalProfileDto.GuardianInfo.builder()
+                .name(primaryGuardian != null ? primaryGuardian.getName() : "Not Specified")
+                .relation(primaryGuardian != null && primaryGuardian.getRelation() != null ? primaryGuardian.getRelation() : "Primary Contact")
+                .phone(primaryGuardian != null ? primaryGuardian.getPhone() : "Not Specified")
+                .occupation(primaryGuardian != null && primaryGuardian.getOccupation() != null ? primaryGuardian.getOccupation() : "Not Specified")
+                .build();
+
+        return StudentPortalProfileDto.builder()
+                .header(header)
+                .personal(personal)
+                .contact(contact)
+                .school(school)
+                .guardian(guardian)
+                .build();
+    }
+
     private String toGrade(Double scorePercent) {
         double score = scorePercent != null ? scorePercent : 0.0;
         if (score >= 90) return "A";
@@ -147,5 +293,70 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
     private double roundOneDecimal(double value) {
         return Math.round(value * 10.0) / 10.0;
+    }
+
+    @Override
+    @Transactional
+    public void submitRemark(UUID institutionId, UUID studentId, SubmitRemarkRequest request) {
+        TenantContext.setCurrentTenant(institutionId.toString());
+        Student author = studentRepository.findActiveById(studentId.toString(), institutionId.toString())
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        Remarks remark = new Remarks();
+        remark.setInstitutionId(institutionId);
+        remark.setAuthorStudent(author);
+        remark.setSubject(request.getSubject());
+        remark.setContent(request.getContent());
+        remark.setTarget(RemarkTarget.valueOf(request.getTargetType()));
+        
+        try {
+            remark.setCategory(RemarkCategory.valueOf(request.getCategory()));
+        } catch (Exception e) {
+            remark.setCategory(RemarkCategory.OTHER);
+        }
+
+        try {
+            if (request.getPriority() != null) {
+                remark.setPriority(com.example.edutrack.entity.enums.RemarkPriority.valueOf(request.getPriority()));
+            }
+        } catch (Exception e) {
+            remark.setPriority(com.example.edutrack.entity.enums.RemarkPriority.LOW);
+        }
+
+        if (request.getTargetId() != null && "STAFF".equals(request.getTargetType())) {
+            Staff targetStaff = staffRepository.findByIdNative(request.getTargetId())
+                    .orElseThrow(() -> new RuntimeException("Target staff not found"));
+            remark.setTargetStaff(targetStaff);
+        }
+
+        remark.setCreatedAt(LocalDateTime.now());
+        remark.setUpdatedAt(LocalDateTime.now());
+        remark.setDeleted(false);
+
+        remarksRepository.save(remark);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<StaffListDto> getStaffList(UUID institutionId) {
+        List<Staff> staffs = staffRepository.findAllByInstitutionIdNative(institutionId.toString());
+        return staffs.stream().map(s -> {
+            String deptName = "Academic Department";
+            try {
+                if (s.getDepartment() != null) {
+                    deptName = s.getDepartment().getName();
+                }
+            } catch (Exception e) {
+                // Handle cases where department record is missing from DB
+                deptName = "Academic Department";
+            }
+            
+            return StaffListDto.builder()
+                .id(s.getId())
+                .fullName(s.getFirstName() + " " + s.getLastName())
+                .role(s.getRole() != null ? s.getRole().name() : "Academic Staff")
+                .departmentName(deptName)
+                .build();
+        }).toList();
     }
 }

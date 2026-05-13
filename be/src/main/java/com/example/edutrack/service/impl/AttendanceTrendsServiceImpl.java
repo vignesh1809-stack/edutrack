@@ -6,6 +6,7 @@ import com.example.edutrack.repository.AttendanceRepository;
 import com.example.edutrack.repository.BranchMonthlyAttendanceProjection;
 import com.example.edutrack.service.AttendanceTrendsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ public class AttendanceTrendsServiceImpl implements AttendanceTrendsService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "attendanceTrends", key = "#institutionId + '-' + #months + '-' + #year + '-' + #branch")
     public AttendanceTrendsDto getTrends(UUID institutionId, int months, Integer year, String branch) {
         TenantContext.setCurrentTenant(institutionId.toString());
 

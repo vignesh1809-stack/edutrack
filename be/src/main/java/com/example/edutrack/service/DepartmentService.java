@@ -13,7 +13,13 @@ public class DepartmentService {
     private DepartmentRepository departmentRepository;
 
     public List<Integer> getDistinctYears(UUID institutionId) {
-        return departmentRepository.findDistinctBatchYears(institutionId.toString());
+        List<Object> rawYears = departmentRepository.findDistinctBatchYears(institutionId.toString());
+        return rawYears.stream()
+                .map(obj -> {
+                    String str = obj.toString();
+                    return Integer.parseInt(str.contains("-") ? str.split("-")[0] : str);
+                })
+                .collect(java.util.stream.Collectors.toList());
     }
 
     public List<String> getDistinctSectionsByYear(UUID institutionId, Integer year) {

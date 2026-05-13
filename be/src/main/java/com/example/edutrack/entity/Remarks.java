@@ -55,6 +55,18 @@ public class Remarks extends BaseEntity {
     @JoinColumn(name = "author_student_id", referencedColumnName = "id", columnDefinition = "BINARY(16)")
     private Student authorStudent;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.BINARY)
+    @JoinColumn(name = "author_guardian_id", referencedColumnName = "id", columnDefinition = "BINARY(16)")
+    private Guardian authorGuardian;
+
+    @Column(name = "ai_suggestion", length = 2000)
+    private String aiSuggestion;
+
+    @Column(name = "ai_suggestion_type", length = 50)
+    private String aiSuggestionType;
+
+    private String subject;
     private String content;
 
     @Enumerated(EnumType.STRING)

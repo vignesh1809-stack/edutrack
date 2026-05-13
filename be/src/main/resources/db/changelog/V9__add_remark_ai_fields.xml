@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="add_remark_ai_and_guardian_fields" author="antigravity">
+        <addColumn tableName="remarks">
+            <column name="author_guardian_id" type="BINARY(16)">
+                <constraints foreignKeyName="fk_remarks_guardian" referencedTableName="guardians" referencedColumnNames="id"/>
+            </column>
+            <column name="ai_suggestion" type="TEXT"/>
+            <column name="ai_suggestion_type" type="VARCHAR(50)"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

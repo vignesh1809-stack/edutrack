@@ -59,6 +59,7 @@ public interface RemarksRepository extends JpaRepository<Remarks, UUID> {
             SELECT COUNT(r.id)
             FROM remarks r
             JOIN students s ON s.id = r.author_student_id
+            LEFT JOIN departments d ON d.id = s.department_id
             WHERE r.institution_id = :instId
               AND DATE(r.created_at) = :date
               AND r.is_deleted       = false
@@ -66,26 +67,31 @@ public interface RemarksRepository extends JpaRepository<Remarks, UUID> {
               AND r.remark_target    IN ('CAMPUS', 'STAFF')
               AND (:batchYear IS NULL OR YEAR(s.batch_year) = :batchYear)
               AND (:section IS NULL OR s.section = :section)
+              AND (:branch IS NULL OR d.code = :branch)
             """, nativeQuery = true)
     long countRemarksSubmittedOnDateFiltered(@Param("instId") UUID instId, 
                                              @Param("date") LocalDate date,
                                              @Param("batchYear") Integer batchYear,
-                                             @Param("section") String section);
+                                             @Param("section") String section,
+                                             @Param("branch") String branch);
 
     @Query(value = """
             SELECT COUNT(r.id)
             FROM remarks r
             JOIN students s ON s.id = r.author_student_id
+            LEFT JOIN departments d ON d.id = s.department_id
             WHERE r.institution_id = :instId
               AND r.is_deleted      = false
               AND r.remark_status   = 'PENDING'
               AND r.remark_target    IN ('CAMPUS', 'STAFF')
-              AND (:batchYear IS NULL OR YEAR(s.batch_year) = :batchYear)
+              AND (:batchYear IS NULL OR s.batch_year = :batchYear)
               AND (:section IS NULL OR s.section = :section)
+              AND (:branch IS NULL OR d.code = :branch)
             """, nativeQuery = true)
     long countTotalRemarksFiltered(@Param("instId") UUID instId,
                                    @Param("batchYear") Integer batchYear,
-                                   @Param("section") String section);
+                                   @Param("section") String section,
+                                   @Param("branch") String branch);
 
     @Query(value = """
             SELECT r.id, r.content, r.created_at,
@@ -93,17 +99,20 @@ public interface RemarksRepository extends JpaRepository<Remarks, UUID> {
                    s.student_id AS studentCode
             FROM remarks r
             JOIN students s ON s.id = r.author_student_id
+            LEFT JOIN departments d ON d.id = s.department_id
             WHERE r.institution_id = :instId
               AND r.is_deleted      = false
               AND r.remark_status   = 'PENDING'
               AND r.remark_target    IN ('CAMPUS', 'STAFF')
-              AND (:batchYear IS NULL OR YEAR(s.batch_year) = :batchYear)
+              AND (:batchYear IS NULL OR s.batch_year = :batchYear)
               AND (:section IS NULL OR s.section = :section)
+              AND (:branch IS NULL OR d.code = :branch)
             ORDER BY r.created_at DESC
             """, nativeQuery = true)
     Page<Object[]> findLatestRemarksFiltered(@Param("instId") UUID instId, 
                                              @Param("batchYear") Integer batchYear,
                                              @Param("section") String section,
+                                             @Param("branch") String branch,
                                              Pageable pageable);
 
     @Query(value = """
@@ -132,7 +141,7 @@ public interface RemarksRepository extends JpaRepository<Remarks, UUID> {
                 AND r.author_student_id IS NOT NULL
                 AND r.remark_target = 'CAMPUS'
                 AND r.is_deleted = false
-                AND (:batchYear IS NULL OR YEAR(s.batch_year) = :batchYear)
+                AND (:batchYear IS NULL OR s.batch_year = :batchYear)
                 AND (:section IS NULL OR s.section = :section)
             """, nativeQuery = true)
     long countPendingCampusRemarksNativeFiltered(@Param("instId") UUID instId,
@@ -159,7 +168,7 @@ public interface RemarksRepository extends JpaRepository<Remarks, UUID> {
                 AND r.remark_target = 'STAFF'
                 AND r.target_staff_id IS NOT NULL
                 AND r.is_deleted = false
-                AND (:batchYear IS NULL OR YEAR(s.batch_year) = :batchYear)
+                AND (:batchYear IS NULL OR s.batch_year = :batchYear)
                 AND (:section IS NULL OR s.section = :section)
             """, nativeQuery = true)
     long countPendingStaffRemarksNativeFiltered(@Param("instId") UUID instId,
@@ -212,7 +221,7 @@ public interface RemarksRepository extends JpaRepository<Remarks, UUID> {
                 AND r.author_student_id IS NOT NULL
                 AND r.remark_target = 'CAMPUS'
                 AND r.is_deleted = false
-                AND (:batchYear IS NULL OR YEAR(s.batch_year) = :batchYear)
+                AND (:batchYear IS NULL OR s.batch_year = :batchYear)
                 AND (:section IS NULL OR s.section = :section)
             ORDER BY r.created_at DESC
             """, nativeQuery = true)
@@ -267,7 +276,7 @@ public interface RemarksRepository extends JpaRepository<Remarks, UUID> {
                 AND r.remark_target = 'STAFF'
                 AND r.target_staff_id IS NOT NULL
                 AND r.is_deleted = false
-                AND (:batchYear IS NULL OR YEAR(stu.batch_year) = :batchYear)
+                AND (:batchYear IS NULL OR stu.batch_year = :batchYear)
                 AND (:section IS NULL OR stu.section = :section)
             ORDER BY r.created_at DESC
             """, nativeQuery = true)
@@ -283,7 +292,7 @@ public interface RemarksRepository extends JpaRepository<Remarks, UUID> {
             WHERE r.institution_id = :instId
               AND r.is_deleted = false
               AND r.remark_target IN ('CAMPUS', 'STAFF')
-              AND (:batchYear IS NULL OR YEAR(s.batch_year) = :batchYear)
+              AND (:batchYear IS NULL OR s.batch_year = :batchYear)
               AND (:section IS NULL OR s.section = :section)
             """, nativeQuery = true)
     long countTotalRemarksForResolutionFiltered(@Param("instId") UUID instId,
@@ -298,7 +307,7 @@ public interface RemarksRepository extends JpaRepository<Remarks, UUID> {
               AND r.is_deleted = false
               AND r.remark_status = 'RESOLVED'
               AND r.remark_target IN ('CAMPUS', 'STAFF')
-              AND (:batchYear IS NULL OR YEAR(s.batch_year) = :batchYear)
+              AND (:batchYear IS NULL OR s.batch_year = :batchYear)
               AND (:section IS NULL OR s.section = :section)
             """, nativeQuery = true)
     long countResolvedRemarksFiltered(@Param("instId") UUID instId,

@@ -71,7 +71,13 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public java.util.List<Integer> getFilterYears(UUID institutionId) {
-        return studentRepository.findDistinctAdmissionYears(institutionId.toString());
+        List<Object> rawYears = studentRepository.findDistinctAdmissionYears(institutionId.toString());
+        return rawYears.stream()
+                .map(obj -> {
+                    String str = obj.toString();
+                    return Integer.parseInt(str.contains("-") ? str.split("-")[0] : str);
+                })
+                .collect(Collectors.toList());
     }
 
     private static final String MALE_IMAGE = "https://lh3.googleusercontent.com/aida-public/AB6AXuAuK5ea-CQnsg9H3SSK-s00z83Y3RDrl2CCwNPRrC1CFOhGmhe00nej2AU4ZxowY-J1Bs9xECe61LGerMBhWbjSXVMV3Oz7GqAh7XZFovM2Jf_T3Uiiig4A1OdN6c1YTyFStRFVHEOtuCGHXUCiZI0a2X-0Uan49bYv9_zwjl2GIFTr7KaPsrBGCAew5G71ANZtcxGNg8g3z9YgB-Wg71PVdkFJ0gi64eG_WJ542-Lcaa1S1ahlIyyos5wpAY-v52OQJ4bRLuZOFXw";

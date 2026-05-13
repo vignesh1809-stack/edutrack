@@ -13,4 +13,9 @@ public interface StudentProfileProjection {
     String getPhone();
     String getEmail();
     String getAddress();
+    java.time.LocalDate getDateOfBirth();
+    String getBloodGroup();
+    Integer getBatchYear();
+    java.math.BigDecimal getCgpa();
+    String getAvatarUrl();
 }

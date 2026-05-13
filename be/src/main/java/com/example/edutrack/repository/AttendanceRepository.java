@@ -49,47 +49,56 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
             SELECT COUNT(DISTINCT a.student_id)
             FROM attendances a
             JOIN students s ON s.id = a.student_id
+            LEFT JOIN departments d ON d.id = s.department_id
             WHERE a.institution_id = :instId
               AND a.record_date    = :date
               AND a.is_deleted     = false
-              AND (:batchYear IS NULL OR YEAR(s.batch_year) = :batchYear)
+              AND (:batchYear IS NULL OR s.batch_year = :batchYear)
               AND (:section IS NULL OR s.section = :section)
+              AND (:branch IS NULL OR d.code = :branch)
             """, nativeQuery = true)
     long countDistinctStudentsOnDateFiltered(@Param("instId") UUID instId, 
                                              @Param("date") LocalDate date,
                                              @Param("batchYear") Integer batchYear,
-                                             @Param("section") String section);
+                                             @Param("section") String section,
+                                             @Param("branch") String branch);
 
     @Query(value = """
             SELECT COUNT(a.id)
             FROM attendances a
             JOIN students s ON s.id = a.student_id
+            LEFT JOIN departments d ON d.id = s.department_id
             WHERE a.institution_id     = :instId
               AND a.record_date        = :date
               AND a.attendance_status  = 'PRESENT'
               AND a.is_deleted         = false
-              AND (:batchYear IS NULL OR YEAR(s.batch_year) = :batchYear)
+              AND (:batchYear IS NULL OR s.batch_year = :batchYear)
               AND (:section IS NULL OR s.section = :section)
+              AND (:branch IS NULL OR d.code = :branch)
             """, nativeQuery = true)
     long countPresentOnDateFiltered(@Param("instId") UUID instId, 
                                     @Param("date") LocalDate date,
                                     @Param("batchYear") Integer batchYear,
-                                    @Param("section") String section);
+                                    @Param("section") String section,
+                                    @Param("branch") String branch);
 
     @Query(value = """
             SELECT COUNT(a.id)
             FROM attendances a
             JOIN students s ON s.id = a.student_id
+            LEFT JOIN departments d ON d.id = s.department_id
             WHERE a.institution_id = :instId
               AND a.record_date    = :date
               AND a.is_deleted     = false
-              AND (:batchYear IS NULL OR YEAR(s.batch_year) = :batchYear)
+              AND (:batchYear IS NULL OR s.batch_year = :batchYear)
               AND (:section IS NULL OR s.section = :section)
+              AND (:branch IS NULL OR d.code = :branch)
             """, nativeQuery = true)
     long countTotalOnDateFiltered(@Param("instId") UUID instId, 
                                   @Param("date") LocalDate date,
                                   @Param("batchYear") Integer batchYear,
-                                  @Param("section") String section);
+                                  @Param("section") String section,
+                                  @Param("branch") String branch);
 
     @Query(value = """
             SELECT a.record_date as recordDate, 
@@ -113,7 +122,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
             WHERE a.institution_id = :instId
               AND a.record_date >= :startDate
               AND a.is_deleted = false
-              AND (:batchYear IS NULL OR YEAR(s.batch_year) = :batchYear)
+              AND (:batchYear IS NULL OR s.batch_year = :batchYear)
               AND (:section IS NULL OR s.section = :section)
             GROUP BY a.record_date
             ORDER BY a.record_date ASC
@@ -141,7 +150,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
             WHERE a.institution_id = :instId
               AND a.record_date >= :startDate
               AND a.is_deleted = false
-              AND (:batchYear IS NULL OR YEAR(s.batch_year) = :batchYear)
+              AND (:batchYear IS NULL OR s.batch_year = :batchYear)
               AND (:branchCode IS NULL OR LOWER(d.code) = LOWER(:branchCode))
             GROUP BY d.code, YEAR(a.record_date), MONTH(a.record_date)
             ORDER BY d.code ASC, yr ASC, mo ASC

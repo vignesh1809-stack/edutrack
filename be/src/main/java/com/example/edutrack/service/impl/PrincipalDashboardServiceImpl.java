@@ -32,6 +32,7 @@ public class PrincipalDashboardServiceImpl implements PrincipalDashboardService 
     @Autowired private BusesLogsRepository  busesLogsRepository;
     @Autowired private RemarksRepository    remarksRepository;
     @Autowired private AssessmentRepository assessmentRepository;
+    @Autowired private PrincipalDashboardMetricsHelper metricsHelper;
 
     @Override
     @Transactional(readOnly = true)
@@ -39,106 +40,51 @@ public class PrincipalDashboardServiceImpl implements PrincipalDashboardService 
         // Ensure tenant context is set
         TenantContext.setCurrentTenant(institutionId.toString());
 
-        LocalDate today = LocalDate.now();
+        String branchFilter = (branch == null || branch.equals("All Branches")) ? null : branch;
 
-        // ── 1. Student counts ─────────────────────────────────────────────────
-        long totalStudents = (year == null && section == null)
-                ? studentRepository.countActiveStudents(institutionId)
-                : studentRepository.countActiveStudentsFiltered(institutionId, year, section);
+        // ── 1. Student counts (Fragmented Cache) ──────────────────────────────
+        long totalStudents = (year == null && section == null && branchFilter == null)
+                ? metricsHelper.getCachedTotalStudents(institutionId)
+                : metricsHelper.getCachedTotalStudentsFiltered(institutionId, year, section, branchFilter);
 
-        long studentsMarkedToday = (year == null && section == null)
-                ? attendanceRepository.countDistinctStudentsOnDate(institutionId, today)
-                : attendanceRepository.countDistinctStudentsOnDateFiltered(institutionId, today, year, section);
-
-        // ── 2. Attendance percentage ──────────────────────────────────────────
-        long presentToday = (year == null && section == null)
-                ? attendanceRepository.countPresentOnDate(institutionId, today)
-                : attendanceRepository.countPresentOnDateFiltered(institutionId, today, year, section);
-
-        long totalRecords = (year == null && section == null)
-                ? attendanceRepository.countTotalOnDate(institutionId, today)
-                : attendanceRepository.countTotalOnDateFiltered(institutionId, today, year, section);
-
-        double attendancePct = totalRecords > 0
-                ? Math.round((presentToday * 100.0 / totalRecords) * 10.0) / 10.0
+        // ── 2. Attendance metrics (11 AM Logic Cache) ─────────────────────────
+        PrincipalDashboardMetricsHelper.AttendanceMetrics att = metricsHelper.getCachedAttendanceMetrics(institutionId, year, section, branchFilter);
+        
+        double attendancePct = att.total > 0
+                ? Math.round((att.present * 100.0 / att.total) * 10.0) / 10.0
                 : 0.0;
 
-        // ── 3. Bus metrics ────────────────────────────────────────────────────
-        long totalBuses = (year == null && section == null)
-                ? busesLogsRepository.countTotalBuses(institutionId)
-                : busesLogsRepository.countTotalBusesFiltered(institutionId, year, section);
+        // ── 3. Bus metrics (11 AM Logic Cache) ────────────────────────────────
+        PrincipalDashboardMetricsHelper.BusMetrics bus = metricsHelper.getCachedBusMetrics(institutionId, year, section, branchFilter);
 
-        long busesArrivedToday = (year == null && section == null)
-                ? busesLogsRepository.countBusesArrivedOnDate(institutionId, today)
-                : busesLogsRepository.countBusesArrivedOnDateFiltered(institutionId, today, year, section);
-
-        // ── 4. Remarks metrics ────────────────────────────────────────────────
-        long remarksToday;
-        long totalRemarks;
-        List<RemarkSummaryDto> latestRemarks;
-
-        if (year == null && section == null) {
-            // Show all remarks for the institution
-            remarksToday = remarksRepository.countRemarksSubmittedOnDate(institutionId, today);
-            totalRemarks = remarksRepository.countTotalRemarks(institutionId);
-
-            List<Object[]> rawRemarks = remarksRepository
-                    .findLatestRemarks(institutionId, PageRequest.of(0, 5))
-                    .getContent();
-
-            latestRemarks = rawRemarks.stream().map(row -> {
-                String createdAt = row[2] != null ? row[2].toString() : null;
-                return RemarkSummaryDto.builder()
-                        .id(row[0] != null ? row[0].toString() : null)
-                        .content(row[1] != null ? row[1].toString() : null)
-                        .createdAt(createdAt)
-                        .studentName(row[3] != null ? row[3].toString() : null)
-                        .studentCode(row[4] != null ? row[4].toString() : null)
-                        .build();
-            }).collect(Collectors.toList());
-        } else {
-            // Show filtered remarks
-            remarksToday = remarksRepository.countRemarksSubmittedOnDateFiltered(institutionId, today, year, section);
-            totalRemarks = remarksRepository.countTotalRemarksFiltered(institutionId, year, section);
-
-            List<Object[]> rawRemarks = remarksRepository
-                    .findLatestRemarksFiltered(institutionId, year, section, PageRequest.of(0, 5))
-                    .getContent();
-
-            latestRemarks = rawRemarks.stream().map(row -> {
-                String createdAt = row[2] != null ? row[2].toString() : null;
-                return RemarkSummaryDto.builder()
-                        .id(row[0] != null ? row[0].toString() : null)
-                        .content(row[1] != null ? row[1].toString() : null)
-                        .createdAt(createdAt)
-                        .studentName(row[3] != null ? row[3].toString() : null)
-                        .studentCode(row[4] != null ? row[4].toString() : null)
-                        .build();
-            }).collect(Collectors.toList());
-        }
+        // ── 4. Remarks metrics (Short TTL Cache) ──────────────────────────────
+        PrincipalDashboardMetricsHelper.RemarkCounts rem = metricsHelper.getCachedRemarkCounts(institutionId, year, section, branchFilter);
+        List<RemarkSummaryDto> latestRemarks = metricsHelper.getCachedLatestRemarks(institutionId, year, section, branchFilter);
 
         return PrincipalDashboardDto.builder()
                 .totalStudents(totalStudents)
-                .studentsMarkedToday(studentsMarkedToday)
+                .studentsMarkedToday(att.marked)
                 .attendancePercentageToday(attendancePct)
-                .totalBuses(totalBuses)
-                .busesArrivedToday(busesArrivedToday)
-                .remarksSubmittedToday(remarksToday)
-                .totalRemarks(totalRemarks)
+                .totalBuses(bus.total)
+                .busesArrivedToday(bus.arrived)
+                .remarksSubmittedToday(rem.today)
+                .totalRemarks(rem.total)
                 .latestRemarks(latestRemarks)
                 .build();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<DepartmentAverageDto> getDepartmentAverages(UUID institutionId, Integer year, String section) {
+    public List<DepartmentAverageDto> getDepartmentAverages(UUID institutionId, Integer year, String section, String branch) {
         TenantContext.setCurrentTenant(institutionId.toString());
 
-        List<DepartmentAverageProjection> currentAverages = studentRepository.findDepartmentAveragesFiltered(institutionId, year, section);
+        String branchFilter = (branch == null || branch.equals("All Branches")) ? null : branch;
+
+        List<DepartmentAverageProjection> currentAverages = studentRepository.findDepartmentAveragesFiltered(institutionId, year, section, branchFilter);
         
         List<DepartmentAverageProjection> previousAverages = null;
         if (year != null) {
-            previousAverages = studentRepository.findDepartmentAveragesFiltered(institutionId, year - 1, section);
+            previousAverages = studentRepository.findDepartmentAveragesFiltered(institutionId, year - 1, section, branchFilter);
         }
 
         List<DepartmentAverageDto> results = new ArrayList<>();

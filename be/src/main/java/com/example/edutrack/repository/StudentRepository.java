@@ -74,6 +74,10 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
         @Query(value = "SELECT * FROM students WHERE id = UUID_TO_BIN(:id) AND institution_id = UUID_TO_BIN(:instId) AND is_deleted = 0", nativeQuery = true)
         Optional<Student> findActiveById(@Param("id") String id, @Param("instId") String instId);
 
+        // Single student by id with eager relationships
+        @Query("SELECT s FROM Student s LEFT JOIN FETCH s.department LEFT JOIN FETCH s.guardians WHERE s.id = :id AND s.institutionId = :institutionId AND s.isDeleted = false")
+        Optional<Student> findFullStudentProfile(@Param("id") UUID id, @Param("institutionId") UUID institutionId);
+
         @Query(value = """
             SELECT 
                 BIN_TO_UUID(s.id) as id,
@@ -87,7 +91,12 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
                 s.current_semester as currentSemester,
                 s.phone as phone,
                 s.email as email,
-                s.address as address
+                s.address as address,
+                s.date_of_birth as dateOfBirth,
+                s.blood_group as bloodGroup,
+                YEAR(s.batch_year) as batchYear,
+                s.cgpa as cgpa,
+                s.avatar_url as avatarUrl
             FROM students s
             LEFT JOIN departments d ON s.department_id = d.id
             WHERE s.id = UUID_TO_BIN(:id) 
@@ -99,8 +108,8 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
         // Lookup by institution + phone (used in auth).
         Optional<Student> findByInstitutionIdAndPhone(UUID institutionId, String phone);
 
-        @Query(value = "SELECT DISTINCT YEAR(batch_year) FROM students WHERE institution_id = UNHEX(REPLACE(:institutionId, '-', '')) AND is_deleted = 0 AND batch_year IS NOT NULL ORDER BY YEAR(batch_year) DESC", nativeQuery = true)
-        List<Integer> findDistinctAdmissionYears(@Param("institutionId") String institutionId);
+        @Query(value = "SELECT DISTINCT batch_year FROM students WHERE institution_id = UNHEX(REPLACE(:institutionId, '-', '')) AND is_deleted = 0 AND batch_year IS NOT NULL ORDER BY batch_year DESC", nativeQuery = true)
+        List<Object> findDistinctAdmissionYears(@Param("institutionId") String institutionId);
 
         @Query(value = "SELECT * FROM students WHERE institution_id = :instId AND phone = :phone", nativeQuery = true)
         Optional<Student> findByPhoneNative(@Param("instId") UUID instId, @Param("phone") String phone);
@@ -117,14 +126,17 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
         @Query(value = """
                         SELECT COUNT(s.id)
                         FROM students s
+                        LEFT JOIN departments d ON d.id = s.department_id
                         WHERE s.institution_id = :instId
                           AND s.is_deleted = false
-                          AND (:batchYear IS NULL OR YEAR(s.batch_year) = :batchYear)
+                          AND (:batchYear IS NULL OR s.batch_year = :batchYear)
                           AND (:section IS NULL OR s.section = :section)
+                          AND (:branch IS NULL OR d.code = :branch)
                         """, nativeQuery = true)
         long countActiveStudentsFiltered(@Param("instId") UUID instId,
                         @Param("batchYear") Integer batchYear,
-                        @Param("section") String section);
+                        @Param("section") String section,
+                        @Param("branch") String branch);
 
         @Query(value = """
                         SELECT
@@ -134,15 +146,17 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
                         JOIN departments d ON d.id = s.department_id
                         WHERE s.institution_id = :instId
                           AND s.is_deleted = false
-                          AND (:batchYear IS NULL OR YEAR(s.batch_year) = :batchYear)
+                          AND (:batchYear IS NULL OR s.batch_year = :batchYear)
                           AND (:section IS NULL OR s.section = :section)
+                          AND (:branch IS NULL OR d.code = :branch)
                           AND s.cgpa IS NOT NULL
                         GROUP BY d.code
                         """, nativeQuery = true)
         List<DepartmentAverageProjection> findDepartmentAveragesFiltered(
                         @Param("instId") UUID instId,
                         @Param("batchYear") Integer batchYear,
-                        @Param("section") String section);
+                        @Param("section") String section,
+                        @Param("branch") String branch);
 
         @Query(value = """
                         SELECT ranked.rank_position AS rankPosition, ranked.cohort_size AS cohortSize
@@ -162,8 +176,12 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
                                   SELECT s2.section FROM students s2
                                   WHERE s2.id = :studentId AND s2.institution_id = :instId LIMIT 1
                               )
-                              AND YEAR(s.batch_year) = (
-                                  SELECT YEAR(s2.batch_year) FROM students s2
+                              AND s.batch_year = (
+                                  SELECT s2.batch_year FROM students s2
+                                  WHERE s2.id = :studentId AND s2.institution_id = :instId LIMIT 1
+                              )
+                              AND s.current_semester = (
+                                  SELECT s2.current_semester FROM students s2
                                   WHERE s2.id = :studentId AND s2.institution_id = :instId LIMIT 1
                               )
                         ) ranked
@@ -184,6 +202,7 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
                                         FROM attendances a
                                         WHERE a.institution_id = s.institution_id
                                           AND a.student_id = s.id
+                                          AND a.semester = s.current_semester
                                           AND a.is_deleted = false
                                     ), 0) DESC
                                 ) AS rank_position,
@@ -199,8 +218,12 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
                                   SELECT s2.section FROM students s2
                                   WHERE s2.id = :studentId AND s2.institution_id = :instId LIMIT 1
                               )
-                              AND YEAR(s.batch_year) = (
-                                  SELECT YEAR(s2.batch_year) FROM students s2
+                              AND s.batch_year = (
+                                  SELECT s2.batch_year FROM students s2
+                                  WHERE s2.id = :studentId AND s2.institution_id = :instId LIMIT 1
+                              )
+                              AND s.current_semester = (
+                                  SELECT s2.current_semester FROM students s2
                                   WHERE s2.id = :studentId AND s2.institution_id = :instId LIMIT 1
                               )
                         ) ranked

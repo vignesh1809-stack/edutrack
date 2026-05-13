@@ -30,13 +30,9 @@ class TenantInterceptor implements HandlerInterceptor {
         String tenantId = request.getHeader("X-Tenant-ID");
         if (tenantId != null) {
             TenantContext.setCurrentTenant(tenantId);
-        } else {
-            // Option 1: Reject if no tenant
-            // response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            // return false;
-            
-            // Option 2: Default tenant (for dev/init)
-             TenantContext.setCurrentTenant("DEFAULT");
+        } else if (TenantContext.getCurrentTenant() == null) {
+            // Only set default if no tenant was set by previous filters (like JwtAuthenticationFilter)
+            TenantContext.setCurrentTenant("DEFAULT");
         }
         return true;
     }

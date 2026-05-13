@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface PrincipalDashboardService {
     PrincipalDashboardDto getDashboard(UUID institutionId, Integer year, String section, String branch);
 
-    List<DepartmentAverageDto> getDepartmentAverages(UUID institutionId, Integer year, String section);
+    List<DepartmentAverageDto> getDepartmentAverages(UUID institutionId, Integer year, String section, String branch);
 
     List<StaffPerformanceDto> getLeastPerformedStaff(UUID institutionId, Integer year, String section, String branch);
 }

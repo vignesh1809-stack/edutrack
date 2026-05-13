@@ -52,9 +52,10 @@ public class PrincipalDashboardController {
     public ResponseEntity<List<DepartmentAverageDto>> getDepartmentAverages(
             @AuthenticationPrincipal CustomUserDetails principal,
             @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) String section) {
+            @RequestParam(required = false) String section,
+            @RequestParam(required = false) String branch) {
         
-        java.util.List<com.example.edutrack.dto.DepartmentAverageDto> data = dashboardService.getDepartmentAverages(principal.getInstitutionId(), year, section);
+        java.util.List<com.example.edutrack.dto.DepartmentAverageDto> data = dashboardService.getDepartmentAverages(principal.getInstitutionId(), year, section, branch);
         return ResponseEntity.ok(data);
     }
 

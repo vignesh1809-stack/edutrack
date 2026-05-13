@@ -39,6 +39,8 @@ public class Guardian extends BaseEntity {
     private String password;
     
     private String address;
+    private String occupation;
+    private String relation;
 
     @ManyToMany(mappedBy = "guardians")
     private java.util.List<Student> students;

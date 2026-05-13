@@ -38,6 +38,7 @@ public class Staff extends BaseEntity {
 
     @Id
     @UuidGenerator(style = UuidGenerator.Style.TIME)
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.BINARY)
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 

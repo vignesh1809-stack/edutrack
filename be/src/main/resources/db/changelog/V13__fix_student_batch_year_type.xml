@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- 
+      Schema Sync Migration
+      Author: Antigravity
+      Description: Converting batch_year from DATE to YEAR to align with JPA Entity definition.
+    -->
+
+    <changeSet id="13-fix-student-batch-year-type-robust" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="students" columnName="batch_year"/>
+        </preConditions>
+        
+        <!-- 1. Add a temporary YEAR column -->
+        <addColumn tableName="students">
+            <column name="batch_year_tmp" type="YEAR"/>
+        </addColumn>
+
+        <!-- 2. Copy the year from the old DATE column to the temporary YEAR column -->
+        <sql>UPDATE students SET batch_year_tmp = YEAR(batch_year) WHERE batch_year IS NOT NULL</sql>
+
+        <!-- 3. Drop the old DATE column -->
+        <dropColumn tableName="students" columnName="batch_year"/>
+
+        <!-- 4. Rename the temporary column to the original name -->
+        <renameColumn tableName="students" oldColumnName="batch_year_tmp" newColumnName="batch_year" columnDataType="YEAR"/>
+    </changeSet>
+
+</databaseChangeLog>

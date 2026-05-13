@@ -17,5 +17,7 @@
     <include file="db/changelog/V9__add_remark_ai_fields.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/V10__add_remark_subject_field.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/V11__optimize_dashboard_indexes.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/V12__add_semester_to_attendance.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/V13__fix_student_batch_year_type.xml" relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

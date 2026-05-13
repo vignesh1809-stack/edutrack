@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- 
+      Schema Sync Migration
+      Author: Antigravity
+      Description: Adding missing semester column to attendances table to align with JPA Entity.
+    -->
+
+    <changeSet id="12-add-semester-to-attendance" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="attendances" columnName="semester"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="attendances">
+            <column name="semester" type="INT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

@@ -162,12 +162,14 @@ public class StudentServiceImpl implements StudentService {
         System.out.println(
                 "[PROFILE] Fetching profile for studentId: " + studentId + " in institutionId: " + institutionId);
 
-        StudentProfileProjection student = studentRepository.findProfileProjection(studentId.toString(), institutionId.toString())
+        StudentProfileProjection student = studentRepository
+                .findProfileProjection(studentId.toString(), institutionId.toString())
                 .orElseThrow(() -> new RuntimeException(
                         "Student not found with UUID: " + studentId));
 
         // Get entity for related data lookups
-        Student studentEntity = studentRepository.findActiveById(studentId.toString(), institutionId.toString()).orElse(null);
+        Student studentEntity = studentRepository.findActiveById(studentId.toString(), institutionId.toString())
+                .orElse(null);
 
         // 1. Identity
         StudentProfileDto.StudentIdentity identity = StudentProfileDto.StudentIdentity.builder()
@@ -183,12 +185,13 @@ public class StudentServiceImpl implements StudentService {
                 .build();
 
         // 2. Performance (Sem-wise Aggregated)
-        List<com.example.edutrack.dto.StudentPerformanceProjection> perfProjs = assessmentRepository.findSemesterPerformanceByStudentId(studentId);
-        
+        List<com.example.edutrack.dto.StudentPerformanceProjection> perfProjs = assessmentRepository
+                .findSemesterPerformanceByStudentId(studentId);
+
         // Map to DTO and ensure all semesters up to current are present
         List<StudentProfileDto.SemesterPerformance> performance = new ArrayList<>();
         int currentSem = student.getCurrentSemester();
-        
+
         for (int i = 1; i <= currentSem; i++) {
             final int sem = i;
             double score = perfProjs.stream()
@@ -196,7 +199,7 @@ public class StudentServiceImpl implements StudentService {
                     .mapToDouble(p -> p.getAverageScore() != null ? p.getAverageScore() : 0.0)
                     .findFirst()
                     .orElse(0.0);
-            
+
             performance.add(StudentProfileDto.SemesterPerformance.builder()
                     .label("Sem " + sem)
                     .score(Math.round(score * 10) / 10.0)
@@ -205,8 +208,9 @@ public class StudentServiceImpl implements StudentService {
         }
 
         // 3. Attendance (Using optimized native query)
-        com.example.edutrack.dto.StudentAttendanceProjection attProj = attendanceRepository.findStudentAttendanceTrend(studentId.toString(), institutionId.toString());
-        
+        com.example.edutrack.dto.StudentAttendanceProjection attProj = attendanceRepository
+                .findStudentAttendanceTrend(studentId.toString(), institutionId.toString());
+
         StudentProfileDto.AttendanceSummary attendance;
         if (attProj != null) {
             attendance = StudentProfileDto.AttendanceSummary.builder()
@@ -219,8 +223,7 @@ public class StudentServiceImpl implements StudentService {
                             attProj.getMonth3() != null ? attProj.getMonth3() : 0,
                             attProj.getMonth2() != null ? attProj.getMonth2() : 0,
                             attProj.getMonth1() != null ? attProj.getMonth1() : 0,
-                            attProj.getMonth0() != null ? attProj.getMonth0() : 0
-                    ))
+                            attProj.getMonth0() != null ? attProj.getMonth0() : 0))
                     .build();
         } else {
             attendance = StudentProfileDto.AttendanceSummary.builder()
@@ -232,8 +235,9 @@ public class StudentServiceImpl implements StudentService {
         }
 
         // 4. Financials (Using optimized native query)
-        com.example.edutrack.dto.StudentFinancialProjection finProj = feeRepository.findStudentFinancialSummary(studentId.toString(), institutionId.toString());
-        
+        com.example.edutrack.dto.StudentFinancialProjection finProj = feeRepository
+                .findStudentFinancialSummary(studentId.toString(), institutionId.toString());
+
         StudentProfileDto.FinancialSummary financials;
         if (finProj != null) {
             financials = StudentProfileDto.FinancialSummary.builder()
@@ -258,7 +262,8 @@ public class StudentServiceImpl implements StudentService {
                     try {
                         if (r.getAuthorStaff() != null) {
                             authorName = r.getAuthorStaff().getFirstName() + " " + r.getAuthorStaff().getLastName();
-                            authorRole = r.getAuthorStaff().getRole() != null ? r.getAuthorStaff().getRole().name() : "Staff";
+                            authorRole = r.getAuthorStaff().getRole() != null ? r.getAuthorStaff().getRole().name()
+                                    : "Staff";
                             type = "Staff";
                         } else if (r.getAuthorStudent() != null) {
                             authorName = r.getAuthorStudent().getFirstName() + " " + r.getAuthorStudent().getLastName();
@@ -286,10 +291,11 @@ public class StudentServiceImpl implements StudentService {
                 .phone(student.getPhone())
                 .email(student.getEmail())
                 .address(student.getAddress())
-                .guardianName(studentEntity != null && studentEntity.getGuardians() != null && !studentEntity.getGuardians().isEmpty() ? 
-                        studentEntity.getGuardians().get(0).getName() : "N/A")
-                .guardianRelation(studentEntity != null && studentEntity.getGuardians() != null && !studentEntity.getGuardians().isEmpty() ? 
-                        "Guardian" : "N/A")
+                .guardianName(studentEntity != null && studentEntity.getGuardians() != null
+                        && !studentEntity.getGuardians().isEmpty() ? studentEntity.getGuardians().get(0).getName()
+                                : "N/A")
+                .guardianRelation(studentEntity != null && studentEntity.getGuardians() != null
+                        && !studentEntity.getGuardians().isEmpty() ? "Guardian" : "N/A")
                 .build();
 
         return StudentProfileDto.builder()
@@ -302,16 +308,15 @@ public class StudentServiceImpl implements StudentService {
                 .build();
     }
 
-
     @Override
     @Transactional(readOnly = true)
     public List<StudentProfileDto.RemarkDto> getStudentRemarks(UUID studentId) {
         String tenantStr = com.example.edutrack.config.TenantContext.getCurrentTenant();
         UUID institutionId;
         try {
-            institutionId = (tenantStr != null && !tenantStr.equals("DEFAULT")) 
-                ? UUID.fromString(tenantStr) 
-                : UUID.fromString("00000000-0000-0000-0000-000000000000");
+            institutionId = (tenantStr != null && !tenantStr.equals("DEFAULT"))
+                    ? UUID.fromString(tenantStr)
+                    : UUID.fromString("00000000-0000-0000-0000-000000000000");
         } catch (Exception e) {
             institutionId = UUID.fromString("00000000-0000-0000-0000-000000000000");
         }
@@ -326,7 +331,8 @@ public class StudentServiceImpl implements StudentService {
                     try {
                         if (r.getAuthorStaff() != null) {
                             authorName = r.getAuthorStaff().getFirstName() + " " + r.getAuthorStaff().getLastName();
-                            authorRole = r.getAuthorStaff().getRole() != null ? r.getAuthorStaff().getRole().name() : "Staff";
+                            authorRole = r.getAuthorStaff().getRole() != null ? r.getAuthorStaff().getRole().name()
+                                    : "Staff";
                             type = "Staff";
                         } else if (r.getAuthorStudent() != null) {
                             authorName = r.getAuthorStudent().getFirstName() + " " + r.getAuthorStudent().getLastName();

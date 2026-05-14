@@ -1,18 +1,55 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/actions/authActions';
+import { fetchStudentProfileRequest } from '../../store/actions/studentDashboardActions';
 import StudentNavBar from '../../components/StudentNavBar';
 import StudentSidebar from '../../components/StudentSidebar';
 
 const StudentProfile = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { profile } = useSelector(state => state.studentDashboard);
+    const { data, loading, error } = profile;
+
+    useEffect(() => {
+        dispatch(fetchStudentProfileRequest());
+    }, [dispatch]);
 
     const handleLogout = () => {
         dispatch(logout());
         navigate('/');
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-surface flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-surface flex items-center justify-center p-4">
+                <div className="bg-red-50 text-red-600 p-6 rounded-3xl border border-red-100 max-w-md w-full text-center">
+                    <span className="material-symbols-outlined text-4xl mb-4">error</span>
+                    <h3 className="text-xl font-bold mb-2">Failed to load profile</h3>
+                    <p className="text-sm opacity-80 mb-6">{error}</p>
+                    <button 
+                        onClick={() => dispatch(fetchStudentProfileRequest())}
+                        className="px-6 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (!data) return null;
+
+    const { header, personal, contact, school, guardian } = data;
 
     return (
         <div className="bg-surface font-body text-on-surface antialiased mb-24 md:mb-0 min-h-screen">
@@ -43,16 +80,16 @@ const StudentProfile = () => {
                                 <div className="w-32 h-32 md:w-44 md:h-44 rounded-full p-1.5 bg-gradient-to-tr from-primary to-primary-container shadow-xl">
                                     <img 
                                         className="w-full h-full rounded-full object-cover border-4 border-white" 
-                                        alt="Alexander Sterling" 
-                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpsvuMcvBD_soJ9wlesX-Epemify8XgF9QGCIeTJSD3Pe6X_GG22KZFtIQ6lQffzBg2e_Hga-ZW2Azig4iAhU-GhNJqHz72DOzVfFouhhM33165N2IAyBP4VdWmR5N2Y6NIDkOXfEhtgDznuNuu5kJeTaZyv-DmfXRUuZGRDWN2lo2RJov4LRxl5hipAI9j9SvgegsyvBL_xdKM9dxk-64h-Y-07aBHWKgWrcd9axVXk5VaFgepUisY0EZxkPpqlwMRmR6uGDEUA0"
+                                        alt={header?.fullName} 
+                                        src={header?.avatarUrl || "https://lh3.googleusercontent.com/aida-public/AB6AXuDpsvuMcvBD_soJ9wlesX-Epemify8XgF9QGCIeTJSD3Pe6X_GG22KZFtIQ6lQffzBg2e_Hga-ZW2Azig4iAhU-GhNJqHz72DOzVfFouhhM33165N2IAyBP4VdWmR5N2Y6NIDkOXfEhtgDznuNuu5kJeTaZyv-DmfXRUuZGRDWN2lo2RJov4LRxl5hipAI9j9SvgegsyvBL_xdKM9dxk-64h-Y-07aBHWKgWrcd9axVXk5VaFgepUisY0EZxkPpqlwMRmR6uGDEUA0"}
                                     />
                                 </div>
                             </div>
                             <div className="flex-1 text-center md:text-left space-y-2 relative z-10">
-                                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-tertiary-container text-on-tertiary-container font-bold text-xs tracking-wider uppercase">GRADE 11, SECTION A</span>
-                                <h2 className="text-4xl md:text-5xl font-headline font-extrabold text-on-surface tracking-tight">Alexander Sterling</h2>
+                                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-tertiary-container text-on-tertiary-container font-bold text-xs tracking-wider uppercase">{header?.gradeSection}</span>
+                                <h2 className="text-4xl md:text-5xl font-headline font-extrabold text-on-surface tracking-tight">{header?.fullName}</h2>
                                 <p className="text-on-surface-variant font-medium flex items-center justify-center md:justify-start gap-2">
-                                    <span className="material-symbols-outlined text-sm">location_on</span> London, United Kingdom
+                                    <span className="material-symbols-outlined text-sm">location_on</span> {header?.location}
                                 </p>
                             </div>
                             {/* Quick Actions */}
@@ -85,22 +122,22 @@ const StudentProfile = () => {
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <div className="border-b border-slate-100 pb-4">
                                                     <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1">Date of Birth</p>
-                                                    <p className="font-bold text-lg text-slate-800">May 14, 2007</p>
+                                                    <p className="font-bold text-lg text-slate-800">{personal?.dateOfBirth ? new Date(personal.dateOfBirth).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
                                                 </div>
                                                 <div className="border-b border-slate-100 pb-4">
                                                     <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1">Gender</p>
-                                                    <p className="font-bold text-lg text-slate-800">Male</p>
+                                                    <p className="font-bold text-lg text-slate-800">{personal?.gender || 'N/A'}</p>
                                                 </div>
                                                 <div className="border-b border-slate-100 pb-4">
                                                     <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1">Blood Group</p>
                                                     <div className="flex items-center gap-2">
                                                         <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]"></span>
-                                                        <p className="font-bold text-lg text-slate-800">A+ Positive</p>
+                                                        <p className="font-bold text-lg text-slate-800">{personal?.bloodGroup || 'N/A'}</p>
                                                     </div>
                                                 </div>
                                                 <div className="border-b border-slate-100 pb-4">
                                                     <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1">Nationality</p>
-                                                    <p className="font-bold text-lg text-slate-800">British</p>
+                                                    <p className="font-bold text-lg text-slate-800">{personal?.nationality || 'N/A'}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -124,16 +161,16 @@ const StudentProfile = () => {
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <div className="border-b border-blue-100/50 pb-4">
                                                     <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1">Primary Phone</p>
-                                                    <p className="font-bold text-lg text-slate-800">+44 20 7946 0123</p>
+                                                    <p className="font-bold text-lg text-slate-800">{contact?.primaryPhone || 'N/A'}</p>
                                                 </div>
                                                 <div className="border-b border-blue-100/50 pb-4">
                                                     <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1">Email Address</p>
-                                                    <p className="font-bold text-lg text-slate-800">a.sterling@academy.edu</p>
+                                                    <p className="font-bold text-lg text-slate-800">{contact?.emailAddress || 'N/A'}</p>
                                                 </div>
                                             </div>
                                             <div className="pt-2">
                                                 <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1">Residential Address</p>
-                                                <p className="font-bold text-lg text-slate-800 leading-relaxed">221B Baker Street, London NW1 6XE, United Kingdom</p>
+                                                <p className="font-bold text-lg text-slate-800 leading-relaxed">{contact?.residentialAddress || 'N/A'}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -158,19 +195,19 @@ const StudentProfile = () => {
                                         <div className="space-y-6">
                                             <div className="border-b border-white/10 pb-4">
                                                 <p className="text-[10px] font-bold text-blue-100 tracking-widest uppercase mb-1">Student ID</p>
-                                                <p className="font-bold text-lg">STU-2021-0842</p>
+                                                <p className="font-bold text-lg">{school?.studentId || 'N/A'}</p>
                                             </div>
                                             <div className="border-b border-white/10 pb-4">
                                                 <p className="text-[10px] font-bold text-blue-100 tracking-widest uppercase mb-1">Department / Branch</p>
-                                                <p className="font-bold text-lg">Natural Sciences & Technology</p>
+                                                <p className="font-bold text-lg">{school?.departmentName || 'N/A'}</p>
                                             </div>
                                             <div className="border-b border-white/10 pb-4">
                                                 <p className="text-[10px] font-bold text-blue-100 tracking-widest uppercase mb-1">Enrollment Year</p>
-                                                <p className="font-bold text-lg">2021 (Spring Intake)</p>
+                                                <p className="font-bold text-lg">{school?.enrollmentYear ? new Date(school.enrollmentYear).getFullYear() : 'N/A'}</p>
                                             </div>
                                             <div>
                                                 <p className="text-[10px] font-bold text-blue-100 tracking-widest uppercase mb-1">Current Academic Level</p>
-                                                <p className="font-bold text-lg">Semester 2, Year 3</p>
+                                                <p className="font-bold text-lg">{school?.currentLevel || 'N/A'}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -191,21 +228,23 @@ const StudentProfile = () => {
                                         
                                         <div className="space-y-6">
                                             <div className="flex items-center gap-5 p-4 bg-slate-50/80 backdrop-blur-sm rounded-2xl border border-blue-50">
-                                                <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-xl shadow-lg">ES</div>
+                                                <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white font-black text-xl shadow-lg">
+                                                    {guardian?.name?.split(' ').map(n => n[0]).join('') || 'G'}
+                                                </div>
                                                 <div>
-                                                    <p className="text-xl font-bold text-slate-900">Elizabeth Sterling</p>
-                                                    <p className="text-xs text-blue-600 font-bold uppercase tracking-wider">Mother • Primary Contact</p>
+                                                    <p className="text-xl font-bold text-slate-900">{guardian?.name || 'N/A'}</p>
+                                                    <p className="text-xs text-blue-600 font-bold uppercase tracking-wider">{guardian?.relation || 'Guardian'} • Primary Contact</p>
                                                 </div>
                                             </div>
                                             
                                             <div className="space-y-4">
                                                 <div className="border-b border-slate-100 pb-4">
                                                     <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1">Contact Number</p>
-                                                    <p className="font-bold text-lg text-slate-800">+44 20 7946 0987</p>
+                                                    <p className="font-bold text-lg text-slate-800">{guardian?.phone || 'N/A'}</p>
                                                 </div>
                                                 <div>
                                                     <p className="text-[10px] font-bold text-blue-600 tracking-widest uppercase mb-1">Occupation</p>
-                                                    <p className="font-bold text-lg text-slate-800">Senior Software Architect</p>
+                                                    <p className="font-bold text-lg text-slate-800">{guardian?.occupation || 'N/A'}</p>
                                                 </div>
                                             </div>
 

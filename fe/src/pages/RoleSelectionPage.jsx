@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const roles = [
     {
         key: 'STAFF',
-        label: 'Staff',
+        label: 'STAFF',
         icon: 'supervisor_account',
         iconBg: 'bg-primary-container',
         iconColor: 'text-on-primary-container',
@@ -11,7 +11,7 @@ const roles = [
     },
     {
         key: 'STUDENT',
-        label: 'Student',
+        label: 'STUDENT',
         icon: 'person',
         iconBg: 'bg-tertiary-container',
         iconColor: 'text-on-tertiary-container',
@@ -19,7 +19,7 @@ const roles = [
     },
     {
         key: 'GUARDIAN',
-        label: 'Guardian',
+        label: 'GUARDIAN',
         icon: 'family_restroom',
         iconBg: 'bg-surface-container-high',
         iconColor: 'text-on-surface-variant',
@@ -27,7 +27,7 @@ const roles = [
     },
     {
         key: 'TRANSPORT',
-        label: 'Transport',
+        label: 'TRANSPORT',
         icon: 'directions_bus',
         iconBg: 'bg-blue-100',
         iconColor: 'text-blue-700',

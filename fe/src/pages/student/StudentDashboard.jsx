@@ -116,7 +116,7 @@ const StudentDashboard = () => {
                                 </div>
                             </div>
                             
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                 {academic.topSubjects?.length > 0 ? (
                                     academic.topSubjects.map((subject, idx) => (
                                         <div key={idx} className="flex md:flex-col items-center md:items-start md:justify-between p-3 md:p-5 rounded-xl md:rounded-2xl bg-surface-container-low md:min-h-[140px]">
@@ -130,11 +130,11 @@ const StudentDashboard = () => {
                                                     {subject.courseName}
                                                 </span>
                                                 <span className="bg-tertiary-container text-on-tertiary-container px-3 py-1 rounded-lg text-xs font-bold md:hidden sm:inline-block">
-                                                    Grade {subject.grade}
+                                                    Grade {subject.grade} | {(subject.scorePercent / 10).toFixed(1)}
                                                 </span>
                                             </div>
                                             <span className="hidden md:inline-block bg-tertiary-container text-on-tertiary-container px-3 py-1 rounded-lg text-xs font-bold">
-                                                Grade {subject.grade}
+                                                Grade {subject.grade} | {(subject.scorePercent / 10).toFixed(1)}
                                             </span>
                                         </div>
                                     ))

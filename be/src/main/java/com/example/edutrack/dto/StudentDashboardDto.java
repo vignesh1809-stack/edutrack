@@ -30,6 +30,7 @@ public class StudentDashboardDto {
         private RankSummary ranks;
         private UpcomingExam upcomingExam;
         private RemarksSummary remarksSummary;
+        private FinancialSummary financials;
     }
 
     @Data
@@ -70,6 +71,8 @@ public class StudentDashboardDto {
     public static class AttendanceSummary {
         private Double semesterPercent;
         private Double trendPercentVsLastMonth;
+        private Integer presents;
+        private Integer totalDays;
         private List<AttendanceBar> weeklyBars;
     }
 
@@ -102,5 +105,25 @@ public class StudentDashboardDto {
     public static class RemarksSummary {
         private Long pendingCount;
         private LocalDateTime latestRemarkAt;
+    }
+
+    @Data
+    @Builder
+    public static class FinancialSummary {
+        private java.math.BigDecimal pendingAmount;
+        private java.time.LocalDate dueDate;
+        private String status; // "PAID", "PARTIAL", "UNPAID"
+        private List<FeeDetailDto> pendingItems;
+    }
+
+    @Data
+    @Builder
+    public static class FeeDetailDto {
+        private String feeType;
+        private String term;
+        private java.math.BigDecimal totalAmount;
+        private java.math.BigDecimal fineAmount;
+        private java.time.LocalDate dueDate;
+        private String status;
     }
 }

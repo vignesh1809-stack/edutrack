@@ -36,7 +36,7 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
                             s.gender as gender,
                             s.status as status,
                             d.name as departmentName,
-                            YEAR(s.batch_year) as batchYear,
+                            CAST(s.batch_year AS SIGNED) as batchYear,
                             s.section as section,
                             s.current_semester as currentSemester,
                             s.cgpa as cgpa
@@ -47,7 +47,7 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
                           AND (:search IS NULL OR LOWER(s.first_name) LIKE :search OR LOWER(s.last_name) LIKE :search OR LOWER(s.student_id) LIKE :search)
                           AND (:status IS NULL OR s.status = :status)
                           AND (:courseLike IS NULL OR LOWER(d.code) LIKE :courseLike)
-                          AND (:batchYear IS NULL OR YEAR(s.batch_year) = :batchYear)
+                          AND (:batchYear IS NULL OR s.batch_year = :batchYear)
                           AND (:section IS NULL OR s.section = :section)
                         """, countQuery = """
                         SELECT COUNT(*)
@@ -58,7 +58,7 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
                           AND (:search IS NULL OR LOWER(s.first_name) LIKE :search OR LOWER(s.last_name) LIKE :search OR LOWER(s.student_id) LIKE :search)
                           AND (:status IS NULL OR s.status = :status)
                           AND (:courseLike IS NULL OR LOWER(d.code) LIKE :courseLike)
-                          AND (:batchYear IS NULL OR YEAR(s.batch_year) = :batchYear)
+                          AND (:batchYear IS NULL OR s.batch_year = :batchYear)
                           AND (:section IS NULL OR s.section = :section)
                         """, nativeQuery = true)
         Page<StudentListProjection> findPrincipalStudentList(
@@ -94,7 +94,7 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
                 s.address as address,
                 s.date_of_birth as dateOfBirth,
                 s.blood_group as bloodGroup,
-                YEAR(s.batch_year) as batchYear,
+                CAST(s.batch_year AS SIGNED) as batchYear,
                 s.cgpa as cgpa,
                 s.avatar_url as avatarUrl
             FROM students s

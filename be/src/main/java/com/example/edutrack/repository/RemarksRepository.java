@@ -65,7 +65,7 @@ public interface RemarksRepository extends JpaRepository<Remarks, UUID> {
               AND r.is_deleted       = false
               AND r.remark_status    = 'PENDING'
               AND r.remark_target    IN ('CAMPUS', 'STAFF')
-              AND (:batchYear IS NULL OR YEAR(s.batch_year) = :batchYear)
+              AND (:batchYear IS NULL OR s.batch_year = :batchYear)
               AND (:section IS NULL OR s.section = :section)
               AND (:branch IS NULL OR d.code = :branch)
             """, nativeQuery = true)

@@ -11,6 +11,13 @@
       Description: Converting batch_year from DATE to YEAR to align with JPA Entity definition.
     -->
 
+    <changeSet id="13-cleanup-failed-migration" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="students" columnName="batch_year_tmp"/>
+        </preConditions>
+        <dropColumn tableName="students" columnName="batch_year_tmp"/>
+    </changeSet>
+
     <changeSet id="13-fix-student-batch-year-type-robust" author="antigravity">
         <preConditions onFail="MARK_RAN">
             <columnExists tableName="students" columnName="batch_year"/>
@@ -21,8 +28,16 @@
             <column name="batch_year_tmp" type="YEAR"/>
         </addColumn>
 
-        <!-- 2. Copy the year from the old DATE column to the temporary YEAR column -->
-        <sql>UPDATE students SET batch_year_tmp = YEAR(batch_year) WHERE batch_year IS NOT NULL</sql>
+        <!-- 2. Copy the year from the old column to the temporary YEAR column.
+             Handle both DATE format (YYYY-MM-DD) and already-year format (YYYY). -->
+        <sql>
+            UPDATE students 
+            SET batch_year_tmp = CASE 
+                WHEN batch_year IS NULL THEN NULL
+                WHEN LENGTH(CAST(batch_year AS CHAR)) = 4 THEN CAST(batch_year AS UNSIGNED)
+                ELSE YEAR(batch_year)
+            END
+        </sql>
 
         <!-- 3. Drop the old DATE column -->
         <dropColumn tableName="students" columnName="batch_year"/>

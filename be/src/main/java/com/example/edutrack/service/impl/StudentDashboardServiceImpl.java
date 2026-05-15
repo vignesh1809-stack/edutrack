@@ -39,6 +39,9 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
     @Autowired
     private StaffRepository staffRepository;
 
+    @Autowired
+    private FeeRepository feeRepository;
+
     @Override
     @Transactional(readOnly = true)
     public StudentDashboardDto getDashboard(UUID institutionId, UUID studentId, Integer semester) {
@@ -124,6 +127,8 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                         .attendance(StudentDashboardDto.AttendanceSummary.builder()
                                 .semesterPercent(semesterPercent)
                                 .trendPercentVsLastMonth(trend)
+                                .presents(attendanceSummaryRow != null && attendanceSummaryRow.getPresentCount() != null ? attendanceSummaryRow.getPresentCount() : 0)
+                                .totalDays(attendanceSummaryRow != null && attendanceSummaryRow.getTotalCount() != null ? attendanceSummaryRow.getTotalCount() : 0)
                                 .weeklyBars(bars)
                                 .build())
                         .ranks(StudentDashboardDto.RankSummary.builder()
@@ -141,7 +146,47 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                                 .pendingCount(pendingRemarks)
                                 .latestRemarkAt(latestPendingRemarkAt)
                                 .build())
+                        .financials(fetchFinancials(institutionId, studentId))
                         .build())
+                .build();
+    }
+
+    private StudentDashboardDto.FinancialSummary fetchFinancials(UUID institutionId, UUID studentId) {
+        try {
+            var finProj = feeRepository.findStudentFinancialSummary(studentId.toString(), institutionId.toString());
+            
+            // Fetch detailed pending items
+            List<com.example.edutrack.entity.Fee> pendingFees = feeRepository.findByStudentId(studentId, institutionId).stream()
+                    .filter(f -> f.getStatus() != com.example.edutrack.entity.enums.FeeStatus.PAID)
+                    .toList();
+
+            List<StudentDashboardDto.FeeDetailDto> items = pendingFees.stream()
+                    .map(f -> StudentDashboardDto.FeeDetailDto.builder()
+                            .feeType(f.getFeeType() != null ? f.getFeeType().name() : "Other")
+                            .term(f.getTerm())
+                            .totalAmount(f.getTotalAmount() != null ? f.getTotalAmount() : java.math.BigDecimal.ZERO)
+                            .fineAmount(f.getFineAmount() != null ? f.getFineAmount() : java.math.BigDecimal.ZERO)
+                            .dueDate(f.getDueDate())
+                            .status(f.getStatus() != null ? f.getStatus().name() : "UNPAID")
+                            .build())
+                    .toList();
+
+            if (finProj != null) {
+                return StudentDashboardDto.FinancialSummary.builder()
+                        .pendingAmount(finProj.getPendingAmount() != null ? finProj.getPendingAmount() : java.math.BigDecimal.ZERO)
+                        .dueDate(finProj.getDueDate())
+                        .status(finProj.getPendingAmount() != null && finProj.getPendingAmount().compareTo(java.math.BigDecimal.ZERO) > 0 ? "UNPAID" : "PAID")
+                        .pendingItems(items)
+                        .build();
+            }
+        } catch (Exception e) {
+            // Log error and return zeroed financials
+        }
+        return StudentDashboardDto.FinancialSummary.builder()
+                .pendingAmount(java.math.BigDecimal.ZERO)
+                .dueDate(null)
+                .status("PAID")
+                .pendingItems(List.of())
                 .build();
     }
 

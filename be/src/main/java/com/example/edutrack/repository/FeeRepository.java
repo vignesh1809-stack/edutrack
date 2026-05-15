@@ -21,8 +21,8 @@ public interface FeeRepository extends JpaRepository<Fee, UUID> {
 
     @Query(value = """
             SELECT 
-                COALESCE(SUM(CASE WHEN f.status IN ('DUE', 'PARTIAL') THEN f.total_amount + COALESCE(f.fine_amount, 0) ELSE 0 END), 0) AS pendingAmount,
-                MIN(CASE WHEN f.status IN ('DUE', 'PARTIAL') THEN f.due_date END) AS dueDate
+                COALESCE(SUM(CASE WHEN f.status IN ('DUE', 'PARTIAL', 'PENDING') THEN f.total_amount + COALESCE(f.fine_amount, 0) ELSE 0 END), 0) AS pendingAmount,
+                MIN(CASE WHEN f.status IN ('DUE', 'PARTIAL', 'PENDING') THEN f.due_date END) AS dueDate
             FROM students s
             LEFT JOIN fees f ON s.id = f.student_id
             WHERE s.id = UUID_TO_BIN(:studentId) 

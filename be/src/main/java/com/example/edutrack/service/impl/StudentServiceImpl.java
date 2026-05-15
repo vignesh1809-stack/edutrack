@@ -65,11 +65,13 @@ public class StudentServiceImpl implements StudentService {
     private RemarksRepository remarksRepository;
 
     @Override
+    @Cacheable(value = "studentFilters", key = "'branches-' + #institutionId.toString()")
     public java.util.List<String> getFilterBranches(UUID institutionId) {
         return departmentRepository.findDistinctCodes(institutionId.toString());
     }
 
     @Override
+    @Cacheable(value = "studentFilters", key = "'years-' + #institutionId.toString()")
     public java.util.List<Integer> getFilterYears(UUID institutionId) {
         List<Object> rawYears = studentRepository.findDistinctAdmissionYears(institutionId.toString());
         return rawYears.stream()
@@ -92,6 +94,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "studentList", key = "#institutionId.toString() + '-' + (#search?:'') + '-' + (#status?:'') + '-' + (#course?:'') + '-' + (#batchYear?:'') + '-' + (#section?:'') + '-' + #pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<StudentListDto> getPrincipalStudentList(UUID institutionId, String search, StudentStatus status,
             String course, Integer batchYear, String section, Pageable pageable) {
         String searchPattern = (search != null && !search.isBlank()) ? "%" + search.toLowerCase() + "%" : null;
@@ -234,6 +237,8 @@ public class StudentServiceImpl implements StudentService {
                     .build();
         }
 
+
+    
         // 4. Financials (Using optimized native query)
         com.example.edutrack.dto.StudentFinancialProjection finProj = feeRepository
                 .findStudentFinancialSummary(studentId.toString(), institutionId.toString());
@@ -358,13 +363,14 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {"students", "studentList", "studentFilters"}, allEntries = true)
     public Student create(Student student) {
         return studentRepository.save(student);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "students", keyGenerator = "tenantKeyGenerator")
+    @CacheEvict(value = {"students", "studentList", "studentFilters"}, allEntries = true)
     public Student update(UUID id, Student student) {
         if (studentRepository.existsById(id)) {
             return studentRepository.save(student);
@@ -374,7 +380,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "students", keyGenerator = "tenantKeyGenerator")
+    @CacheEvict(value = {"students", "studentList", "studentFilters"}, allEntries = true)
     public void delete(UUID id) {
         studentRepository.softDelete(id);
     }

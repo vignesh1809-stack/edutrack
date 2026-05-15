@@ -204,7 +204,9 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
                       AND a3.student_id = :studentId
                       AND a3.is_deleted = false
                       AND DATE_FORMAT(a3.record_date, '%Y-%m') = DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 MONTH), '%Y-%m')
-                ) AS previousMonthPercent
+                ) AS previousMonthPercent,
+                SUM(CASE WHEN a.attendance_status = 'PRESENT' THEN 1 ELSE 0 END) AS presentCount,
+                COUNT(a.id) AS totalCount
             FROM attendances a
             WHERE a.institution_id = :instId
               AND a.student_id = :studentId

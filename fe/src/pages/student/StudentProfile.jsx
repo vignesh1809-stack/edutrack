@@ -203,7 +203,7 @@ const StudentProfile = () => {
                                             </div>
                                             <div className="border-b border-white/10 pb-4">
                                                 <p className="text-[10px] font-bold text-blue-100 tracking-widest uppercase mb-1">Enrollment Year</p>
-                                                <p className="font-bold text-lg">{school?.enrollmentYear ? new Date(school.enrollmentYear).getFullYear() : 'N/A'}</p>
+                                                <p className="font-bold text-lg">{school?.enrollmentYear || 'N/A'}</p>
                                             </div>
                                             <div>
                                                 <p className="text-[10px] font-bold text-blue-100 tracking-widest uppercase mb-1">Current Academic Level</p>
@@ -233,7 +233,10 @@ const StudentProfile = () => {
                                                 </div>
                                                 <div>
                                                     <p className="text-xl font-bold text-slate-900">{guardian?.name || 'N/A'}</p>
-                                                    <p className="text-xs text-blue-600 font-bold uppercase tracking-wider">{guardian?.relation || 'Guardian'} • Primary Contact</p>
+                                                    <p className="text-xs text-blue-600 font-bold uppercase tracking-wider">
+                                                        {guardian?.relation || 'Guardian'} 
+                                                        {(guardian?.relation !== 'Primary Contact') && ' • Primary Contact'}
+                                                    </p>
                                                 </div>
                                             </div>
                                             
@@ -248,9 +251,6 @@ const StudentProfile = () => {
                                                 </div>
                                             </div>
 
-                                            <button className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold text-sm hover:bg-blue-700 transition-all active:scale-[0.98] shadow-lg shadow-blue-600/20">
-                                                View Full History
-                                            </button>
                                         </div>
                                     </div>
                                 </div>

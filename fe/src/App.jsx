@@ -18,6 +18,8 @@ import FacultyProfile from './pages/guardian/FacultyProfile';
 import GuardianProfile from './pages/guardian/GuardianProfile';
 import GuardianChat from './pages/guardian/GuardianChat';
 import StudentDashboard from './pages/student/StudentDashboard';
+import Academics from './pages/student/Academics';
+import SubjectAnalysis from './pages/student/SubjectAnalysis';
 import StudentRemarks from './pages/student/StudentRemarks';
 import SubmitFeedback from './pages/student/SubmitFeedback';
 import StudentOwnProfile from './pages/student/StudentProfile';
@@ -27,6 +29,10 @@ import TransportRoutes from './pages/transport-incharge/TransportRoutes';
 import AddTransportStaff from './pages/transport-incharge/AddTransportStaff';
 import AddTransportLog from './pages/transport-incharge/AddTransportLog';
 import TransportProfile from './pages/transport-incharge/TransportProfile';
+import LecturerDashboard from './pages/staff/LecturerDashboard';
+import LecturerAttendance from './pages/staff/LecturerAttendance';
+import LecturerPapers from './pages/staff/LecturerPapers';
+import LecturerProfile from './pages/staff/LecturerProfile';
 
 function App() {
   return (
@@ -57,6 +63,8 @@ function App() {
 
         {/* --- Student --- */}
         <Route path="/student/dashboard" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
+        <Route path="/student/academics" element={<ProtectedRoute><Academics /></ProtectedRoute>} />
+        <Route path="/student/subject-analysis" element={<ProtectedRoute><SubjectAnalysis /></ProtectedRoute>} />
         <Route path="/student/remarks" element={<ProtectedRoute><StudentRemarks /></ProtectedRoute>} />
         <Route path="/student/submit-feedback" element={<ProtectedRoute><SubmitFeedback /></ProtectedRoute>} />
         <Route path="/student/profile" element={<ProtectedRoute><StudentOwnProfile /></ProtectedRoute>} />
@@ -68,6 +76,12 @@ function App() {
         <Route path="/transport/add-staff" element={<ProtectedRoute><AddTransportStaff /></ProtectedRoute>} />
         <Route path="/transport/add-log" element={<ProtectedRoute><AddTransportLog /></ProtectedRoute>} />
         <Route path="/transport/profile" element={<ProtectedRoute><TransportProfile /></ProtectedRoute>} />
+
+        {/* --- Staff / Lecturer --- */}
+        <Route path="/staff/dashboard" element={<ProtectedRoute><LecturerDashboard /></ProtectedRoute>} />
+        <Route path="/staff/attendance" element={<ProtectedRoute><LecturerAttendance /></ProtectedRoute>} />
+        <Route path="/staff/papers" element={<ProtectedRoute><LecturerPapers /></ProtectedRoute>} />
+        <Route path="/staff/profile" element={<ProtectedRoute><LecturerProfile /></ProtectedRoute>} />
       </Routes>
     </Router>
   );

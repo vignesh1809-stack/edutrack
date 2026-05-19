@@ -60,6 +60,7 @@ const LoginPage = () => {
             if (r === 'STUDENT') navigate('/student/dashboard');
             else if (r === 'GUARDIAN') navigate('/guardian/dashboard');
             else if (r === 'TRANSPORT_INCHARGE' || r === 'TRANSPORT') navigate('/transport/dashboard');
+            else if (r === 'LECTURER' || r === 'CLASS_TEACHER') navigate('/staff/dashboard');
             else navigate('/principal/dashboard');
         }
     }, [user, navigate]);

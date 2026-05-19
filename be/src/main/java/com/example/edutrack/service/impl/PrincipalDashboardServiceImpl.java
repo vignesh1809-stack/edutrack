@@ -80,11 +80,11 @@ public class PrincipalDashboardServiceImpl implements PrincipalDashboardService 
 
         String branchFilter = (branch == null || branch.equals("All Branches")) ? null : branch;
 
-        List<DepartmentAverageProjection> currentAverages = studentRepository.findDepartmentAveragesFiltered(institutionId, year, section, branchFilter);
+        List<DepartmentAverageProjection> currentAverages = metricsHelper.getCachedDepartmentAverages(institutionId, year, section, branchFilter);
         
         List<DepartmentAverageProjection> previousAverages = null;
         if (year != null) {
-            previousAverages = studentRepository.findDepartmentAveragesFiltered(institutionId, year - 1, section, branchFilter);
+            previousAverages = metricsHelper.getCachedDepartmentAverages(institutionId, year - 1, section, branchFilter);
         }
 
         List<DepartmentAverageDto> results = new ArrayList<>();
@@ -123,7 +123,7 @@ public class PrincipalDashboardServiceImpl implements PrincipalDashboardService 
         
         String branchFilter = (branch == null || branch.equals("All Branches")) ? null : branch;
 
-        return assessmentRepository.findLeastPerformedStaff(institutionId, year, section, branchFilter)
+        return metricsHelper.getCachedLeastPerformedStaff(institutionId, year, section, branchFilter)
                 .stream()
                 .map(proj -> StaffPerformanceDto.builder()
                         .staffId(proj.getStaffId())

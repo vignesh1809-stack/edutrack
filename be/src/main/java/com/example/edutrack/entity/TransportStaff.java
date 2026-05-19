@@ -13,11 +13,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @AllArgsConstructor
 @Data
 @Entity
-@Table(name = "buses", indexes = {
-    @Index(name = "idx_buses_institution", columnList = "institution_id, id")
-})
+@Table(name = "transport_staffs")
 @EqualsAndHashCode(callSuper = true)
-public class Buses extends BaseEntity {
+public class TransportStaff extends BaseEntity {
 
     @Id
     @UuidGenerator(style = UuidGenerator.Style.TIME)
@@ -29,18 +27,24 @@ public class Buses extends BaseEntity {
     @JsonIgnore
     private Institution institution;
 
-    private String busNumber;
-    private int totalStudents;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "route_id", columnDefinition = "BINARY(16)")
-    private BusRoute route;
+    @JoinColumn(name = "bus_id", columnDefinition = "BINARY(16)")
+    private Buses bus;
 
-    @Column(name = "fleet_status")
-    private String fleetStatus;
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
+
+    private String role;
     
-    @ManyToOne
-    @JoinColumn(name = "incharge_id", referencedColumnName = "id", columnDefinition = "BINARY(16)")
-    private Staff incharge;
+    private String phone;
+    
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
+    @Column(name = "is_active", columnDefinition = "TINYINT(1) DEFAULT 1")
+    private Boolean isActive = true;
     
 }

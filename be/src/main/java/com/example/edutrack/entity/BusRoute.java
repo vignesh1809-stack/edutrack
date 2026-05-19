@@ -13,11 +13,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @AllArgsConstructor
 @Data
 @Entity
-@Table(name = "buses", indexes = {
-    @Index(name = "idx_buses_institution", columnList = "institution_id, id")
-})
+@Table(name = "bus_routes")
 @EqualsAndHashCode(callSuper = true)
-public class Buses extends BaseEntity {
+public class BusRoute extends BaseEntity {
 
     @Id
     @UuidGenerator(style = UuidGenerator.Style.TIME)
@@ -29,18 +27,10 @@ public class Buses extends BaseEntity {
     @JsonIgnore
     private Institution institution;
 
-    private String busNumber;
-    private int totalStudents;
+    @Column(name = "route_name")
+    private String routeName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "route_id", columnDefinition = "BINARY(16)")
-    private BusRoute route;
-
-    @Column(name = "fleet_status")
-    private String fleetStatus;
-    
-    @ManyToOne
-    @JoinColumn(name = "incharge_id", referencedColumnName = "id", columnDefinition = "BINARY(16)")
-    private Staff incharge;
+    @Column(name = "path_summary", columnDefinition = "TEXT")
+    private String pathSummary;
     
 }

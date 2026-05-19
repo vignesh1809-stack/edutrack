@@ -64,4 +64,15 @@ public interface BusesLogsRepository extends JpaRepository<BusesLogs, UUID> {
                                          @Param("batchYear") Integer batchYear,
                                          @Param("section") String section,
                                          @Param("branch") String branch);
+
+    @Query(value = """
+            SELECT COUNT(DISTINCT bl.bus_id)
+            FROM buses_logs bl
+            JOIN buses b ON b.id = bl.bus_id
+            WHERE b.institution_id = :instId
+              AND DATE(bl.arrival_time) = :date
+              AND TIME(bl.arrival_time) < '09:00:00'
+              AND bl.is_deleted = false
+            """, nativeQuery = true)
+    long countBusesArrivedBefore9AM(@Param("instId") UUID instId, @Param("date") LocalDate date);
 }

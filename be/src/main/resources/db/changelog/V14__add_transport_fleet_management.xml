@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Bus Routes Table -->
+    <changeSet id="v14-create-bus-routes" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="bus_routes"/></not>
+        </preConditions>
+        <createTable tableName="bus_routes">
+            <column name="id" type="BINARY(16)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="institution_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="route_name" type="VARCHAR(255)"/>
+            <column name="path_summary" type="TEXT"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="institution_id" baseTableName="bus_routes" constraintName="fk_bus_route_institution" referencedColumnNames="id" referencedTableName="institutions"/>
+    </changeSet>
+
+    <!-- Transport Staffs Table -->
+    <changeSet id="v14-create-transport-staffs" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="transport_staffs"/></not>
+        </preConditions>
+        <createTable tableName="transport_staffs">
+            <column name="id" type="BINARY(16)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="institution_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bus_id" type="BINARY(16)"/>
+            <column name="first_name" type="VARCHAR(255)"/>
+            <column name="last_name" type="VARCHAR(255)"/>
+            <column name="role" type="VARCHAR(50)"/>
+            <column name="phone" type="VARCHAR(20)"/>
+            <column name="avatar_url" type="VARCHAR(255)"/>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="institution_id" baseTableName="transport_staffs" constraintName="fk_trans_staff_inst" referencedColumnNames="id" referencedTableName="institutions"/>
+        <!-- FK for bus_id will be added after buses table modification to ensure it exists and matches -->
+    </changeSet>
+
+    <!-- Modify Buses Table -->
+    <changeSet id="v14-modify-buses-table" author="antigravity">
+        <!-- Add new columns -->
+        <addColumn tableName="buses">
+            <column name="route_id" type="BINARY(16)"/>
+            <column name="fleet_status" type="VARCHAR(50)" defaultValue="IDLE"/>
+        </addColumn>
+
+        <!-- Add foreign key constraint for route_id -->
+        <addForeignKeyConstraint baseColumnNames="route_id" baseTableName="buses" constraintName="fk_bus_route" referencedColumnNames="id" referencedTableName="bus_routes"/>
+
+        <!-- Now we can safely add the FK from transport_staffs to buses -->
+        <addForeignKeyConstraint baseColumnNames="bus_id" baseTableName="transport_staffs" constraintName="fk_trans_staff_bus" referencedColumnNames="id" referencedTableName="buses"/>
+
+        <!-- Drop old columns -->
+        <dropColumn tableName="buses" columnName="driver_name"/>
+        <dropColumn tableName="buses" columnName="route"/>
+    </changeSet>
+
+</databaseChangeLog>

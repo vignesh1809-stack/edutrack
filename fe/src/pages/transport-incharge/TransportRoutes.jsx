@@ -1,36 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchTransportRoutesRequest } from '../../store/actions/transportActions';
 
 const TransportRoutes = () => {
-    const routes = [
-        {
-            id: 1,
-            busId: 'BUS-702',
-            routeName: 'North Route',
-            status: 'Active',
-            statusColor: 'bg-green-100 text-green-700',
-            path: 'Downtown Hub → Baker Street → North High Square → Residential Zone A',
-            driver: 'Robert Chen'
-        },
-        {
-            id: 2,
-            busId: 'BUS-305',
-            routeName: 'East Route',
-            status: 'Delayed',
-            statusColor: 'bg-amber-100 text-amber-700',
-            path: 'Central Station → Sunset Blvd → Tech Park → East Meadows',
-            driver: 'Sarah Miller'
-        },
-        {
-            id: 3,
-            busId: 'BUS-104',
-            routeName: 'West Route',
-            status: 'Alert',
-            statusColor: 'bg-error-container/20 text-error',
-            path: 'Campus South → West Gate → Central Park Junction → Oak Ridge',
-            driver: 'James Wilson'
-        }
-    ];
+    const dispatch = useDispatch();
+    const { routes } = useSelector(state => state.transport);
+
+    useEffect(() => {
+        dispatch(fetchTransportRoutesRequest());
+    }, [dispatch]);
 
     return (
         <div className="bg-background text-on-surface font-body min-h-screen pb-24">
@@ -92,43 +71,49 @@ const TransportRoutes = () => {
                                 Filter
                             </button>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                            {routes.map((route) => (
-                                <div key={route.id} className="bg-surface-container-lowest rounded-[24px] p-5 shadow-[0px_10px_30px_rgba(42,52,57,0.04)] border border-surface-container hover:shadow-md transition-shadow">
-                                    <div className="flex justify-between items-start mb-3">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-12 h-12 rounded-2xl bg-primary-container/30 flex items-center justify-center text-primary">
-                                                <span className="material-symbols-outlined text-3xl">directions_bus</span>
+                        {routes.loading ? (
+                            <div className="flex justify-center p-8">
+                                <span className="text-primary font-semibold">Loading Routes...</span>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                {routes.data?.map((route) => (
+                                    <div key={route.id} className="bg-surface-container-lowest rounded-[24px] p-5 shadow-[0px_10px_30px_rgba(42,52,57,0.04)] border border-surface-container hover:shadow-md transition-shadow">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-12 h-12 rounded-2xl bg-primary-container/30 flex items-center justify-center text-primary">
+                                                    <span className="material-symbols-outlined text-3xl">directions_bus</span>
+                                                </div>
+                                                <div className="space-y-0.5">
+                                                    <p className="text-[10px] font-bold text-primary tracking-widest uppercase">Route ID</p>
+                                                    <h3 className="font-headline font-bold text-lg text-on-surface">{route.routeName}</h3>
+                                                </div>
                                             </div>
-                                            <div className="space-y-0.5">
-                                                <p className="text-[10px] font-bold text-primary tracking-widest uppercase">{route.busId}</p>
-                                                <h3 className="font-headline font-bold text-lg text-on-surface">{route.routeName}</h3>
+                                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700`}>
+                                                ACTIVE
+                                            </span>
+                                        </div>
+                                        <div className="p-4 bg-surface-container-low rounded-2xl space-y-2">
+                                            <div className="flex items-center gap-2 text-on-surface-variant">
+                                                <span className="material-symbols-outlined text-sm">route</span>
+                                                <p className="text-xs font-medium">Path Summary</p>
                                             </div>
+                                            <p className="text-sm text-on-surface leading-relaxed">{route.pathSummary}</p>
                                         </div>
-                                        <span className={`${route.statusColor} px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider`}>
-                                            {route.status}
-                                        </span>
-                                    </div>
-                                    <div className="p-4 bg-surface-container-low rounded-2xl space-y-2">
-                                        <div className="flex items-center gap-2 text-on-surface-variant">
-                                            <span className="material-symbols-outlined text-sm">route</span>
-                                            <p className="text-xs font-medium">Path Summary</p>
+                                        <div className="flex items-center justify-between pt-2">
+                                            <div className="flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-base text-on-surface-variant">person</span>
+                                                <span className="text-xs text-on-surface-variant">Assigned Driver</span>
+                                            </div>
+                                            <button className="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
+                                                Details
+                                                <span className="material-symbols-outlined text-sm">chevron_right</span>
+                                            </button>
                                         </div>
-                                        <p className="text-sm text-on-surface leading-relaxed">{route.path}</p>
                                     </div>
-                                    <div className="flex items-center justify-between pt-2">
-                                        <div className="flex items-center gap-2">
-                                            <span className="material-symbols-outlined text-base text-on-surface-variant">person</span>
-                                            <span className="text-xs text-on-surface-variant">{route.driver}</span>
-                                        </div>
-                                        <button className="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
-                                            Details
-                                            <span className="material-symbols-outlined text-sm">chevron_right</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
                     </section>
                 </main>
             </div>

@@ -7,6 +7,7 @@ import com.example.edutrack.repository.RemarksRepository;
 import com.example.edutrack.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import com.example.edutrack.repository.AssessmentRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +23,8 @@ public class PrincipalDashboardMetricsHelper {
     @Autowired private AttendanceRepository attendanceRepository;
     @Autowired private BusesLogsRepository busesLogsRepository;
     @Autowired private RemarksRepository remarksRepository;
+    @Autowired private AssessmentRepository assessmentRepository;
+
 
     // Cache total students for 30 days (manually evicted on changes)
     @Cacheable(value = "totalStudents", key = "#institutionId")
@@ -99,6 +102,16 @@ public class PrincipalDashboardMetricsHelper {
                     .studentCode(row[4] != null ? row[4].toString() : null)
                     .build();
         }).collect(java.util.stream.Collectors.toList());
+    }
+
+    @Cacheable(value = "departmentAverages", key = "#institutionId + '-' + #year + '-' + #section + '-' + #branch")
+    public List<com.example.edutrack.dto.DepartmentAverageProjection> getCachedDepartmentAverages(UUID institutionId, Integer year, String section, String branch) {
+        return studentRepository.findDepartmentAveragesFiltered(institutionId, year, section, branch);
+    }
+
+    @Cacheable(value = "staffPerformance", key = "#institutionId + '-' + #year + '-' + #section + '-' + #branch")
+    public List<com.example.edutrack.dto.StaffPerformanceProjection> getCachedLeastPerformedStaff(UUID institutionId, Integer year, String section, String branch) {
+        return assessmentRepository.findLeastPerformedStaff(institutionId, year, section, branch);
     }
 
     /**

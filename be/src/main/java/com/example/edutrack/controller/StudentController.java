@@ -2,8 +2,6 @@ package com.example.edutrack.controller;
 
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
-
 import com.example.edutrack.entity.Student;
 import com.example.edutrack.service.StudentService;
 

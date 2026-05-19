@@ -19,6 +19,7 @@
     </changeSet>
 
     <changeSet id="13-fix-student-batch-year-type-robust" author="antigravity">
+        <validCheckSum>9:c1a66bab2240364097b674ce919cf9b3</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <columnExists tableName="students" columnName="batch_year"/>
         </preConditions>

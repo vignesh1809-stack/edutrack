@@ -10,6 +10,7 @@ import java.util.UUID;
 public class GuardianDashboardDto {
     private List<ChildMinimalDto> children;
     private StudentDashboardDto selectedChildData;
+    private List<StudentRemarkDto> latestRemarks;
 
     @Data
     @Builder

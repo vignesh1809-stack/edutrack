@@ -5,6 +5,8 @@ import dashboardSaga from './dashboardSaga';
 import { studentWatcherSaga } from './studentSaga';
 import remarksSaga from './remarksSaga';
 import { studentDashboardSaga } from './studentDashboardSaga';
+import guardianDashboardSaga from './guardianDashboardSaga';
+import transportSaga from './transportSaga';
 
 export default function* rootSaga() {
   yield all([
@@ -14,5 +16,7 @@ export default function* rootSaga() {
     fork(studentWatcherSaga),
     fork(remarksSaga),
     fork(studentDashboardSaga),
+    fork(guardianDashboardSaga),
+    fork(transportSaga),
   ]);
 }

@@ -1,9 +1,26 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchTransportDashboardRequest, fetchTransportOnDutyRequest } from '../../store/actions/transportActions';
 
 const TransportDashboard = () => {
     const navigate = useNavigate();
-    
+    const dispatch = useDispatch();
+
+    const { dashboard, onDuty } = useSelector(state => state.transport);
+
+    useEffect(() => {
+        dispatch(fetchTransportDashboardRequest());
+        dispatch(fetchTransportOnDutyRequest());
+    }, [dispatch]);
+
+    const stats = dashboard.data || {
+        totalBuses: 0,
+        activeTransit: 0,
+        inWorkshop: 0,
+        efficiencyScore: 0
+    };
+
     return (
         <div className="bg-surface text-on-surface selection:bg-primary-container min-h-screen">
             {/* TopAppBar */}
@@ -95,7 +112,9 @@ const TransportDashboard = () => {
                                     <span className="text-xs font-bold text-primary px-2 py-1 bg-primary-container/30 rounded-full">Total</span>
                                 </div>
                                 <div>
-                                    <p className="text-4xl font-extrabold text-on-surface">24</p>
+                                    <p className="text-4xl font-extrabold text-on-surface">
+                                        {dashboard.loading ? '...' : String(stats.totalBuses).padStart(2, '0')}
+                                    </p>
                                     <p className="text-sm font-medium text-on-surface-variant">Fleet Capacity</p>
                                 </div>
                             </div>
@@ -108,7 +127,9 @@ const TransportDashboard = () => {
                                     </div>
                                 </div>
                                 <div>
-                                    <p className="text-4xl font-extrabold text-on-surface">18</p>
+                                    <p className="text-4xl font-extrabold text-on-surface">
+                                        {dashboard.loading ? '...' : String(stats.activeTransit).padStart(2, '0')}
+                                    </p>
                                     <p className="text-sm font-medium text-on-surface-variant">Active Transit</p>
                                 </div>
                             </div>
@@ -119,7 +140,9 @@ const TransportDashboard = () => {
                                     <span className="text-xs font-bold text-amber-600 px-2 py-1 bg-amber-100 rounded-full">Pending</span>
                                 </div>
                                 <div>
-                                    <p className="text-4xl font-extrabold text-on-surface">02</p>
+                                    <p className="text-4xl font-extrabold text-on-surface">
+                                        {dashboard.loading ? '...' : String(stats.inWorkshop).padStart(2, '0')}
+                                    </p>
                                     <p className="text-sm font-medium text-on-surface-variant">In Workshop</p>
                                 </div>
                             </div>
@@ -133,7 +156,10 @@ const TransportDashboard = () => {
                                     <span className="text-xs font-bold text-white/80 border border-white/20 px-2 py-1 rounded-full">Efficiency</span>
                                 </div>
                                 <div className="z-10">
-                                    <p className="text-4xl font-extrabold text-white">16<span className="text-xl font-medium opacity-60">/24</span></p>
+                                    <p className="text-4xl font-extrabold text-white">
+                                        {dashboard.loading ? '...' : String(stats.efficiencyScore).padStart(2, '0')}
+                                        <span className="text-xl font-medium opacity-60">/{String(stats.totalBuses).padStart(2, '0')}</span>
+                                    </p>
                                     <p className="text-sm font-medium text-white/90">Early Arrivals (9:00 AM)</p>
                                 </div>
                             </div>
@@ -145,54 +171,33 @@ const TransportDashboard = () => {
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-xl font-bold text-on-surface">Staff On-Duty</h3>
-                                    <button className="text-sm font-bold text-primary hover:underline">All Staff</button>
+                                    <button onClick={() => navigate('/transport/staff')} className="text-sm font-bold text-primary hover:underline cursor-pointer">All Staff</button>
                                 </div>
                                 <div className="bg-surface-container-low p-4 rounded-2xl space-y-3">
-                                    {/* Staff Item */}
-                                    <div className="bg-surface-container-lowest p-3 rounded-xl flex items-center gap-3 shadow-sm">
-                                        <div className="w-10 h-10 rounded-full overflow-hidden">
-                                            <img 
-                                                alt="Staff Portrait" 
-                                                className="w-full h-full object-cover" 
-                                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZTlE7bFpbAYa_MB3lwRXlKfam6eXMTozEATVB3UUtNwBLBqiq13XqauhtGtA0u8JIYrDHY0Gf2iTzlzKywIH2AgjEYqTsZfgsXf5S4tlJNpScbqpjox3lBlBLQM9S7m9kG8S9zlXvYdLHsY2EXY7P0OWMphni9cfi9KKeoymJGrmq3yle7R58TIgLr-os2SA7fv6ZfueaPgnFOy-3sE6WeNbxZQObm_1tOf75G9rbI4lM-YC_Jzeon9qFCBzm4CJhdic7YTXVnuU" 
-                                            />
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="text-sm font-bold text-on-surface leading-none">Marcus Reeves</p>
-                                            <p className="text-[11px] text-on-surface-variant font-medium">Driver • BUS-702</p>
-                                        </div>
-                                        <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full">ACTIVE</span>
-                                    </div>
-                                    {/* Staff Item */}
-                                    <div className="bg-surface-container-lowest p-3 rounded-xl flex items-center gap-3 shadow-sm">
-                                        <div className="w-10 h-10 rounded-full overflow-hidden">
-                                            <img 
-                                                alt="Staff Portrait" 
-                                                className="w-full h-full object-cover" 
-                                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuACrha3-cuu2XyBkAtcwt6NFXoA3pyTeuVlJRx4FjMA1Bi1zKAWF1QWohC2O2mgPiMbYZpG1wLd2yF-b-VO04paMsVmKrelUEdr5hp0jfiGy2NTs2IdKtkM0r1KXkTDW_Slrk8t9ypuQCQ8jS91A5RuAgLFepkT-ZafguPgbyRvjPbhBagDTYhxzgqwHQEJt3GjjLCDi8BurCq8j8hn7argUk9Tp70v4mx01L3N5SOjLWSFX77U2t9GD1ZQ1myzbrFu83r-lIuaHUk" 
-                                            />
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="text-sm font-bold text-on-surface leading-none">Sarah Chen</p>
-                                            <p className="text-[11px] text-on-surface-variant font-medium">Cleaner • BUS-702</p>
-                                        </div>
-                                        <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full">ACTIVE</span>
-                                    </div>
-                                    {/* Staff Item */}
-                                    <div className="bg-surface-container-lowest p-3 rounded-xl flex items-center gap-3 shadow-sm opacity-60">
-                                        <div className="w-10 h-10 rounded-full overflow-hidden grayscale">
-                                            <img 
-                                                alt="Staff Portrait" 
-                                                className="w-full h-full object-cover" 
-                                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvU36Aiakn-36F8pvBxomrka21QkcCmim3ov3_i0MqU4xKc27x53Hh_i2Y6oHymBiGVMP7xE6A0ahDtNkEo4I2GjXJlIsf3AyVWxe9c_kI3q1OKIvC0nZCfrnfmH9S_5O7RocWBZ2TKutbIYnRy3JtWRfybW5Wdgx4NcwhZI83nDGq_4MuIhd1JDyCPWWAZ-BcYM_tEI0TEIC0MrjEBLs_buDFe2bKPOzNBResZq5BNU9fY1FbAB548pVeREgwoCjmNO6-qBlV52M" 
-                                            />
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="text-sm font-bold text-on-surface leading-none">David Miller</p>
-                                            <p className="text-[11px] text-on-surface-variant font-medium">Driver • BUS-205</p>
-                                        </div>
-                                        <span className="px-2 py-1 bg-secondary-container text-secondary text-[10px] font-bold rounded-full">OFF-DUTY</span>
-                                    </div>
+                                    {onDuty.loading ? (
+                                        <p className="text-sm text-slate-500">Loading on-duty staff...</p>
+                                    ) : onDuty.data?.length > 0 ? (
+                                        onDuty.data.map(staff => (
+                                            <div key={staff.id} className="bg-surface-container-lowest p-3 rounded-xl flex items-center gap-3 shadow-sm">
+                                                <div className="w-10 h-10 rounded-full overflow-hidden">
+                                                    <img 
+                                                        alt="Staff Portrait" 
+                                                        className="w-full h-full object-cover" 
+                                                        src={staff.img || `https://ui-avatars.com/api/?name=${staff.name}&background=random`} 
+                                                    />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-bold text-on-surface leading-none">{staff.name}</p>
+                                                    <p className="text-[11px] text-on-surface-variant font-medium capitalize">{staff.role.toLowerCase()} • {staff.bus}</p>
+                                                </div>
+                                                <span className={`px-2 py-1 text-[10px] font-bold rounded-full ${staff.active ? 'bg-emerald-100 text-emerald-700' : 'bg-secondary-container text-secondary'}`}>
+                                                    {staff.active ? 'ACTIVE' : 'OFF-DUTY'}
+                                                </span>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-sm text-slate-500">No staff currently on-duty.</p>
+                                    )}
                                 </div>
                             </div>
                         </div>

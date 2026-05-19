@@ -27,7 +27,7 @@ public class GuardianDashboardServiceImpl implements GuardianDashboardService {
     @Override
     @Transactional(readOnly = true)
     public GuardianDashboardDto getDashboard(UUID institutionId, UUID guardianId, UUID selectedStudentId, Integer semester) {
-        Guardian guardian = guardianRepository.findByIdNative(guardianId.toString(), institutionId.toString())
+        Guardian guardian = guardianRepository.findByIdNative(guardianId, institutionId)
                 .orElseThrow(() -> new RuntimeException("Guardian not found"));
 
         List<Student> students = guardian.getStudents();
@@ -55,17 +55,21 @@ public class GuardianDashboardServiceImpl implements GuardianDashboardService {
         
         // Fetch detailed dashboard data using existing student dashboard service
         StudentDashboardDto childDashboardData = studentDashboardService.getDashboard(institutionId, studentToFetchId, semester);
+        
+        // Fetch latest remarks for the selected child
+        List<com.example.edutrack.dto.StudentRemarkDto> remarks = studentDashboardService.getStudentRemarks(institutionId, studentToFetchId);
 
         return GuardianDashboardDto.builder()
                 .children(childrenMinimal)
                 .selectedChildData(childDashboardData)
+                .latestRemarks(remarks.stream().limit(5).collect(Collectors.toList()))
                 .build();
     }
 
     @Override
     @Transactional(readOnly = true)
     public StudentDashboardDto.AttendanceSummary getAttendance(UUID institutionId, UUID guardianId, UUID selectedStudentId, Integer semester) {
-        Guardian guardian = guardianRepository.findByIdNative(guardianId.toString(), institutionId.toString())
+        Guardian guardian = guardianRepository.findByIdNative(guardianId, institutionId)
                 .orElseThrow(() -> new RuntimeException("Guardian not found"));
 
         if (guardian.getStudents() == null || guardian.getStudents().isEmpty()) {
@@ -80,7 +84,7 @@ public class GuardianDashboardServiceImpl implements GuardianDashboardService {
     @Override
     @Transactional(readOnly = true)
     public StudentDashboardDto.FinancialSummary getFees(UUID institutionId, UUID guardianId, UUID selectedStudentId) {
-        Guardian guardian = guardianRepository.findByIdNative(guardianId.toString(), institutionId.toString())
+        Guardian guardian = guardianRepository.findByIdNative(guardianId, institutionId)
                 .orElseThrow(() -> new RuntimeException("Guardian not found"));
 
         if (guardian.getStudents() == null || guardian.getStudents().isEmpty()) {

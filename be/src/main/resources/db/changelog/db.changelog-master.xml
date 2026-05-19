@@ -19,5 +19,6 @@
     <include file="db/changelog/V11__optimize_dashboard_indexes.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/V12__add_semester_to_attendance.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/V13__fix_student_batch_year_type.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/V14__add_transport_fleet_management.xml" relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

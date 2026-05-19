@@ -1,7 +1,10 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const GuardianSidebar = () => {
+  const { user } = useSelector(state => state.auth);
+  
   const navItems = [
     { name: 'Home', icon: 'dashboard', path: '/guardian/dashboard' },
     { name: 'Messages', icon: 'chat_bubble', path: '/guardian/faculty-directory' },
@@ -40,15 +43,19 @@ const GuardianSidebar = () => {
 
       <div className="mt-auto bg-white/40 p-4 rounded-xl flex items-center gap-3 shadow-sm border border-white/60">
         <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold overflow-hidden">
-          <img 
-            alt="Sarah Sterling" 
-            className="w-full h-full object-cover" 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuClQKhXwVQr2CROipVsZFX6eligluBRzByT4Q5olS6K_7KelKQ9mPwYXLrySmvobZCF9pS2lo-qq2AXhkGt4D7fU4OhLSL2aAedrn6WknhiMg9j6dORPyypdudnQDTltm6LDqbYraZWrJfJGYeSgaulQwA1AT93o5aGBN0-Z7RT-Cj-hOham_3XUDhQfQD_9L-5GJucZbghadEn-wDFNHMWOMrL_VVciwa5LIi9Yf6NLv3ocjP_y-JJDhYZl4NvAn7AsfwG7kfkLAY"
-          />
+          {user?.avatarUrl ? (
+            <img 
+              alt={user?.firstName} 
+              className="w-full h-full object-cover" 
+              src={user.avatarUrl}
+            />
+          ) : (
+            <span className="material-symbols-outlined">person</span>
+          )}
         </div>
-        <div>
-          <p className="text-sm font-bold text-on-surface">Sarah Sterling</p>
-          <p className="text-[10px] text-slate-400">Guardian ID: #8821</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-bold text-on-surface truncate">{user?.firstName} {user?.lastName}</p>
+          <p className="text-[10px] text-slate-400">Guardian</p>
         </div>
       </div>
     </aside>

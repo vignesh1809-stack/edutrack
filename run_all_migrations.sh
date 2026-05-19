@@ -28,8 +28,17 @@ cd ..
 
 # 2. Setup Python Environment
 echo -e "\n${GREEN}Step 2: Setting up Python Environment...${NC}"
+if [ -d "migration/venv" ]; then
+    echo "Using virtual environment..."
+    PYTHON="migration/venv/bin/python3"
+    PIP="migration/venv/bin/pip"
+else
+    PYTHON="python3"
+    PIP="pip"
+fi
+
 if [ -f "migration/requirements.txt" ]; then
-    pip install -r migration/requirements.txt --quiet
+    $PIP install -r migration/requirements.txt --quiet
 fi
 
 # 3. Run Data Migration/Seed Scripts in Order
@@ -38,31 +47,31 @@ echo -e "\n${GREEN}Step 3: Running Data Seeding Scripts...${NC}"
 # Run the complete migration script first (Base Data)
 if [ -f "migration/migration_complete.py" ]; then
     echo -e "Running migration_complete.py..."
-    python3 migration/migration_complete.py
+    $PYTHON migration/migration_complete.py
 fi
 
 # Run Addons
 if [ -f "migration/migration_addons.py" ]; then
     echo -e "Running migration_addons.py..."
-    python3 migration/migration_addons.py
+    $PYTHON migration/migration_addons.py
 fi
 
 # Run Remarks
 if [ -f "migration/migration_remarks.py" ]; then
     echo -e "Running migration_remarks.py..."
-    python3 migration/migration_remarks.py
+    $PYTHON migration/migration_remarks.py
 fi
 
 # Run Guardian Mapping
 if [ -f "migration/run_guardian_map.py" ]; then
     echo -e "Running run_guardian_map.py..."
-    python3 migration/run_guardian_map.py
+    $PYTHON migration/run_guardian_map.py
 fi
 
 # Run Test Data Generation
 if [ -f "migration/generate_test_data.py" ]; then
     echo -e "Running generate_test_data.py..."
-    python3 migration/generate_test_data.py
+    $PYTHON migration/generate_test_data.py
 fi
 
 echo -e "\n${BLUE}=== Migration Completed Successfully! ===${NC}"

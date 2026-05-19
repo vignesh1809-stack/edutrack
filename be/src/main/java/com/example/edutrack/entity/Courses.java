@@ -32,6 +32,7 @@ public class Courses extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id", nullable = false)
+    @JsonIgnore
     private Department department;
 
     private String courseName;
@@ -40,6 +41,7 @@ public class Courses extends BaseEntity {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "staff_id")
+    @JsonIgnore
     private Staff staff;
 
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)

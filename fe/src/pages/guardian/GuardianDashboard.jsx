@@ -187,13 +187,17 @@ const GuardianDashboard = () => {
                                 <span className={`p-2 rounded-lg ${financials.status === 'PAID' ? 'bg-success-container/20 text-success' : 'bg-error-container/20 text-error'}`}>
                                     <span className="material-symbols-outlined">payments</span>
                                 </span>
-                                {financials.status !== 'PAID' && (
-                                    <span className="text-xs font-bold text-primary underline">View Details</span>
-                                )}
+                                <span className="text-xs font-bold text-primary underline">View Details</span>
                             </div>
-                            <div>
-                                <p className="text-on-surface-variant text-sm font-medium">Pending Fees</p>
-                                <h3 className="font-headline font-extrabold text-3xl text-on-surface">{formatCurrency(financials.pendingAmount)}</h3>
+                            <div className="flex gap-6">
+                                <div>
+                                    <p className="text-on-surface-variant text-xs font-medium">Pending Fees</p>
+                                    <h3 className="font-headline font-extrabold text-2xl text-error">{formatCurrency(financials.pendingAmount)}</h3>
+                                </div>
+                                <div className="border-l border-slate-100 pl-6">
+                                    <p className="text-on-surface-variant text-xs font-medium">Paid Fees</p>
+                                    <h3 className="font-headline font-extrabold text-2xl text-success">{formatCurrency(financials.paidAmount)}</h3>
+                                </div>
                             </div>
                         </div>
                     </div>

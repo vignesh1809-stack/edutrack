@@ -20,5 +20,7 @@
     <include file="db/changelog/V12__add_semester_to_attendance.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/V13__fix_student_batch_year_type.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/V14__add_transport_fleet_management.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/V15__add_paper_evaluation_tables.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/V16__add_school_class_table.xml" relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

@@ -26,6 +26,8 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
         @Query("SELECT s FROM Student s WHERE s.institutionId = :institutionId AND s.isDeleted = false")
         Page<Student> findAllActive(@Param("institutionId") UUID institutionId, Pageable pageable);
 
+        List<Student> findByInstitutionIdAndIsDeletedFalse(UUID institutionId);
+
         // Principal paginated student list using native SQL and interface projection
         @Query(value = """
                         SELECT
@@ -36,30 +38,32 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
                             s.gender as gender,
                             s.status as status,
                             d.name as departmentName,
-                            CAST(s.batch_year AS SIGNED) as batchYear,
-                            s.section as section,
+                            CAST(c.batch_year AS SIGNED) as batchYear,
+                            c.section as section,
                             s.current_semester as currentSemester,
                             s.cgpa as cgpa
                         FROM students s
-                        JOIN departments d ON s.department_id = d.id
+                        JOIN classes c ON s.class_id = c.id
+                        JOIN departments d ON c.department_id = d.id
                         WHERE s.institution_id = :institutionId
                           AND s.is_deleted = 0
                           AND (:search IS NULL OR LOWER(s.first_name) LIKE :search OR LOWER(s.last_name) LIKE :search OR LOWER(s.student_id) LIKE :search)
                           AND (:status IS NULL OR s.status = :status)
                           AND (:courseLike IS NULL OR LOWER(d.code) LIKE :courseLike)
-                          AND (:batchYear IS NULL OR s.batch_year = :batchYear)
-                          AND (:section IS NULL OR s.section = :section)
+                          AND (:batchYear IS NULL OR c.batch_year = :batchYear)
+                          AND (:section IS NULL OR c.section = :section)
                         """, countQuery = """
                         SELECT COUNT(*)
                         FROM students s
-                        JOIN departments d ON s.department_id = d.id
+                        JOIN classes c ON s.class_id = c.id
+                        JOIN departments d ON c.department_id = d.id
                         WHERE s.institution_id = :institutionId
                           AND s.is_deleted = 0
                           AND (:search IS NULL OR LOWER(s.first_name) LIKE :search OR LOWER(s.last_name) LIKE :search OR LOWER(s.student_id) LIKE :search)
                           AND (:status IS NULL OR s.status = :status)
                           AND (:courseLike IS NULL OR LOWER(d.code) LIKE :courseLike)
-                          AND (:batchYear IS NULL OR s.batch_year = :batchYear)
-                          AND (:section IS NULL OR s.section = :section)
+                          AND (:batchYear IS NULL OR c.batch_year = :batchYear)
+                          AND (:section IS NULL OR c.section = :section)
                         """, nativeQuery = true)
         Page<StudentListProjection> findPrincipalStudentList(
                         @Param("institutionId") UUID institutionId,
@@ -75,7 +79,7 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
         Optional<Student> findActiveById(@Param("id") String id, @Param("instId") String instId);
 
         // Single student by id with eager relationships
-        @Query("SELECT s FROM Student s LEFT JOIN FETCH s.department LEFT JOIN FETCH s.guardians WHERE s.id = :id AND s.institutionId = :institutionId AND s.isDeleted = false")
+        @Query("SELECT s FROM Student s LEFT JOIN FETCH s.schoolClass sc LEFT JOIN FETCH sc.department LEFT JOIN FETCH s.guardians WHERE s.id = :id AND s.institutionId = :institutionId AND s.isDeleted = false")
         Optional<Student> findFullStudentProfile(@Param("id") UUID id, @Param("institutionId") UUID institutionId);
 
         @Query(value = """
@@ -87,18 +91,19 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
                 s.status as status,
                 s.gender as gender,
                 d.name as departmentName,
-                s.section as section,
+                c.section as section,
                 s.current_semester as currentSemester,
                 s.phone as phone,
                 s.email as email,
                 s.address as address,
                 s.date_of_birth as dateOfBirth,
                 s.blood_group as bloodGroup,
-                CAST(s.batch_year AS SIGNED) as batchYear,
+                CAST(c.batch_year AS SIGNED) as batchYear,
                 s.cgpa as cgpa,
                 s.avatar_url as avatarUrl
             FROM students s
-            LEFT JOIN departments d ON s.department_id = d.id
+            JOIN classes c ON s.class_id = c.id
+            LEFT JOIN departments d ON c.department_id = d.id
             WHERE s.id = UUID_TO_BIN(:id) 
               AND s.institution_id = UUID_TO_BIN(:instId) 
               AND s.is_deleted = 0
@@ -108,7 +113,7 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
         // Lookup by institution + phone (used in auth).
         Optional<Student> findByInstitutionIdAndPhone(UUID institutionId, String phone);
 
-        @Query(value = "SELECT DISTINCT batch_year FROM students WHERE institution_id = UNHEX(REPLACE(:institutionId, '-', '')) AND is_deleted = 0 AND batch_year IS NOT NULL ORDER BY batch_year DESC", nativeQuery = true)
+        @Query(value = "SELECT DISTINCT batch_year FROM classes WHERE institution_id = UNHEX(REPLACE(:institutionId, '-', '')) AND is_deleted = 0 AND batch_year IS NOT NULL ORDER BY batch_year DESC", nativeQuery = true)
         List<Object> findDistinctAdmissionYears(@Param("institutionId") String institutionId);
 
         @Query(value = "SELECT * FROM students WHERE institution_id = :instId AND phone = :phone", nativeQuery = true)
@@ -126,11 +131,12 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
         @Query(value = """
                         SELECT COUNT(s.id)
                         FROM students s
-                        LEFT JOIN departments d ON d.id = s.department_id
+                        JOIN classes c ON s.class_id = c.id
+                        LEFT JOIN departments d ON d.id = c.department_id
                         WHERE s.institution_id = :instId
                           AND s.is_deleted = false
-                          AND (:batchYear IS NULL OR s.batch_year = :batchYear)
-                          AND (:section IS NULL OR s.section = :section)
+                          AND (:batchYear IS NULL OR c.batch_year = :batchYear)
+                          AND (:section IS NULL OR c.section = :section)
                           AND (:branch IS NULL OR d.code = :branch)
                         """, nativeQuery = true)
         long countActiveStudentsFiltered(@Param("instId") UUID instId,
@@ -143,11 +149,12 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
                             d.code as departmentCode,
                             AVG(s.cgpa) as averageCgpa
                         FROM students s
-                        JOIN departments d ON d.id = s.department_id
+                        JOIN classes c ON s.class_id = c.id
+                        JOIN departments d ON d.id = c.department_id
                         WHERE s.institution_id = :instId
                           AND s.is_deleted = false
-                          AND (:batchYear IS NULL OR s.batch_year = :batchYear)
-                          AND (:section IS NULL OR s.section = :section)
+                          AND (:batchYear IS NULL OR c.batch_year = :batchYear)
+                          AND (:section IS NULL OR c.section = :section)
                           AND (:branch IS NULL OR d.code = :branch)
                           AND s.cgpa IS NOT NULL
                         GROUP BY d.code
@@ -168,16 +175,8 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
                             FROM students s
                             WHERE s.institution_id = :instId
                               AND s.is_deleted = false
-                              AND s.department_id = (
-                                  SELECT s2.department_id FROM students s2
-                                  WHERE s2.id = :studentId AND s2.institution_id = :instId LIMIT 1
-                              )
-                              AND s.section = (
-                                  SELECT s2.section FROM students s2
-                                  WHERE s2.id = :studentId AND s2.institution_id = :instId LIMIT 1
-                              )
-                              AND s.batch_year = (
-                                  SELECT s2.batch_year FROM students s2
+                              AND s.class_id = (
+                                  SELECT s2.class_id FROM students s2
                                   WHERE s2.id = :studentId AND s2.institution_id = :instId LIMIT 1
                               )
                               AND s.current_semester = (
@@ -204,22 +203,14 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
                                           AND a.student_id = s.id
                                           AND a.semester = s.current_semester
                                           AND a.is_deleted = false
-                                    ), 0) DESC
+                                      ), 0) DESC
                                 ) AS rank_position,
                                 COUNT(*) OVER () AS cohort_size
                             FROM students s
                             WHERE s.institution_id = :instId
                               AND s.is_deleted = false
-                              AND s.department_id = (
-                                  SELECT s2.department_id FROM students s2
-                                  WHERE s2.id = :studentId AND s2.institution_id = :instId LIMIT 1
-                              )
-                              AND s.section = (
-                                  SELECT s2.section FROM students s2
-                                  WHERE s2.id = :studentId AND s2.institution_id = :instId LIMIT 1
-                              )
-                              AND s.batch_year = (
-                                  SELECT s2.batch_year FROM students s2
+                              AND s.class_id = (
+                                  SELECT s2.class_id FROM students s2
                                   WHERE s2.id = :studentId AND s2.institution_id = :instId LIMIT 1
                               )
                               AND s.current_semester = (
@@ -232,4 +223,29 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
         StudentDashboardRankProjection findAttendanceRankForStudentDashboard(
                         @Param("instId") UUID instId,
                         @Param("studentId") UUID studentId);
+
+        @Query(value = "SELECT COUNT(*) FROM students WHERE class_id = :classId AND is_deleted = 0", nativeQuery = true)
+        long countBySchoolClassIdNative(@Param("classId") UUID classId);
+
+        @Query(value = "SELECT COALESCE(AVG(a.marks_obtained / a.max_score * 100.0), 0.0) FROM assessments a JOIN students s ON a.student_id = s.id WHERE s.class_id = :classId AND a.is_deleted = 0 AND s.is_deleted = 0", nativeQuery = true)
+        double getAvgMarksByClassIdNative(@Param("classId") UUID classId);
+
+        @Query(value = "SELECT COALESCE(AVG(CASE WHEN a.attendance_status = 'PRESENT' THEN 100.0 ELSE 0.0 END), 0.0) FROM attendances a JOIN students s ON a.student_id = s.id WHERE s.class_id = :classId AND a.is_deleted = 0 AND s.is_deleted = 0", nativeQuery = true)
+        double getAttendanceByClassIdNative(@Param("classId") UUID classId);
+
+        @Query(value = "SELECT COUNT(*) FROM remarks r JOIN students s ON r.target_student_id = s.id WHERE s.class_id = :classId AND r.is_deleted = 0 AND s.is_deleted = 0", nativeQuery = true)
+        long countPendingRemarksByClassIdNative(@Param("classId") UUID classId);
+
+        @Query(value = """
+            SELECT 
+                s.first_name AS firstName,
+                s.last_name AS lastName,
+                AVG(a.marks_obtained / a.max_score * 100.0) AS averageScore
+            FROM students s
+            LEFT JOIN assessments a ON s.id = a.student_id AND a.is_deleted = 0
+            WHERE s.class_id = :classId AND s.is_deleted = 0
+            GROUP BY s.id, s.first_name, s.last_name
+            ORDER BY averageScore DESC
+            """, nativeQuery = true)
+        List<com.example.edutrack.dto.StudentPerformanceReviewProjection> findStudentPerformanceReviewByClassId(@Param("classId") UUID classId);
 }

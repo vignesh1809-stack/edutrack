@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="16-add-school-class-table" author="antigravity">
+        <!-- 1. Create classes table -->
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="classes"/></not>
+        </preConditions>
+        <createTable tableName="classes">
+            <column name="id" type="BINARY(16)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="institution_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="department_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="batch_year" type="YEAR">
+                <constraints nullable="false"/>
+            </column>
+            <column name="section" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="class_teacher_id" type="BINARY(16)"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="institution_id" baseTableName="classes" constraintName="fk_class_institution" referencedColumnNames="id" referencedTableName="institutions"/>
+        <addForeignKeyConstraint baseColumnNames="department_id" baseTableName="classes" constraintName="fk_class_department" referencedColumnNames="id" referencedTableName="departments"/>
+        <addForeignKeyConstraint baseColumnNames="class_teacher_id" baseTableName="classes" constraintName="fk_class_teacher" referencedColumnNames="id" referencedTableName="staffs"/>
+        
+        <createIndex indexName="idx_classes_lookup" tableName="classes">
+            <column name="institution_id"/>
+            <column name="department_id"/>
+            <column name="batch_year"/>
+            <column name="section"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="16-migrate-students-to-classes" author="antigravity">
+        <!-- 2. Populate classes with unique combinations from students -->
+        <sql>
+            INSERT INTO classes (id, institution_id, department_id, batch_year, section, created_at, is_deleted)
+            SELECT DISTINCT 
+                UUID_TO_BIN(UUID()), 
+                institution_id, 
+                department_id, 
+                batch_year, 
+                section, 
+                NOW(), 
+                0
+            FROM students 
+            WHERE is_deleted = 0 
+              AND department_id IS NOT NULL 
+              AND batch_year IS NOT NULL 
+              AND section IS NOT NULL;
+        </sql>
+
+        <!-- 3. Assign class teachers with role Lecturer from the same department and institution -->
+        <sql>
+            UPDATE classes c
+            SET c.class_teacher_id = (
+                SELECT s.id 
+                FROM staffs s 
+                WHERE s.department_id = c.department_id 
+                  AND s.institution_id = c.institution_id 
+                  AND s.role = 'Lecturer'
+                  AND s.is_deleted = 0
+                LIMIT 1
+            );
+        </sql>
+
+        <!-- 4. Add temporary nullable class_id column to students -->
+        <addColumn tableName="students">
+            <column name="class_id" type="BINARY(16)"/>
+        </addColumn>
+
+        <!-- 5. Populate class_id in students by matching properties -->
+        <sql>
+            UPDATE students s
+            JOIN classes c ON s.institution_id = c.institution_id 
+                          AND s.department_id = c.department_id 
+                          AND s.batch_year = c.batch_year 
+                          AND s.section = c.section
+            SET s.class_id = c.id;
+        </sql>
+
+        <!-- 6a. Create temporary index to satisfy institution_id foreign key constraint -->
+        <createIndex indexName="idx_students_fk_temp" tableName="students">
+            <column name="institution_id"/>
+        </createIndex>
+
+        <!-- 6b. Drop old index before removing columns -->
+        <dropIndex indexName="idx_students_dashboard_perf" tableName="students"/>
+
+        <!-- 7. Drop obsolete constraints and columns from students -->
+        <dropForeignKeyConstraint baseTableName="students" constraintName="fk_student_department"/>
+        <dropColumn tableName="students" columnName="department_id"/>
+        <dropColumn tableName="students" columnName="batch_year"/>
+        <dropColumn tableName="students" columnName="section"/>
+
+        <!-- 8. Make class_id NOT NULL and add foreign key constraint -->
+        <addNotNullConstraint tableName="students" columnName="class_id" columnDataType="BINARY(16)"/>
+        <addForeignKeyConstraint baseColumnNames="class_id" baseTableName="students" constraintName="fk_student_class" referencedColumnNames="id" referencedTableName="classes"/>
+
+        <!-- 9a. Create optimized dashboard index with class_id -->
+        <createIndex indexName="idx_students_dashboard_perf" tableName="students">
+            <column name="institution_id"/>
+            <column name="is_deleted"/>
+            <column name="class_id"/>
+        </createIndex>
+
+        <!-- 9b. Drop temporary index now that final index is present -->
+        <dropIndex indexName="idx_students_fk_temp" tableName="students"/>
+    </changeSet>
+
+</databaseChangeLog>

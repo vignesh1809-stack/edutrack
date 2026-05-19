@@ -178,6 +178,17 @@ function* handleFetchLeastPerformedStaff(action) {
     }
 }
 
+function* handleFetchLecturerDashboard() {
+    try {
+        const response = yield call(axiosInstance.get, '/api/staff/dashboard');
+        yield put(actions.fetchLecturerDashboardSuccess(response.data));
+    } catch (error) {
+        yield put(actions.fetchLecturerDashboardFailure(
+            error.response?.data?.message || error.message || 'Failed to fetch lecturer dashboard'
+        ));
+    }
+}
+
 export default function* dashboardSaga() {
     yield takeLatest(types.FETCH_PRINCIPAL_DASHBOARD_REQUEST, handleFetchDashboard);
     yield takeLatest(types.FETCH_STAFF_ATTENDANCE_GRAPH_REQUEST, handleFetchStaffAttendanceGraph);
@@ -188,4 +199,5 @@ export default function* dashboardSaga() {
     yield takeLatest(types.FETCH_ATTENDANCE_TRENDS_REQUEST, handleFetchAttendanceTrends);
     yield takeLatest(types.FETCH_DEPARTMENT_AVERAGES_REQUEST, handleFetchDepartmentAverages);
     yield takeLatest(types.FETCH_LEAST_PERFORMED_STAFF_REQUEST, handleFetchLeastPerformedStaff);
+    yield takeLatest(types.FETCH_LECTURER_DASHBOARD_REQUEST, handleFetchLecturerDashboard);
 }

@@ -47,8 +47,8 @@ public class Student extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JdbcTypeCode(SqlTypes.BINARY)
-    @JoinColumn(name = "department_id", nullable = false, columnDefinition = "BINARY(16)")
-    private Department department;
+    @JoinColumn(name = "class_id", nullable = false, columnDefinition = "BINARY(16)")
+    private SchoolClass schoolClass;
 
     @Enumerated(EnumType.STRING)   
     private StudentStatus status;
@@ -69,9 +69,6 @@ public class Student extends BaseEntity {
     private boolean twoFactorEnabled;
 
     private BigDecimal CGPA;
-    @Column(columnDefinition = "YEAR")
-    private Integer batchYear;
-    private String section;
     private int currentSemester;
 
     @ManyToMany(fetch = FetchType.LAZY)

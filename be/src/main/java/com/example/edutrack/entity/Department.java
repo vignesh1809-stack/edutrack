@@ -35,9 +35,7 @@ public class Department extends BaseEntity {
 
     private String code;
 
-    @OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<Student> students;
+
 
     @OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
     @JsonIgnore

@@ -1,6 +1,7 @@
 package com.example.edutrack.controller;
 
 import com.example.edutrack.dto.AttendanceGraphDto;
+import com.example.edutrack.dto.LecturerDashboardDto;
 import com.example.edutrack.security.CustomUserDetails;
 import com.example.edutrack.service.StaffDashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,15 @@ public class StaffDashboardController {
 
     @Autowired
     private StaffDashboardService staffDashboardService;
+
+    @GetMapping
+    @PreAuthorize("hasAnyAuthority('Lecturer', 'Head_of_Department', 'Administrator')")
+    public ResponseEntity<LecturerDashboardDto> getLecturerDashboard(
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        
+        LecturerDashboardDto dashboard = staffDashboardService.getLecturerDashboard(principal.getInstitutionId(), principal.getId());
+        return ResponseEntity.ok(dashboard);
+    }
 
     /**
      * GET /api/staff/dashboard/attendance-graph

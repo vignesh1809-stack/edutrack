@@ -52,8 +52,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                     Student student = studentOpt.get();
                     String deptName = null;
                     try {
-                        if (student.getDepartment() != null) {
-                            deptName = student.getDepartment().getName();
+                        if (student.getSchoolClass() != null && student.getSchoolClass().getDepartment() != null) {
+                            deptName = student.getSchoolClass().getDepartment().getName();
                         }
                     } catch (jakarta.persistence.EntityNotFoundException e) {
                         deptName = null;

@@ -49,12 +49,13 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
             SELECT COUNT(DISTINCT a.student_id)
             FROM attendances a
             JOIN students s ON s.id = a.student_id
-            LEFT JOIN departments d ON d.id = s.department_id
+            JOIN classes c ON s.class_id = c.id
+            LEFT JOIN departments d ON d.id = c.department_id
             WHERE a.institution_id = :instId
               AND a.record_date    = :date
               AND a.is_deleted     = false
-              AND (:batchYear IS NULL OR s.batch_year = :batchYear)
-              AND (:section IS NULL OR s.section = :section)
+              AND (:batchYear IS NULL OR c.batch_year = :batchYear)
+              AND (:section IS NULL OR c.section = :section)
               AND (:branch IS NULL OR d.code = :branch)
             """, nativeQuery = true)
     long countDistinctStudentsOnDateFiltered(@Param("instId") UUID instId, 
@@ -67,13 +68,14 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
             SELECT COUNT(a.id)
             FROM attendances a
             JOIN students s ON s.id = a.student_id
-            LEFT JOIN departments d ON d.id = s.department_id
+            JOIN classes c ON s.class_id = c.id
+            LEFT JOIN departments d ON d.id = c.department_id
             WHERE a.institution_id     = :instId
               AND a.record_date        = :date
               AND a.attendance_status  = 'PRESENT'
               AND a.is_deleted         = false
-              AND (:batchYear IS NULL OR s.batch_year = :batchYear)
-              AND (:section IS NULL OR s.section = :section)
+              AND (:batchYear IS NULL OR c.batch_year = :batchYear)
+              AND (:section IS NULL OR c.section = :section)
               AND (:branch IS NULL OR d.code = :branch)
             """, nativeQuery = true)
     long countPresentOnDateFiltered(@Param("instId") UUID instId, 
@@ -86,12 +88,13 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
             SELECT COUNT(a.id)
             FROM attendances a
             JOIN students s ON s.id = a.student_id
-            LEFT JOIN departments d ON d.id = s.department_id
+            JOIN classes c ON s.class_id = c.id
+            LEFT JOIN departments d ON d.id = c.department_id
             WHERE a.institution_id = :instId
               AND a.record_date    = :date
               AND a.is_deleted     = false
-              AND (:batchYear IS NULL OR s.batch_year = :batchYear)
-              AND (:section IS NULL OR s.section = :section)
+              AND (:batchYear IS NULL OR c.batch_year = :batchYear)
+              AND (:section IS NULL OR c.section = :section)
               AND (:branch IS NULL OR d.code = :branch)
             """, nativeQuery = true)
     long countTotalOnDateFiltered(@Param("instId") UUID instId, 
@@ -119,11 +122,12 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
                    COUNT(a.id) as totalCount
             FROM attendances a
             JOIN students s ON s.id = a.student_id
+            JOIN classes c ON s.class_id = c.id
             WHERE a.institution_id = :instId
               AND a.record_date >= :startDate
               AND a.is_deleted = false
-              AND (:batchYear IS NULL OR s.batch_year = :batchYear)
-              AND (:section IS NULL OR s.section = :section)
+              AND (:batchYear IS NULL OR c.batch_year = :batchYear)
+              AND (:section IS NULL OR c.section = :section)
             GROUP BY a.record_date
             ORDER BY a.record_date ASC
             """, nativeQuery = true)
@@ -146,11 +150,12 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
                 COUNT(a.id) AS totalCount
             FROM attendances a
             JOIN students s ON s.id = a.student_id
-            JOIN departments d ON d.id = s.department_id
+            JOIN classes c ON s.class_id = c.id
+            JOIN departments d ON d.id = c.department_id
             WHERE a.institution_id = :instId
               AND a.record_date >= :startDate
               AND a.is_deleted = false
-              AND (:batchYear IS NULL OR s.batch_year = :batchYear)
+              AND (:batchYear IS NULL OR c.batch_year = :batchYear)
               AND (:branchCode IS NULL OR LOWER(d.code) = LOWER(:branchCode))
             GROUP BY d.code, YEAR(a.record_date), MONTH(a.record_date)
             ORDER BY d.code ASC, yr ASC, mo ASC
@@ -233,4 +238,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
     List<StudentDashboardDayAttendanceProjection> findStudentDashboardWeeklyBars(
             @Param("instId") UUID instId,
             @Param("studentId") UUID studentId);
+
+    @Query(value = "SELECT COALESCE(AVG(CASE WHEN a.attendance_status = 'PRESENT' THEN 100.0 ELSE 0.0 END), 0.0) FROM attendances a JOIN courses c ON a.course_id = c.id WHERE c.staff_id = :staffId AND a.is_deleted = 0 AND c.is_deleted = 0", nativeQuery = true)
+    double getAttendanceRateByStaffIdNative(@Param("staffId") UUID staffId);
 }

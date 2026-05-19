@@ -22,10 +22,12 @@ RECORDS = 1000
 institutions = []
 departments_by_inst = {}
 staffs_by_inst = {}
+lecturers_by_inst = {}
 buses_by_inst = {}
 students_by_inst = {}
 courses_by_inst = {}
 guardians_by_inst = {}
+classes_by_inst = {}
 fees_all = [] # (fee_id, inst_id, status, total)
 
 # Enum choices based on DB schema
@@ -58,6 +60,7 @@ def create_institutions(cursor):
         # Initialize containers for this institution
         departments_by_inst[inst_id] = []
         staffs_by_inst[inst_id] = []
+        lecturers_by_inst[inst_id] = []
         buses_by_inst[inst_id] = []
         students_by_inst[inst_id] = []
         courses_by_inst[inst_id] = []
@@ -92,16 +95,18 @@ def create_staffs(cursor):
     print("Creating staffs...")
     data = []
     for inst in institutions:
-        for _ in range(20):
+        for i in range(20):
             staff_id = uuid_bin()
             fname = fake.first_name()
             lname = fake.last_name()
             email = fake.unique.email()
             password = "hashed_password"
             phone = fake.phone_number()[:20]
-            role = random.choice(STAFF_ROLES)
+            role = 'Lecturer' if i < 12 else random.choice(STAFF_ROLES)
             data.append((staff_id, inst, 0, email, fname, lname, password, phone, role, 0))
             staffs_by_inst[inst].append(staff_id)
+            if role == 'Lecturer':
+                lecturers_by_inst[inst].append(staff_id)
             
     cursor.executemany("""
         INSERT INTO staffs (id, created_at, institution_id, is_deleted, email, first_name, last_name, password, phone, role, two_factor_enabled)
@@ -132,16 +137,35 @@ def create_buses(cursor):
         for _ in range(3):
             bus_id = uuid_bin()
             bus_num = fake.license_plate()
-            driver = fake.name()
-            route = fake.street_name()
             tot_students = random.randint(30, 50)
-            incharge = random.choice(staffs_by_inst[inst])
-            data.append((bus_id, inst, 0, bus_num, driver, route, tot_students, incharge))
+            data.append((bus_id, inst, 0, bus_num, tot_students))
             buses_by_inst[inst].append(bus_id)
             
     cursor.executemany("""
-        INSERT INTO buses (id, created_at, institution_id, is_deleted, bus_number, driver_name, route, total_students, incharge_id)
-        VALUES (%s, NOW(), %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO buses (id, institution_id, is_deleted, bus_number, total_students, created_at, updated_at)
+        VALUES (%s, %s, %s, %s, %s, NOW(), NOW())
+    """, data)
+
+def create_classes(cursor):
+    print("Creating classes...")
+    data = []
+    for inst in institutions:
+        classes_by_inst[inst] = []
+        lecturer_staffs = lecturers_by_inst.get(inst, [])
+        if not lecturer_staffs:
+            lecturer_staffs = staffs_by_inst.get(inst, [])
+        
+        for dept in departments_by_inst[inst]:
+            for year in [2024, 2025, 2026]:
+                for sec in ['A', 'B']:
+                    class_id = uuid_bin()
+                    teacher_id = random.choice(lecturer_staffs) if lecturer_staffs else None
+                    data.append((class_id, inst, 0, year, sec, dept, teacher_id))
+                    classes_by_inst[inst].append(class_id)
+                    
+    cursor.executemany("""
+        INSERT INTO classes (id, created_at, institution_id, is_deleted, batch_year, section, department_id, class_teacher_id)
+        VALUES (%s, NOW(), %s, %s, %s, %s, %s, %s)
     """, data)
 
 def create_students(cursor):
@@ -153,23 +177,20 @@ def create_students(cursor):
             fname = fake.first_name()
             lname = fake.last_name()
             email = fake.unique.email()
-            dept = random.choice(departments_by_inst[inst])
+            clazz = random.choice(classes_by_inst[inst])
             bus = random.choice(buses_by_inst[inst])
             is_hosteller = random.choice([0, 1])
             status = random.choice(STATUS_CHOICES)
             student_id_str = fake.bothify(text='STU-####')
             cgpa = round(random.uniform(2.0, 4.0), 2)
-            batch_year = f"{random.randint(2020, 2026)}-01-01"
-            section = random.choice(['A', 'B', 'C'])
             sem = random.randint(1, 8)
-            data.append((sid, inst, 0, cgpa, email, fname, lname, is_hosteller, status, student_id_str, bus, dept, batch_year, section, sem))
-
+            data.append((sid, inst, 0, cgpa, email, fname, lname, is_hosteller, status, student_id_str, bus, clazz, sem))
 
             students_by_inst[inst].append(sid)
             
     cursor.executemany("""
-        INSERT INTO students (id, created_at, institution_id, is_deleted, cgpa, email, first_name, last_name, is_hosteller, status, student_id, bus_id, department_id, batch_year, section, current_semester)
-        VALUES (%s, NOW(), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO students (id, created_at, institution_id, is_deleted, cgpa, email, first_name, last_name, is_hosteller, status, student_id, bus_id, class_id, current_semester)
+        VALUES (%s, NOW(), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, data)
 
 
@@ -336,6 +357,7 @@ if __name__ == "__main__":
         create_staffs(cursor)
         create_guardians(cursor)
         create_buses(cursor)
+        create_classes(cursor)
         create_students(cursor)
         create_courses(cursor)
         create_fees(cursor)

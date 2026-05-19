@@ -111,6 +111,7 @@ public class StudentDashboardDto {
     @Builder
     public static class FinancialSummary {
         private java.math.BigDecimal pendingAmount;
+        private java.math.BigDecimal paidAmount;
         private java.time.LocalDate dueDate;
         private String status; // "PAID", "PARTIAL", "UNPAID"
         private List<FeeDetailDto> pendingItems;

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 // stops scanning them and emitting "could not safely identify store" warnings.
 @SpringBootApplication
 @EnableCaching
+@org.springframework.scheduling.annotation.EnableAsync
 @EnableJpaRepositories(basePackages = "com.example.edutrack.repository")
 public class EdutrackApplication {
 

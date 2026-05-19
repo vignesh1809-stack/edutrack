@@ -151,12 +151,27 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
         try {
             var finProj = feeRepository.findStudentFinancialSummary(studentId.toString(), institutionId.toString());
             
-            // Fetch detailed pending items
-            List<com.example.edutrack.entity.Fee> pendingFees = feeRepository.findByStudentId(studentId, institutionId).stream()
-                    .filter(f -> f.getStatus() != com.example.edutrack.entity.enums.FeeStatus.PAID)
+            // Fetch all fees
+            List<com.example.edutrack.entity.Fee> allFees = feeRepository.findByStudentId(studentId, institutionId);
+
+            // Calculate paid amount
+            java.math.BigDecimal paidAmount = allFees.stream()
+                    .filter(f -> f.getStatus() == com.example.edutrack.entity.enums.FeeStatus.PAID)
+                    .map(f -> f.getTotalAmount() != null ? f.getTotalAmount() : java.math.BigDecimal.ZERO)
+                    .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+            // Sort so that unpaid/pending are first, paid are last
+            List<com.example.edutrack.entity.Fee> sortedFees = allFees.stream()
+                    .sorted((f1, f2) -> {
+                        boolean p1 = f1.getStatus() == com.example.edutrack.entity.enums.FeeStatus.PAID;
+                        boolean p2 = f2.getStatus() == com.example.edutrack.entity.enums.FeeStatus.PAID;
+                        if (p1 && !p2) return 1;
+                        if (!p1 && p2) return -1;
+                        return 0;
+                    })
                     .toList();
 
-            List<StudentDashboardDto.FeeDetailDto> items = pendingFees.stream()
+            List<StudentDashboardDto.FeeDetailDto> items = sortedFees.stream()
                     .map(f -> StudentDashboardDto.FeeDetailDto.builder()
                             .feeType(f.getFeeType() != null ? f.getFeeType().name() : "Other")
                             .term(f.getTerm())
@@ -167,19 +182,25 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
                             .build())
                     .toList();
 
-            if (finProj != null) {
-                return StudentDashboardDto.FinancialSummary.builder()
-                        .pendingAmount(finProj.getPendingAmount() != null ? finProj.getPendingAmount() : java.math.BigDecimal.ZERO)
-                        .dueDate(finProj.getDueDate())
-                        .status(finProj.getPendingAmount() != null && finProj.getPendingAmount().compareTo(java.math.BigDecimal.ZERO) > 0 ? "UNPAID" : "PAID")
-                        .pendingItems(items)
-                        .build();
-            }
+            java.math.BigDecimal pendingAmount = (finProj != null && finProj.getPendingAmount() != null) 
+                    ? finProj.getPendingAmount() 
+                    : java.math.BigDecimal.ZERO;
+            java.time.LocalDate dueDate = finProj != null ? finProj.getDueDate() : null;
+            String status = pendingAmount.compareTo(java.math.BigDecimal.ZERO) > 0 ? "UNPAID" : "PAID";
+
+            return StudentDashboardDto.FinancialSummary.builder()
+                    .pendingAmount(pendingAmount)
+                    .paidAmount(paidAmount)
+                    .dueDate(dueDate)
+                    .status(status)
+                    .pendingItems(items)
+                    .build();
         } catch (Exception e) {
             // Log error and return zeroed financials
         }
         return StudentDashboardDto.FinancialSummary.builder()
                 .pendingAmount(java.math.BigDecimal.ZERO)
+                .paidAmount(java.math.BigDecimal.ZERO)
                 .dueDate(null)
                 .status("PAID")
                 .pendingItems(List.of())

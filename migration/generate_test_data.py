@@ -22,7 +22,12 @@ def generate_data():
 
     try:
         # 1. Fetch Students
-        cursor.execute("SELECT id, institution_id, department_id, current_semester FROM students WHERE is_deleted = 0")
+        cursor.execute("""
+            SELECT s.id, s.institution_id, c.department_id, s.current_semester 
+            FROM students s
+            JOIN classes c ON s.class_id = c.id
+            WHERE s.is_deleted = 0
+        """)
         students = cursor.fetchall()
         print(f"Found {len(students)} students.")
 

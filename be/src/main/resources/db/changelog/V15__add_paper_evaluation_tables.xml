@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <!-- Paper Submissions Table -->
+    <changeSet id="17-create-paper-submissions" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="paper_submissions"/></not>
+        </preConditions>
+        <createTable tableName="paper_submissions">
+            <column name="id" type="BINARY(16)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="institution_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="student_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="course_id" type="BINARY(16)"/>
+            <column name="exam_type" type="VARCHAR(100)"/>
+            <column name="academic_year" type="VARCHAR(50)"/>
+            <column name="section" type="VARCHAR(20)"/>
+            <column name="status" type="VARCHAR(50)"/>
+            <column name="max_score" type="DECIMAL(5,2)"/>
+            <column name="marks_obtained" type="DECIMAL(5,2)"/>
+            <column name="overall_feedback" type="TEXT"/>
+            <column name="question_paper_url" type="VARCHAR(512)"/>
+            <column name="answer_key_url" type="VARCHAR(512)"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="institution_id" baseTableName="paper_submissions" constraintName="fk_paper_sub_institution" referencedColumnNames="id" referencedTableName="institutions"/>
+        <addForeignKeyConstraint baseColumnNames="student_id" baseTableName="paper_submissions" constraintName="fk_paper_sub_student" referencedColumnNames="id" referencedTableName="students"/>
+        <addForeignKeyConstraint baseColumnNames="course_id" baseTableName="paper_submissions" constraintName="fk_paper_sub_course" referencedColumnNames="id" referencedTableName="courses"/>
+        <createIndex indexName="idx_paper_sub_student" tableName="paper_submissions">
+            <column name="institution_id"/>
+            <column name="student_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Paper Submission Pages Table -->
+    <changeSet id="18-create-paper-submission-pages" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="paper_submission_pages"/></not>
+        </preConditions>
+        <createTable tableName="paper_submission_pages">
+            <column name="id" type="BINARY(16)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="submission_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="page_number" type="INT"/>
+            <column name="image_url" type="VARCHAR(512)"/>
+            <column name="md5_hash" type="VARCHAR(32)"/>
+            <column name="ocr_text" type="TEXT"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="submission_id" baseTableName="paper_submission_pages" constraintName="fk_page_submission" referencedColumnNames="id" referencedTableName="paper_submissions"/>
+        <createIndex indexName="idx_page_submission" tableName="paper_submission_pages">
+            <column name="submission_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Paper Submission Questions Table -->
+    <changeSet id="19-create-paper-submission-questions" author="antigravity">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="paper_submission_questions"/></not>
+        </preConditions>
+        <createTable tableName="paper_submission_questions">
+            <column name="id" type="BINARY(16)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="submission_id" type="BINARY(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="question_number" type="INT"/>
+            <column name="max_score" type="DECIMAL(5,2)"/>
+            <column name="marks_obtained" type="DECIMAL(5,2)"/>
+            <column name="feedback" type="TEXT"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="submission_id" baseTableName="paper_submission_questions" constraintName="fk_question_submission" referencedColumnNames="id" referencedTableName="paper_submissions"/>
+        <createIndex indexName="idx_question_submission" tableName="paper_submission_questions">
+            <column name="submission_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

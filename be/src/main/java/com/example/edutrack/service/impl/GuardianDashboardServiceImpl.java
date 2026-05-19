@@ -45,7 +45,7 @@ public class GuardianDashboardServiceImpl implements GuardianDashboardService {
                         .name(s.getFirstName() + " " + s.getLastName())
                         .photo(s.getAvatarUrl())
                         .grade("YEAR " + ((s.getCurrentSemester() + 1) / 2))
-                        .section(s.getSection())
+                        .section(s.getSchoolClass() != null ? s.getSchoolClass().getSection() : "A")
                         .active(selectedStudentId != null ? s.getId().equals(selectedStudentId) : s.getId().equals(students.get(0).getId()))
                         .build())
                 .collect(Collectors.toList());

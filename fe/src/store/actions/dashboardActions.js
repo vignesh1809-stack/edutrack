@@ -138,3 +138,17 @@ export const fetchLeastPerformedStaffFailure = (error) => ({
     type: types.FETCH_LEAST_PERFORMED_STAFF_FAILURE,
     payload: error,
 });
+
+export const fetchLecturerDashboardRequest = () => ({
+    type: types.FETCH_LECTURER_DASHBOARD_REQUEST,
+});
+
+export const fetchLecturerDashboardSuccess = (data) => ({
+    type: types.FETCH_LECTURER_DASHBOARD_SUCCESS,
+    payload: data,
+});
+
+export const fetchLecturerDashboardFailure = (error) => ({
+    type: types.FETCH_LECTURER_DASHBOARD_FAILURE,
+    payload: error,
+});

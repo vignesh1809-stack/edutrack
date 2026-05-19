@@ -107,6 +107,24 @@ const dashboardReducer = (state = initialState, action) => {
                 loading: false,
                 error: action.payload,
             };
+        case types.FETCH_LECTURER_DASHBOARD_REQUEST:
+            return {
+                ...state,
+                loading: true,
+                error: null,
+            };
+        case types.FETCH_LECTURER_DASHBOARD_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                data: action.payload,
+            };
+        case types.FETCH_LECTURER_DASHBOARD_FAILURE:
+            return {
+                ...state,
+                loading: false,
+                error: action.payload,
+            };
         case types.FETCH_STAFF_ATTENDANCE_GRAPH_REQUEST:
             return {
                 ...state,

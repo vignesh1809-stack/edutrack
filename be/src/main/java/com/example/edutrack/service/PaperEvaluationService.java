@@ -19,4 +19,6 @@ public interface PaperEvaluationService {
     List<PaperSubmission> getSubmissions(UUID institutionId);
 
     PaperSubmission getSubmissionDetails(UUID id, UUID institutionId);
+
+    void handleEvaluationWebhook(com.example.edutrack.dto.PaperEvaluationWebhookRequest request);
 }

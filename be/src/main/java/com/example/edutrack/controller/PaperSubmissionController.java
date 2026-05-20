@@ -98,4 +98,11 @@ public class PaperSubmissionController {
         PaperSubmission submission = evaluationService.getSubmissionDetails(id, principal.getInstitutionId());
         return ResponseEntity.ok(submission);
     }
+
+    @PostMapping("/webhook")
+    public ResponseEntity<String> handleWebhook(
+            @RequestBody com.example.edutrack.dto.PaperEvaluationWebhookRequest payload) {
+        evaluationService.handleEvaluationWebhook(payload);
+        return ResponseEntity.ok("Webhook processed successfully.");
+    }
 }

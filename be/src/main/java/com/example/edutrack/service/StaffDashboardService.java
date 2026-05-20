@@ -7,5 +7,5 @@ import java.util.UUID;
 
 public interface StaffDashboardService {
     List<AttendanceGraphDto> getAttendanceGraph(UUID institutionId, int days, Integer year, String section);
-    LecturerDashboardDto getLecturerDashboard(UUID institutionId, UUID staffId);
+    LecturerDashboardDto getLecturerDashboard(UUID institutionId, UUID staffId, String courseId);
 }

@@ -4,4 +4,5 @@ public interface StudentPerformanceReviewProjection {
     String getFirstName();
     String getLastName();
     Double getAverageScore();
+    String getGender();
 }

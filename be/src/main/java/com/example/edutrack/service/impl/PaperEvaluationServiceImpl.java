@@ -43,13 +43,16 @@ public class PaperEvaluationServiceImpl implements PaperEvaluationService {
     @Autowired
     private StorageService storageService;
 
+    @Autowired
+    private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+
     @Override
     @Transactional
-    public PaperSubmission createSubmission(UUID studentId, UUID courseId, String examType, 
-                                             String academicYear, String section, 
-                                             List<MultipartFile> files, MultipartFile questionPaper, 
-                                             MultipartFile answerKey, UUID institutionId) throws IOException {
-        
+    public PaperSubmission createSubmission(UUID studentId, UUID courseId, String examType,
+            String academicYear, String section,
+            List<MultipartFile> files, MultipartFile questionPaper,
+            MultipartFile answerKey, UUID institutionId) throws IOException {
+
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found."));
 
@@ -84,7 +87,8 @@ public class PaperEvaluationServiceImpl implements PaperEvaluationService {
         List<PaperSubmissionPage> pages = new ArrayList<>();
         int pageIndex = 1;
         for (MultipartFile file : files) {
-            if (file == null || file.isEmpty()) continue;
+            if (file == null || file.isEmpty())
+                continue;
 
             String fileUrl = storageService.store(file);
             byte[] fileBytes = file.getBytes();
@@ -98,7 +102,8 @@ public class PaperEvaluationServiceImpl implements PaperEvaluationService {
                 ocrText = cachedPages.get(0).getOcrText();
             } else {
                 log.info("OCR cache MISS for file MD5: {}", md5Hash);
-                ocrText = "OCR Text for page " + pageIndex + ": [Handwritten Student Script Page - Analysis In Progress]";
+                ocrText = "OCR Text for page " + pageIndex
+                        + ": [Handwritten Student Script Page - Analysis In Progress]";
             }
 
             PaperSubmissionPage page = new PaperSubmissionPage();
@@ -107,7 +112,7 @@ public class PaperEvaluationServiceImpl implements PaperEvaluationService {
             page.setImageUrl(fileUrl);
             page.setMd5Hash(md5Hash);
             page.setOcrText(ocrText);
-            
+
             pages.add(page);
         }
 
@@ -128,7 +133,7 @@ public class PaperEvaluationServiceImpl implements PaperEvaluationService {
         log.info("Starting asynchronous AI evaluation for submission ID: {}", submissionId);
         try {
             // Give time for creation transaction to commit
-            Thread.sleep(1500);
+            Thread.sleep(1000);
 
             Optional<PaperSubmission> optSub = submissionRepository.findById(submissionId);
             if (optSub.isEmpty()) {
@@ -138,101 +143,130 @@ public class PaperEvaluationServiceImpl implements PaperEvaluationService {
 
             PaperSubmission submission = optSub.get();
             submission.setStatus(SubmissionStatus.PROCESSING);
-            submission.setOverallFeedback("Performing OCR text extraction and alignment check...");
+            submission.setOverallFeedback("Offloading evaluation payload to Python VLM service...");
             submissionRepository.save(submission);
 
-            // Simulate OCR & Image Alignment processing
-            Thread.sleep(4000);
+            // Prepare HTTP payload for Python FastAPI service
+            java.util.Map<String, Object> payload = new java.util.HashMap<>();
+            payload.put("submissionId", submission.getId().toString());
+            payload.put("studentId", submission.getStudent().getId().toString());
+            payload.put("courseName",
+                    submission.getCourse() != null ? submission.getCourse().getCourseName() : "General");
+            payload.put("examType", submission.getExamType());
+            payload.put("questionPaperUrl", submission.getQuestionPaperUrl());
+            payload.put("answerKeyUrl", submission.getAnswerKeyUrl());
+            payload.put("callbackUrl", "http://localhost:8080/api/staff/papers/webhook");
 
-            submission.setOverallFeedback("Grading questions against provided Answer Key...");
+            List<String> pageUrls = new ArrayList<>();
+            for (PaperSubmissionPage page : submission.getPages()) {
+                pageUrls.add(page.getImageUrl());
+            }
+            payload.put("scriptPageUrls", pageUrls);
+
+            // Trigger REST handshake to Python AI Service (Port 8000)
+            java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+            String requestBody = objectMapper.writeValueAsString(payload);
+            java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                    .uri(java.net.URI.create("http://localhost:8000/api/v1/evaluate"))
+                    .header("Content-Type", "application/json")
+                    .POST(java.net.http.HttpRequest.BodyPublishers.ofString(requestBody))
+                    .build();
+
+            log.info("Dispatching grading request to Python service: {}", requestBody);
+            client.sendAsync(request, java.net.http.HttpResponse.BodyHandlers.ofString())
+                    .thenAccept(response -> {
+                        log.info("Python AI microservice handoff completed. Response status: {}",
+                                response.statusCode());
+                    })
+                    .exceptionally(ex -> {
+                        log.error("Failed to connect to Python FastAPI microservice: {}", ex.getMessage());
+                        // Fallback to FAILED status
+                        try {
+                            markEvaluationFailed(submissionId, "AI Microservice Connection Failed: " + ex.getMessage());
+                        } catch (Exception err) {
+                            log.error("Error setting failed status", err);
+                        }
+                        return null;
+                    });
+
+        } catch (Exception e) {
+            log.error("Error initiating async AI evaluation", e);
+            markEvaluationFailed(submissionId, "Initialization failed: " + e.getMessage());
+        }
+    }
+
+    private void markEvaluationFailed(UUID submissionId, String reason) {
+        submissionRepository.findById(submissionId).ifPresent(sub -> {
+            sub.setStatus(SubmissionStatus.FAILED);
+            sub.setOverallFeedback(reason);
+            submissionRepository.save(sub);
+        });
+    }
+
+    @Override
+    @Transactional
+    public void handleEvaluationWebhook(com.example.edutrack.dto.PaperEvaluationWebhookRequest request) {
+        log.info("Received AI evaluation callback for submission ID: {}", request.getSubmissionId());
+
+        PaperSubmission submission = submissionRepository.findById(request.getSubmissionId())
+                .orElseThrow(() -> new IllegalArgumentException("Submission not found: " + request.getSubmissionId()));
+
+        if ("FAILED".equalsIgnoreCase(request.getStatus())) {
+            submission.setStatus(SubmissionStatus.FAILED);
+            submission.setOverallFeedback(request.getOverallFeedback());
             submissionRepository.save(submission);
+            return;
+        }
 
-            // Simulate LLM Evaluation
-            Thread.sleep(4000);
+        submission.setStatus(SubmissionStatus.COMPLETED);
+        submission.setOverallFeedback(request.getOverallFeedback());
+        submission.setMaxScore(request.getMaxScore());
+        submission.setMarksObtained(request.getMarksObtained());
 
-            List<PaperSubmissionQuestion> questions = new ArrayList<>();
-            BigDecimal totalScore = BigDecimal.ZERO;
-
-            // Generate realistic evaluations
-            String[] questionsText = {
-                "Describe the time complexity of bubble sort. (Max: 10)",
-                "What is a deadlock? List the conditions. (Max: 10)",
-                "Explain public key cryptography. (Max: 10)",
-                "Write code to reverse a linked list. (Max: 10)",
-                "What is normal form in DBMS? (Max: 10)"
-            };
-
-            BigDecimal[] maxScores = {
-                new BigDecimal("10.00"),
-                new BigDecimal("10.00"),
-                new BigDecimal("10.00"),
-                new BigDecimal("10.00"),
-                new BigDecimal("10.00")
-            };
-
-            BigDecimal[] obtainedScores = {
-                new BigDecimal("8.00"),
-                new BigDecimal("9.50"),
-                new BigDecimal("7.00"),
-                new BigDecimal("10.00"),
-                new BigDecimal("6.00")
-            };
-
-            String[] feedbacks = {
-                "Good explanation. Included worst-case O(n^2) and best-case O(n) scenarios, but did not sketch the pass swaps visual diagram.",
-                "Excellent answer. Correctly detailed Mutual Exclusion, Hold & Wait, No Preemption, and Circular Wait conditions.",
-                "Well explained. Discussed asymmetric keys (public/private) and key distribution, but omitted mathematical RSA basis.",
-                "Flawless recursive implementation. Handled edge cases (empty list and single element) perfectly with correct pointer swaps.",
-                "Partial credit. Correctly described 1NF and 2NF, but failed to define 3NF transitives and BCNF dependencies accurately."
-            };
-
-            for (int i = 0; i < 5; i++) {
-                PaperSubmissionQuestion q = new PaperSubmissionQuestion();
-                q.setSubmission(submission);
-                q.setQuestionNumber(i + 1);
-                q.setMaxScore(maxScores[i]);
-                q.setMarksObtained(obtainedScores[i]);
-                q.setFeedback(feedbacks[i]);
-                questions.add(q);
-                totalScore = totalScore.add(obtainedScores[i]);
-
-                // Update page OCRs with realistic text based on evaluation
-                if (i < submission.getPages().size()) {
-                    PaperSubmissionPage p = submission.getPages().get(i);
-                    p.setOcrText("OCR Extracted Handwritings (Page " + (i+1) + "):\nQuestion " + (i+1) + ": Answered.\nStudent Answered details: " + feedbacks[i].substring(0, Math.min(feedbacks[i].length(), 40)) + "...");
-                    pageRepository.save(p);
+        // Update parsed OCR texts matching page numbers
+        if (request.getPages() != null) {
+            for (com.example.edutrack.dto.PaperEvaluationWebhookRequest.PageOcrDto pDto : request.getPages()) {
+                for (PaperSubmissionPage page : submission.getPages()) {
+                    if (page.getPageNumber() == pDto.getPageNumber()) {
+                        page.setOcrText(pDto.getOcrText());
+                        pageRepository.save(page);
+                    }
                 }
             }
-
-            submission.getQuestions().clear();
-            submission.getQuestions().addAll(questions);
-            submission.setMarksObtained(totalScore);
-            submission.setStatus(SubmissionStatus.COMPLETED);
-            submission.setOverallFeedback("The student has shown strong performance in algorithms and coding logic. Focus areas: cryptography equations and relational database normalization theory.");
-            
-            submissionRepository.save(submission);
-            log.info("AI evaluation completed successfully for submission ID: {}", submissionId);
-
-        } catch (InterruptedException e) {
-            log.error("Async evaluation thread interrupted", e);
-            Thread.currentThread().interrupt();
-        } catch (Exception e) {
-            log.error("Error during async AI evaluation", e);
-            submissionRepository.findById(submissionId).ifPresent(sub -> {
-                sub.setStatus(SubmissionStatus.FAILED);
-                sub.setOverallFeedback("AI processing failed: " + e.getMessage());
-                submissionRepository.save(sub);
-            });
         }
+
+        // Populates parsed Question breaks
+        List<PaperSubmissionQuestion> questions = new ArrayList<>();
+        if (request.getQuestions() != null) {
+            for (com.example.edutrack.dto.PaperEvaluationWebhookRequest.QuestionGradeDto qDto : request
+                    .getQuestions()) {
+                PaperSubmissionQuestion q = new PaperSubmissionQuestion();
+                q.setSubmission(submission);
+                q.setQuestionNumber(qDto.getQuestionNumber());
+                q.setMaxScore(qDto.getMaxScore());
+                q.setMarksObtained(qDto.getMarksObtained());
+                q.setFeedback(qDto.getFeedback());
+                questions.add(q);
+            }
+        }
+
+        submission.getQuestions().clear();
+        submission.getQuestions().addAll(questions);
+        submissionRepository.save(submission);
+
+        log.info("AI evaluation successfully saved to MySQL. Job ID: {}", submission.getId());
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<PaperSubmission> getSubmissions(UUID institutionId) {
-        List<PaperSubmission> submissions = submissionRepository.findByInstitutionIdAndIsDeletedFalseOrderByCreatedAtDesc(institutionId);
+        List<PaperSubmission> submissions = submissionRepository
+                .findByInstitutionIdAndIsDeletedFalseOrderByCreatedAtDesc(institutionId);
         for (PaperSubmission sub : submissions) {
-            if (sub.getPages() != null) sub.getPages().size();
-            if (sub.getQuestions() != null) sub.getQuestions().size();
+            if (sub.getPages() != null)
+                sub.getPages().size();
+            if (sub.getQuestions() != null)
+                sub.getQuestions().size();
         }
         return submissions;
     }
@@ -242,8 +276,10 @@ public class PaperEvaluationServiceImpl implements PaperEvaluationService {
     public PaperSubmission getSubmissionDetails(UUID id, UUID institutionId) {
         PaperSubmission submission = submissionRepository.findByIdAndInstitutionIdAndIsDeletedFalse(id, institutionId)
                 .orElseThrow(() -> new IllegalArgumentException("Submission not found."));
-        if (submission.getPages() != null) submission.getPages().size();
-        if (submission.getQuestions() != null) submission.getQuestions().size();
+        if (submission.getPages() != null)
+            submission.getPages().size();
+        if (submission.getQuestions() != null)
+            submission.getQuestions().size();
         return submission;
     }
 }

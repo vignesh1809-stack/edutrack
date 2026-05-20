@@ -139,8 +139,9 @@ export const fetchLeastPerformedStaffFailure = (error) => ({
     payload: error,
 });
 
-export const fetchLecturerDashboardRequest = () => ({
+export const fetchLecturerDashboardRequest = (courseId) => ({
     type: types.FETCH_LECTURER_DASHBOARD_REQUEST,
+    payload: courseId,
 });
 
 export const fetchLecturerDashboardSuccess = (data) => ({
@@ -150,5 +151,50 @@ export const fetchLecturerDashboardSuccess = (data) => ({
 
 export const fetchLecturerDashboardFailure = (error) => ({
     type: types.FETCH_LECTURER_DASHBOARD_FAILURE,
+    payload: error,
+});
+
+export const fetchStaffAttendanceClassRequest = (params) => ({
+    type: types.FETCH_STAFF_ATTENDANCE_CLASS_REQUEST,
+    payload: params, // { date, semester }
+});
+
+export const fetchStaffAttendanceClassSuccess = (data) => ({
+    type: types.FETCH_STAFF_ATTENDANCE_CLASS_SUCCESS,
+    payload: data,
+});
+
+export const fetchStaffAttendanceClassFailure = (error) => ({
+    type: types.FETCH_STAFF_ATTENDANCE_CLASS_FAILURE,
+    payload: error,
+});
+
+export const submitStaffAttendanceRequest = (payload) => ({
+    type: types.SUBMIT_STAFF_ATTENDANCE_REQUEST,
+    payload, // { recordDate, semester, records }
+});
+
+export const submitStaffAttendanceSuccess = (data) => ({
+    type: types.SUBMIT_STAFF_ATTENDANCE_SUCCESS,
+    payload: data,
+});
+
+export const submitStaffAttendanceFailure = (error) => ({
+    type: types.SUBMIT_STAFF_ATTENDANCE_FAILURE,
+    payload: error,
+});
+
+export const fetchStaffAttendanceHistoryRequest = (params) => ({
+    type: types.FETCH_STAFF_ATTENDANCE_HISTORY_REQUEST,
+    payload: params, // { limit }
+});
+
+export const fetchStaffAttendanceHistorySuccess = (data) => ({
+    type: types.FETCH_STAFF_ATTENDANCE_HISTORY_SUCCESS,
+    payload: data,
+});
+
+export const fetchStaffAttendanceHistoryFailure = (error) => ({
+    type: types.FETCH_STAFF_ATTENDANCE_HISTORY_FAILURE,
     payload: error,
 });

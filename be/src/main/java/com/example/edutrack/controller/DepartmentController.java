@@ -25,4 +25,9 @@ public class DepartmentController {
         List<String> sections = departmentService.getDistinctSectionsByYear(institutionId, year);
         return sections;
     }
+
+    @GetMapping("/names")
+    public List<String> getDepartmentNames(@RequestParam UUID institutionId) {
+        return departmentService.getDistinctNames(institutionId);
+    }
 }

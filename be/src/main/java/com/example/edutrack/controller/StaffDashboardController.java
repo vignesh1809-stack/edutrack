@@ -23,9 +23,10 @@ public class StaffDashboardController {
     @GetMapping
     @PreAuthorize("hasAnyAuthority('Lecturer', 'Head_of_Department', 'Administrator')")
     public ResponseEntity<LecturerDashboardDto> getLecturerDashboard(
-            @AuthenticationPrincipal CustomUserDetails principal) {
+            @AuthenticationPrincipal CustomUserDetails principal,
+            @RequestParam(required = false) String courseId) {
         
-        LecturerDashboardDto dashboard = staffDashboardService.getLecturerDashboard(principal.getInstitutionId(), principal.getId());
+        LecturerDashboardDto dashboard = staffDashboardService.getLecturerDashboard(principal.getInstitutionId(), principal.getId(), courseId);
         return ResponseEntity.ok(dashboard);
     }
 

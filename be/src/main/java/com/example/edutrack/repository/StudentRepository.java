@@ -78,6 +78,9 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
         @Query(value = "SELECT * FROM students WHERE id = UUID_TO_BIN(:id) AND institution_id = UUID_TO_BIN(:instId) AND is_deleted = 0", nativeQuery = true)
         Optional<Student> findActiveById(@Param("id") String id, @Param("instId") String instId);
 
+        @Query(value = "SELECT * FROM students WHERE id = UUID_TO_BIN(:id) AND is_deleted = 0", nativeQuery = true)
+        Optional<Student> findActiveByIdOnlyNative(@Param("id") String id);
+
         // Single student by id with eager relationships
         @Query("SELECT s FROM Student s LEFT JOIN FETCH s.schoolClass sc LEFT JOIN FETCH sc.department LEFT JOIN FETCH s.guardians WHERE s.id = :id AND s.institutionId = :institutionId AND s.isDeleted = false")
         Optional<Student> findFullStudentProfile(@Param("id") UUID id, @Param("institutionId") UUID institutionId);
@@ -240,12 +243,16 @@ public interface StudentRepository extends JpaRepository<Student, UUID> {
             SELECT 
                 s.first_name AS firstName,
                 s.last_name AS lastName,
+                s.gender AS gender,
                 AVG(a.marks_obtained / a.max_score * 100.0) AS averageScore
             FROM students s
             LEFT JOIN assessments a ON s.id = a.student_id AND a.is_deleted = 0
             WHERE s.class_id = :classId AND s.is_deleted = 0
-            GROUP BY s.id, s.first_name, s.last_name
+            GROUP BY s.id, s.first_name, s.last_name, s.gender
             ORDER BY averageScore DESC
             """, nativeQuery = true)
         List<com.example.edutrack.dto.StudentPerformanceReviewProjection> findStudentPerformanceReviewByClassId(@Param("classId") UUID classId);
+
+        @Query(value = "SELECT * FROM students WHERE class_id = :classId AND is_deleted = 0 ORDER BY first_name ASC, last_name ASC", nativeQuery = true)
+        List<Student> findStudentsByClassIdNative(@Param("classId") UUID classId);
 }

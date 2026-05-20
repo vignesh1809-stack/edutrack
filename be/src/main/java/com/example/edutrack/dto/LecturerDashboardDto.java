@@ -18,6 +18,7 @@ public class LecturerDashboardDto {
     private double attendanceRate;
 
     private List<StudentPerformerDto> performers;
+    private List<CourseStatsDto> courses;
 
     @Data
     @Builder
@@ -27,5 +28,15 @@ public class LecturerDashboardDto {
         private String marks;
         private String statusColor;
         private String image;
+        private String gender;
+    }
+
+    @Data
+    @Builder
+    public static class CourseStatsDto {
+        private String courseId;
+        private String courseName;
+        private double avgStudentMarks;
+        private double attendanceRate;
     }
 }

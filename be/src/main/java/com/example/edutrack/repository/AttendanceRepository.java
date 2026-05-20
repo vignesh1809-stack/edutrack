@@ -241,4 +241,42 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
 
     @Query(value = "SELECT COALESCE(AVG(CASE WHEN a.attendance_status = 'PRESENT' THEN 100.0 ELSE 0.0 END), 0.0) FROM attendances a JOIN courses c ON a.course_id = c.id WHERE c.staff_id = :staffId AND a.is_deleted = 0 AND c.is_deleted = 0", nativeQuery = true)
     double getAttendanceRateByStaffIdNative(@Param("staffId") UUID staffId);
+
+    @Query(value = "SELECT COALESCE(AVG(CASE WHEN a.attendance_status = 'PRESENT' THEN 100.0 ELSE 0.0 END), 0.0) FROM attendances a WHERE a.course_id = :courseId AND a.is_deleted = 0", nativeQuery = true)
+    double getAttendanceRateByCourseIdNative(@Param("courseId") UUID courseId);
+
+    @Query(value = """
+            SELECT a.* FROM attendances a
+            JOIN students s ON a.student_id = s.id
+            WHERE s.class_id = :classId
+              AND a.record_date = :date
+              AND a.is_deleted = false
+            """, nativeQuery = true)
+    List<Attendance> findClassAttendanceByDateNative(@Param("classId") UUID classId, @Param("date") LocalDate date);
+
+    @Query(value = """
+            SELECT a.* FROM attendances a
+            WHERE a.student_id = :studentId
+              AND a.record_date = :date
+              AND a.is_deleted = false
+            LIMIT 1
+            """, nativeQuery = true)
+    java.util.Optional<Attendance> findByStudentIdAndRecordDateNative(@Param("studentId") UUID studentId, @Param("date") LocalDate date);
+
+    @Query(value = """
+            SELECT 
+                a.record_date AS logDate,
+                COUNT(DISTINCT s.id) AS totalCount,
+                COUNT(CASE WHEN a.attendance_status = 'PRESENT' THEN 1 END) AS presentCount,
+                COUNT(CASE WHEN a.attendance_status = 'ABSENT' THEN 1 END) AS absentCount,
+                COUNT(CASE WHEN a.attendance_status = 'LATE' THEN 1 END) AS lateCount
+            FROM attendances a
+            JOIN students s ON a.student_id = s.id
+            WHERE s.class_id = :classId
+              AND a.is_deleted = false
+            GROUP BY a.record_date
+            ORDER BY a.record_date DESC
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<Object[]> findClassAttendanceHistoryLogsNative(@Param("classId") UUID classId, @Param("limit") int limit);
 }

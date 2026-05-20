@@ -6,6 +6,7 @@ import { fetchPrincipalDashboardRequest, fetchAttendanceTrendsRequest, fetchDepa
 import Sidebar from '../../components/Sidebar';
 import TopAppBar from '../../components/TopAppBar';
 import BottomNavBar from '../../components/BottomNavBar';
+import ProfessionalDropdown from '../../components/ProfessionalDropdown';
 
 const CHART_GRADIENTS = [
   { id: 'grad-blue', start: '#BFDBFE', end: '#60A5FA' },
@@ -139,50 +140,14 @@ const Reports = () => {
             </div>
 
             {/* Year Dropdown — Professional Style */}
-            <div className="relative">
-              <button 
-                onClick={(e) => toggleDropdown(e, 'year')}
-                className="flex items-center gap-3 px-6 py-2.5 bg-slate-50 border-none text-[#475569] rounded-lg hover:bg-slate-100 transition-all active:scale-95 shadow-sm"
-              >
-                <span className="text-[13px] font-black uppercase tracking-wider whitespace-nowrap">
-                  {selectedYear === 'All Years' ? 'YEAR ALL' : `YEAR ${selectedYear}`}
-                </span>
-                <span className={`material-symbols-outlined text-[18px] text-slate-400 transition-transform duration-300 ${activeDropdown === 'year' ? 'rotate-180' : ''}`}>expand_more</span>
-              </button>
-
-              {activeDropdown === 'year' && (
-                <div 
-                  className="absolute top-full left-0 mt-2 w-48 bg-white border border-slate-100 rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] py-2 z-50 animate-in fade-in zoom-in-95 duration-200"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button 
-                    onClick={() => { setSelectedYear('All Years'); setActiveDropdown(null); }}
-                    className={`w-full flex items-center justify-between px-5 py-3 text-sm transition-colors ${
-                      selectedYear === 'All Years' 
-                        ? 'bg-primary/5 text-primary font-bold' 
-                        : 'text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    <span className="uppercase font-bold tracking-tight">All Years</span>
-                    {selectedYear === 'All Years' && <span className="material-symbols-outlined text-sm">check</span>}
-                  </button>
-                  {years.map((year) => (
-                    <button 
-                      key={year}
-                      onClick={() => { setSelectedYear(year); setActiveDropdown(null); }}
-                      className={`w-full flex items-center justify-between px-5 py-3 text-sm transition-colors ${
-                        selectedYear === year 
-                          ? 'bg-primary/5 text-primary font-bold' 
-                          : 'text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      <span className="uppercase font-bold tracking-tight">{year}</span>
-                      {selectedYear === year && <span className="material-symbols-outlined text-sm">check</span>}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <ProfessionalDropdown
+              value={selectedYear}
+              onChange={setSelectedYear}
+              options={years}
+              labelPrefix="YEAR"
+              defaultValue="All Years"
+              defaultLabel="All Years"
+            />
 
             <button 
               onClick={handleApplyFilters}

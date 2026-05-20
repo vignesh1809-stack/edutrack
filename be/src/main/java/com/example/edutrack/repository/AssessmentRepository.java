@@ -110,4 +110,7 @@ public interface AssessmentRepository extends JpaRepository<Assessment, UUID> {
 
     @Query(value = "SELECT COALESCE(AVG(a.marks_obtained / a.max_score * 100.0), 0.0) FROM assessments a JOIN courses c ON a.course_id = c.id WHERE c.staff_id = :staffId AND a.is_deleted = 0 AND c.is_deleted = 0", nativeQuery = true)
     double getAvgMarksByStaffIdNative(@Param("staffId") UUID staffId);
+
+    @Query(value = "SELECT COALESCE(AVG(a.marks_obtained / a.max_score * 100.0), 0.0) FROM assessments a WHERE a.course_id = :courseId AND a.is_deleted = 0", nativeQuery = true)
+    double getAvgMarksByCourseIdNative(@Param("courseId") UUID courseId);
 }

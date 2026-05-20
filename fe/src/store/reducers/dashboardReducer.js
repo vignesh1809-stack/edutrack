@@ -18,7 +18,8 @@ const initialState = {
     graphError: null,
     filters: {
         year: 'All Years',
-        section: 'All Sections'
+        section: 'All Sections',
+        selectedCourseId: 'ALL'
     },
     availableYears: [],
     availableSections: [],
@@ -43,7 +44,10 @@ const initialState = {
         data: [],
         loading: false,
         error: null,
-    }
+    },
+    attendanceClassData: null,
+    attendanceHistory: null,
+    attendanceSubmitSuccess: false
 };
 
 const dashboardReducer = (state = initialState, action) => {
@@ -227,6 +231,63 @@ const dashboardReducer = (state = initialState, action) => {
                     loading: false,
                     error: action.payload,
                 },
+            };
+        case types.FETCH_STAFF_ATTENDANCE_CLASS_REQUEST:
+            return {
+                ...state,
+                loading: true,
+                error: null,
+                attendanceSubmitSuccess: false
+            };
+        case types.FETCH_STAFF_ATTENDANCE_CLASS_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                attendanceClassData: action.payload,
+            };
+        case types.FETCH_STAFF_ATTENDANCE_CLASS_FAILURE:
+            return {
+                ...state,
+                loading: false,
+                error: action.payload,
+            };
+        case types.SUBMIT_STAFF_ATTENDANCE_REQUEST:
+            return {
+                ...state,
+                loading: true,
+                error: null,
+                attendanceSubmitSuccess: false
+            };
+        case types.SUBMIT_STAFF_ATTENDANCE_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                attendanceSubmitSuccess: true
+            };
+        case types.SUBMIT_STAFF_ATTENDANCE_FAILURE:
+            return {
+                ...state,
+                loading: false,
+                error: action.payload,
+                attendanceSubmitSuccess: false
+            };
+        case types.FETCH_STAFF_ATTENDANCE_HISTORY_REQUEST:
+            return {
+                ...state,
+                loading: true,
+                error: null,
+            };
+        case types.FETCH_STAFF_ATTENDANCE_HISTORY_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                attendanceHistory: action.payload,
+            };
+        case types.FETCH_STAFF_ATTENDANCE_HISTORY_FAILURE:
+            return {
+                ...state,
+                loading: false,
+                error: action.payload,
             };
         default:
             return state;

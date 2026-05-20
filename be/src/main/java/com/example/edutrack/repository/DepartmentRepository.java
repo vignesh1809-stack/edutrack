@@ -22,4 +22,7 @@ public interface DepartmentRepository extends JpaRepository<Department, UUID> {
 
     @Query(value = "SELECT DISTINCT code FROM departments WHERE institution_id = UNHEX(REPLACE(:institutionId, '-', '')) AND is_deleted = 0", nativeQuery = true)
     List<String> findDistinctCodes(@Param("institutionId") String institutionId);
+
+    @Query(value = "SELECT DISTINCT name FROM departments WHERE institution_id = UNHEX(REPLACE(:institutionId, '-', '')) AND is_deleted = 0 ORDER BY name ASC", nativeQuery = true)
+    List<String> findDistinctNames(@Param("institutionId") String institutionId);
 }

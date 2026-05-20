@@ -28,4 +28,8 @@ public class DepartmentService {
         }
         return departmentRepository.findDistinctSectionsByBatchYear(institutionId.toString(), year);
     }
+
+    public List<String> getDistinctNames(UUID institutionId) {
+        return departmentRepository.findDistinctNames(institutionId.toString());
+    }
 }

@@ -66,6 +66,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/institutions/**").permitAll()
                 .requestMatchers("/api/uploads/**").permitAll()
+                .requestMatchers("/api/staff/papers/webhook").permitAll()
                 .anyRequest().authenticated()
             );
 

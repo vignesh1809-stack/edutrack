@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { logout, fetchProfileRequest } from '../../store/actions/authActions';
+import { logout, fetchProfileRequest, clearAuthError } from '../../store/actions/authActions';
 import Sidebar from '../../components/Sidebar';
 import TopAppBar from '../../components/TopAppBar';
 import BottomNavBar from '../../components/BottomNavBar';
@@ -10,13 +10,18 @@ import BottomNavBar from '../../components/BottomNavBar';
 const Profile = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user, loading } = useSelector((state) => state.auth);
+  const { user, loading, error } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    if (!user?.responsibilities && !loading) {
+    // Clear any previous profile error on mount
+    dispatch(clearAuthError());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!user?.responsibilities && !loading && !error) {
       dispatch(fetchProfileRequest());
     }
-  }, [dispatch, user, loading]);
+  }, [dispatch, user, loading, error]);
 
   const handleLogout = () => {
     dispatch(logout());

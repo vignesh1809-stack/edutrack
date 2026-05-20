@@ -7,6 +7,7 @@ import remarksSaga from './remarksSaga';
 import { studentDashboardSaga } from './studentDashboardSaga';
 import { guardianDashboardSaga } from './guardianDashboardSaga';
 import transportSaga from './transportSaga';
+import { paperWatcherSaga } from './paperSaga';
 
 export default function* rootSaga() {
   yield all([
@@ -18,5 +19,6 @@ export default function* rootSaga() {
     fork(studentDashboardSaga),
     fork(guardianDashboardSaga),
     fork(transportSaga),
+    fork(paperWatcherSaga),
   ]);
 }

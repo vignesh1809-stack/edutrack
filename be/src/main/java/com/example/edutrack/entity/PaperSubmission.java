@@ -32,7 +32,7 @@ public class PaperSubmission extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.BINARY)
     @JoinColumn(name = "student_id", nullable = false, columnDefinition = "BINARY(16)")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "department", "guardians", "bus", "remarksTargeted", "remarksAuthored", "fees", "assessments", "attendance"})
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "schoolClass", "department", "guardians", "bus", "remarksTargeted", "remarksAuthored", "fees", "assessments", "attendance"})
     private Student student;
 
     @ManyToOne(fetch = FetchType.LAZY)

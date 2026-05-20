@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +31,7 @@ public class PaperSubmissionController {
 
     @GetMapping("/students")
     @PreAuthorize("hasAnyAuthority('Administrator', 'Lecturer', 'Head_of_Department', 'Principal')")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<java.util.Map<String, Object>>> getStudents(
             @AuthenticationPrincipal CustomUserDetails principal) {
         List<com.example.edutrack.entity.Student> students = studentRepository.findByInstitutionIdAndIsDeletedFalse(principal.getInstitutionId());
@@ -39,7 +41,17 @@ public class PaperSubmissionController {
             map.put("studentId", s.getStudentId());
             map.put("firstName", s.getFirstName());
             map.put("lastName", s.getLastName());
-            map.put("section", s.getSchoolClass() != null ? s.getSchoolClass().getSection() : "A");
+            map.put("currentSemester", s.getCurrentSemester());
+            if (s.getSchoolClass() != null) {
+                map.put("batchYear", s.getSchoolClass().getBatchYear());
+                map.put("section", s.getSchoolClass().getSection());
+                if (s.getSchoolClass().getDepartment() != null) {
+                    map.put("departmentCode", s.getSchoolClass().getDepartment().getCode());
+                    map.put("departmentName", s.getSchoolClass().getDepartment().getName());
+                }
+            } else {
+                map.put("section", "A");
+            }
             return map;
         }).collect(java.util.stream.Collectors.toList());
         return ResponseEntity.ok(result);
@@ -47,6 +59,7 @@ public class PaperSubmissionController {
 
     @GetMapping("/courses")
     @PreAuthorize("hasAnyAuthority('Administrator', 'Lecturer', 'Head_of_Department', 'Principal')")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<java.util.Map<String, Object>>> getCourses(
             @AuthenticationPrincipal CustomUserDetails principal) {
         List<com.example.edutrack.entity.Courses> courses = coursesRepository.findByInstitutionIdAndIsDeletedFalse(principal.getInstitutionId());
@@ -55,6 +68,10 @@ public class PaperSubmissionController {
             map.put("id", c.getId());
             map.put("courseName", c.getCourseName());
             map.put("semester", c.getSemester());
+            if (c.getDepartment() != null) {
+                map.put("departmentCode", c.getDepartment().getCode());
+                map.put("departmentName", c.getDepartment().getName());
+            }
             return map;
         }).collect(java.util.stream.Collectors.toList());
         return ResponseEntity.ok(result);

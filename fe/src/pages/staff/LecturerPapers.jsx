@@ -1,17 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import LecturerNavBar from '../../components/LecturerNavBar';
 import LecturerSidebar from '../../components/LecturerSidebar';
 import TopAppBar from '../../components/TopAppBar';
-import axiosInstance from '../../api/axiosInstance';
+import ProfessionalDropdown from '../../components/ProfessionalDropdown';
+import {
+    fetchPaperMasterDataRequest,
+    fetchPaperSubmissionsRequest,
+    submitPaperGradingRequest
+} from '../../store/actions/paperActions';
 
 const LecturerPapers = () => {
+    const dispatch = useDispatch();
     const { user } = useSelector((state) => state.auth);
     
-    // Form States
-    const [academicYear, setAcademicYear] = useState('2023 - 2024');
-    const [section, setSection] = useState('Section A');
-    const [branch, setBranch] = useState('Computer Science');
+    // Select paper evaluation state from Redux store
+    const {
+        students,
+        courses,
+        submissions,
+        loading,
+        submitLoading
+    } = useSelector((state) => state.papers || { students: [], courses: [], submissions: [], loading: false, submitLoading: false });
+
+    // Form & Cascade States
+    const [selectedBatch, setSelectedBatch] = useState('');
+    const [selectedDept, setSelectedDept] = useState('');
+    const [selectedSemester, setSelectedSemester] = useState('');
+    const [selectedSection, setSelectedSection] = useState('');
     const [selectedStudentId, setSelectedStudentId] = useState('');
     const [selectedCourseId, setSelectedCourseId] = useState('');
     const [examType, setExamType] = useState('Mid-Semester Examination');
@@ -21,74 +37,140 @@ const LecturerPapers = () => {
     const [questionPaper, setQuestionPaper] = useState(null);
     const [answerKey, setAnswerKey] = useState(null);
     
-    // Dynamic lookups
-    const [students, setStudents] = useState([]);
-    const [courses, setCourses] = useState([]);
-    
-    // Active evaluations / History
-    const [submissions, setSubmissions] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [submitLoading, setSubmitLoading] = useState(false);
-    
     // Detailed Report Modal
     const [selectedReport, setSelectedReport] = useState(null);
     const [activeReportTab, setActiveReportTab] = useState('scores'); // 'scores', 'ocr'
     const [selectedOcrPage, setSelectedOcrPage] = useState(0);
 
-    // Fetch master data & history
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const [studRes, courseRes, subRes] = await Promise.all([
-                axiosInstance.get('/api/staff/papers/students'),
-                axiosInstance.get('/api/staff/papers/courses'),
-                axiosInstance.get('/api/staff/papers/submissions')
-            ]);
-            setStudents(studRes.data || []);
-            setCourses(courseRes.data || []);
-            setSubmissions(subRes.data || []);
-
-            // Set initial defaults
-            if (studRes.data && studRes.data.length > 0) {
-                setSelectedStudentId(studRes.data[0].id);
-            }
-            if (courseRes.data && courseRes.data.length > 0) {
-                setSelectedCourseId(courseRes.data[0].id);
-            }
-        } catch (error) {
-            console.error('Error fetching master data:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
+    // Fetch master data & history via Redux actions
     useEffect(() => {
-        fetchData();
-    }, []);
+        dispatch(fetchPaperMasterDataRequest());
+        dispatch(fetchPaperSubmissionsRequest());
+    }, [dispatch]);
+
+    // ----------------------------------------------------
+    // Dynamic Cascading Filters Derivation
+    // ----------------------------------------------------
+    
+    // 1. Batch options (derived from students' batch years)
+    const batches = [...new Set(students.map(s => s.batchYear).filter(Boolean))].sort((a, b) => b - a);
+
+    // 2. Department options (filtered by selected batch)
+    const departmentsMap = {};
+    students.forEach(s => {
+        if (s.batchYear === selectedBatch && s.departmentCode) {
+            departmentsMap[s.departmentCode] = s.departmentName || s.departmentCode;
+        }
+    });
+    const departments = Object.entries(departmentsMap).map(([code, name]) => ({
+        id: code,
+        name: name
+    }));
+
+    // 3. Semester options (filtered by batch & department)
+    const semesters = [...new Set(
+        students
+            .filter(s => s.batchYear === selectedBatch && s.departmentCode === selectedDept)
+            .map(s => s.currentSemester)
+            .filter(Boolean)
+    )].sort();
+
+    // 4. Section options (filtered by batch, department & semester)
+    const sections = [...new Set(
+        students
+            .filter(s => 
+                s.batchYear === selectedBatch && 
+                s.departmentCode === selectedDept && 
+                s.currentSemester === selectedSemester
+            )
+            .map(s => s.section)
+            .filter(Boolean)
+    )].sort();
+
+    // 5. Course options (associated with selected department & semester)
+    const filteredCourses = courses.filter(c => 
+        c.departmentCode === selectedDept && 
+        c.semester === selectedSemester
+    );
+
+    // 6. Student options (associated with selected batch, department, semester & section)
+    const filteredStudents = students.filter(s => 
+        s.batchYear === selectedBatch && 
+        s.departmentCode === selectedDept && 
+        s.currentSemester === selectedSemester && 
+        s.section === selectedSection
+    );
+
+    // Dynamic selection safety resets
+    useEffect(() => {
+        if (students.length === 0) return;
+
+        // Reset batch
+        if (batches.length > 0 && (!selectedBatch || !batches.includes(selectedBatch))) {
+            setSelectedBatch(batches[0]);
+            return;
+        }
+
+        // Reset department
+        const deptKeys = departments.map(d => d.id);
+        if (deptKeys.length > 0 && (!selectedDept || !deptKeys.includes(selectedDept))) {
+            setSelectedDept(deptKeys[0]);
+            return;
+        }
+
+        // Reset semester
+        if (semesters.length > 0 && (!selectedSemester || !semesters.includes(selectedSemester))) {
+            setSelectedSemester(semesters[0]);
+            return;
+        }
+
+        // Reset section
+        if (sections.length > 0 && (!selectedSection || !sections.includes(selectedSection))) {
+            setSelectedSection(sections[0]);
+            return;
+        }
+
+        // Reset course
+        if (filteredCourses.length > 0) {
+            const hasValidCourse = filteredCourses.some(c => c.id === selectedCourseId);
+            if (!selectedCourseId || !hasValidCourse) {
+                setSelectedCourseId(filteredCourses[0].id);
+            }
+        } else {
+            setSelectedCourseId('');
+        }
+
+        // Reset student
+        if (filteredStudents.length > 0) {
+            const hasValidStudent = filteredStudents.some(s => s.id === selectedStudentId);
+            if (!selectedStudentId || !hasValidStudent) {
+                setSelectedStudentId(filteredStudents[0].id);
+            }
+        } else {
+            setSelectedStudentId('');
+        }
+
+    }, [students, courses, selectedBatch, selectedDept, selectedSemester, selectedSection]);
 
     // Polling active evaluations (every 3 seconds if there is a PENDING or PROCESSING job)
     useEffect(() => {
         const hasActiveJobs = submissions.some(sub => sub.status === 'PENDING' || sub.status === 'PROCESSING');
         if (!hasActiveJobs) return;
 
-        const interval = setInterval(async () => {
-            try {
-                const res = await axiosInstance.get('/api/staff/papers/submissions');
-                setSubmissions(res.data || []);
-                
-                // If the currently viewed report is updated in the list, update modal too
-                if (selectedReport) {
-                    const updated = res.data.find(s => s.id === selectedReport.id);
-                    if (updated && updated.status !== selectedReport.status) {
-                        setSelectedReport(updated);
-                    }
-                }
-            } catch (error) {
-                console.error('Error polling submissions:', error);
-            }
+        const interval = setInterval(() => {
+            dispatch(fetchPaperSubmissionsRequest());
         }, 3000);
 
         return () => clearInterval(interval);
+    }, [submissions, dispatch]);
+
+    // Keep the currently viewed report in the modal reactive to polling updates
+    useEffect(() => {
+        if (!selectedReport) return;
+        const updated = submissions.find(s => s.id === selectedReport.id);
+        if (updated && (updated.status !== selectedReport.status || updated.marksObtained !== selectedReport.marksObtained)) {
+            setSelectedReport(updated);
+        }
     }, [submissions, selectedReport]);
 
     // Handle Script pages click/selection
@@ -117,22 +199,21 @@ const LecturerPapers = () => {
     };
 
     // Submit form
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         if (scriptPages.length === 0) {
             alert('Please select or capture at least 1 handwritten script page.');
             return;
         }
 
-        setSubmitLoading(true);
         const formData = new FormData();
         formData.append('studentId', selectedStudentId);
         if (selectedCourseId) {
             formData.append('courseId', selectedCourseId);
         }
         formData.append('examType', examType);
-        formData.append('academicYear', academicYear);
-        formData.append('section', section);
+        formData.append('academicYear', selectedBatch ? `${selectedBatch} - ${parseInt(selectedBatch) + 1}` : '2023 - 2024');
+        formData.append('section', selectedSection ? `Section ${selectedSection}` : 'Section A');
         
         // Append all script pages
         scriptPages.forEach(page => {
@@ -146,32 +227,18 @@ const LecturerPapers = () => {
             formData.append('answerKey', answerKey);
         }
 
-        try {
-            const res = await formDataSubmit(formData);
-            
+        new Promise((resolve, reject) => {
+            dispatch(submitPaperGradingRequest(formData, resolve, reject));
+        }).then(() => {
             // Clear page inputs
             scriptPages.forEach(p => URL.revokeObjectURL(p.previewUrl));
             setScriptPages([]);
             setQuestionPaper(null);
             setAnswerKey(null);
-            
-            // Refresh list
-            fetchData();
-        } catch (error) {
+        }).catch((error) => {
             console.error('Submission failed:', error);
             alert('Failed to submit evaluation. Check console for details.');
-        } finally {
-            setSubmitLoading(false);
-        }
-    };
-
-    const formDataSubmit = async (formData) => {
-        const response = await axiosInstance.post('/api/staff/papers/submit', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
         });
-        return response.data;
     };
 
     // Status Badge Helpers
@@ -209,81 +276,96 @@ const LecturerPapers = () => {
                             
                             {/* Class and Student Selection */}
                             <div className="space-y-4">
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-blue-600">1. Student Details</h3>
-                                
-                                <div className="space-y-1.5">
-                                    <label className="font-headline text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Student</label>
-                                    <div className="relative">
-                                        <select 
-                                            value={selectedStudentId}
-                                            onChange={(e) => setSelectedStudentId(e.target.value)}
-                                            className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-slate-900 appearance-none focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600/30 transition-all cursor-pointer text-sm"
-                                        >
-                                            {students.map(stud => (
-                                                <option key={stud.id} value={stud.id}>
-                                                    {stud.firstName} {stud.lastName} ({stud.studentId})
-                                                </option>
-                                            ))}
-                                            {students.length === 0 && <option>No students found</option>}
-                                        </select>
-                                        <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">person</span>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label className="font-headline text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Batch Year</label>
+                                        <ProfessionalDropdown
+                                            value={selectedBatch}
+                                            onChange={setSelectedBatch}
+                                            options={batches}
+                                            placeholder="Select Batch"
+                                            showDefault={false}
+                                            className="w-full"
+                                        />
                                     </div>
-                                </div>
-
-                                <div className="space-y-1.5">
-                                    <label className="font-headline text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Subject / Course</label>
-                                    <div className="relative">
-                                        <select 
-                                            value={selectedCourseId}
-                                            onChange={(e) => setSelectedCourseId(e.target.value)}
-                                            className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-slate-900 appearance-none focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600/30 transition-all cursor-pointer text-sm"
-                                        >
-                                            {courses.map(c => (
-                                                <option key={c.id} value={c.id}>{c.courseName}</option>
-                                            ))}
-                                            {courses.length === 0 && <option>No courses found</option>}
-                                        </select>
-                                        <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">menu_book</span>
+                                    <div className="space-y-1.5">
+                                        <label className="font-headline text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Department</label>
+                                        <ProfessionalDropdown
+                                            value={selectedDept}
+                                            onChange={setSelectedDept}
+                                            options={departments}
+                                            placeholder="Select Dept"
+                                            showDefault={false}
+                                            className="w-full"
+                                        />
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
-                                        <label className="font-headline text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Academic Year</label>
-                                        <select 
-                                            value={academicYear}
-                                            onChange={(e) => setAcademicYear(e.target.value)}
-                                            className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-3 text-slate-900 focus:ring-2 focus:ring-blue-600/10 transition-all text-sm"
-                                        >
-                                            <option>2023 - 2024</option>
-                                            <option>2024 - 2025</option>
-                                        </select>
+                                        <label className="font-headline text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Semester</label>
+                                        <ProfessionalDropdown
+                                            value={selectedSemester}
+                                            onChange={setSelectedSemester}
+                                            options={semesters.map(s => ({ id: s, name: `Semester ${s}` }))}
+                                            placeholder="Select Sem"
+                                            showDefault={false}
+                                            className="w-full"
+                                        />
                                     </div>
                                     <div className="space-y-1.5">
                                         <label className="font-headline text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Section</label>
-                                        <select 
-                                            value={section}
-                                            onChange={(e) => setSection(e.target.value)}
-                                            className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-3 text-slate-900 focus:ring-2 focus:ring-blue-600/10 transition-all text-sm"
-                                        >
-                                            <option>Section A</option>
-                                            <option>Section B</option>
-                                            <option>Section C</option>
-                                        </select>
+                                        <ProfessionalDropdown
+                                            value={selectedSection}
+                                            onChange={setSelectedSection}
+                                            options={sections.map(s => ({ id: s, name: `Section ${s}` }))}
+                                            placeholder="Select Sec"
+                                            showDefault={false}
+                                            className="w-full"
+                                        />
                                     </div>
                                 </div>
 
                                 <div className="space-y-1.5">
+                                    <label className="font-headline text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Subject / Course</label>
+                                    <ProfessionalDropdown
+                                        value={selectedCourseId}
+                                        onChange={setSelectedCourseId}
+                                        options={filteredCourses.map(c => ({ id: c.id, name: c.courseName }))}
+                                        placeholder="Select Subject / Course"
+                                        showDefault={false}
+                                        className="w-full"
+                                    />
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="font-headline text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Student</label>
+                                    <ProfessionalDropdown
+                                        value={selectedStudentId}
+                                        onChange={setSelectedStudentId}
+                                        options={filteredStudents.map(s => ({ id: s.id, name: `${s.firstName} ${s.lastName} (${s.studentId})` }))}
+                                        placeholder="Select Student"
+                                        showSearch={true}
+                                        searchPlaceholder="Search student by name or ID..."
+                                        showDefault={false}
+                                        className="w-full"
+                                    />
+                                </div>
+
+                                <div className="space-y-1.5">
                                     <label className="font-headline text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">Exam Type</label>
-                                    <select 
+                                    <ProfessionalDropdown
                                         value={examType}
-                                        onChange={(e) => setExamType(e.target.value)}
-                                        className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-slate-900 focus:ring-2 focus:ring-blue-600/10 transition-all text-sm"
-                                    >
-                                        <option>Mid-Semester Examination</option>
-                                        <option>Final Examination</option>
-                                        <option>Class Test / Quiz</option>
-                                    </select>
+                                        onChange={setExamType}
+                                        options={[
+                                            { id: 'Mid-Semester Examination', name: 'Mid-Semester Examination' },
+                                            { id: 'Final Examination', name: 'Final Examination' },
+                                            { id: 'Class Test / Quiz', name: 'Class Test / Quiz' }
+                                        ]}
+                                        placeholder="Select Exam Type"
+                                        showDefault={false}
+                                        className="w-full"
+                                    />
                                 </div>
                             </div>
 
@@ -402,7 +484,10 @@ const LecturerPapers = () => {
                                 <p className="text-slate-400 text-xs mt-0.5">Real-time progress and history of submitted papers.</p>
                             </div>
                             <button 
-                                onClick={fetchData} 
+                                onClick={() => {
+                                    dispatch(fetchPaperMasterDataRequest());
+                                    dispatch(fetchPaperSubmissionsRequest());
+                                }} 
                                 className="w-10 h-10 bg-white border border-slate-100 hover:bg-slate-50 rounded-xl flex items-center justify-center text-slate-500 shadow-sm transition-all"
                             >
                                 <span className="material-symbols-outlined text-xl">refresh</span>

@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class RefreshTokenServiceImpl implements RefreshTokenService {
@@ -20,6 +21,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Autowired private StringRedisTemplate redisTemplate;
     @Autowired private JwtUtils jwtUtils;
+
+    // In-memory fallback token store for local dev when Redis is not running
+    private final ConcurrentHashMap<String, String> tokenMap = new ConcurrentHashMap<>();
 
     // When true (production): Redis failure aborts the request.
     // When false (default/dev): Redis failure is logged as a warning and the
@@ -36,6 +40,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                 Duration.ofMillis(jwtUtils.getRefreshTokenExpirationMs())
             );
         } catch (DataAccessException e) {
+            tokenMap.put(jti, userId);
             handleRedisFailure("store refresh token", e);
         }
     }
@@ -46,8 +51,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             return Boolean.TRUE.equals(redisTemplate.hasKey(KEY_PREFIX + jti));
         } catch (DataAccessException e) {
             handleRedisFailure("validate refresh token", e);
-            // Degrade gracefully: treat token as valid so refresh still works.
-            return true;
+            // Degrade gracefully: return true if the token is present in the in-memory fallback,
+            // or if the fallback is empty (which might happen if backend restarted, to avoid logging out users)
+            return tokenMap.containsKey(jti) || tokenMap.isEmpty();
         }
     }
 
@@ -58,6 +64,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         } catch (DataAccessException e) {
             logger.warn("[Redis] Could not revoke refresh token jti={} — Redis unavailable: {}", jti, e.getMessage());
         }
+        tokenMap.remove(jti);
     }
 
     private void handleRedisFailure(String operation, DataAccessException e) {
@@ -65,7 +72,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             logger.error("[Redis] FATAL — {} failed. Redis is required in this environment: {}", operation, e.getMessage());
             throw new RuntimeException("Authentication service unavailable — please contact support.");
         }
-        logger.warn("[Redis] {} failed — running without token revocation (set app.redis.required=true in production): {}",
+        logger.warn("[Redis] {} failed — running with in-memory token fallback (set app.redis.required=true in production): {}",
                 operation, e.getMessage());
     }
 }

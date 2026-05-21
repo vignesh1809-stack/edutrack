@@ -61,12 +61,23 @@ axiosInstance.interceptors.response.use(
 
         try {
             // Use plain axios (no interceptors) to avoid infinite loops.
-            // Must include full URL since plain axios has no baseURL.
-            const { data } = await axios.post('http://localhost:8080/api/auth/refresh', { refreshToken });
+            // Using a relative URL will route correctly through Vite's proxy and avoid CORS/host issues.
+            const { data } = await axios.post('/api/auth/refresh', { refreshToken });
             console.log('[Auth] Token refreshed successfully.');
+            
             localStorage.setItem('accessToken', data.accessToken);
             localStorage.setItem('refreshToken', data.refreshToken);
             axiosInstance.defaults.headers.common.Authorization = `Bearer ${data.accessToken}`;
+            
+            // Sync with Redux store
+            store?.dispatch({
+                type: 'REFRESH_TOKEN_SUCCESS',
+                payload: {
+                    accessToken: data.accessToken,
+                    refreshToken: data.refreshToken
+                }
+            });
+
             processQueue(null, data.accessToken);
             original.headers.Authorization = `Bearer ${data.accessToken}`;
             return axiosInstance(original);

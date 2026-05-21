@@ -22,5 +22,6 @@
     <include file="db/changelog/V14__add_transport_fleet_management.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/V15__add_paper_evaluation_tables.xml" relativeToChangelogFile="false"/>
     <include file="db/changelog/V16__add_school_class_table.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/V17__add_what_went_well_to_questions.xml" relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

@@ -64,6 +64,12 @@ public class StudentDashboardDto {
         private String courseName;
         private String grade;
         private Double scorePercent;
+        private java.util.UUID courseId;
+        private java.util.UUID submissionId;
+        private String subTitle;
+        private String icon;
+        private String color;
+        private String textColor;
     }
 
     @Data

@@ -18,7 +18,11 @@ public interface PaperEvaluationService {
 
     List<PaperSubmission> getSubmissions(UUID institutionId);
 
+    List<PaperSubmission> getSubmissions(UUID institutionId, String status);
+
     PaperSubmission getSubmissionDetails(UUID id, UUID institutionId);
 
     void handleEvaluationWebhook(com.example.edutrack.dto.PaperEvaluationWebhookRequest request);
+
+    org.springframework.web.servlet.mvc.method.annotation.SseEmitter registerEmitter(UUID institutionId);
 }

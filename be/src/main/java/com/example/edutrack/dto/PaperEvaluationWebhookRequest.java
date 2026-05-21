@@ -16,6 +16,7 @@ import java.util.UUID;
 public class PaperEvaluationWebhookRequest {
 
     private UUID submissionId;
+    private UUID institutionId;
     private String status;
     private String overallFeedback;
     private BigDecimal maxScore;
@@ -31,6 +32,8 @@ public class PaperEvaluationWebhookRequest {
         private BigDecimal maxScore;
         private BigDecimal marksObtained;
         private String feedback;
+        private String whatWentWell;
+        private String needsImprovement;
     }
 
     @Data

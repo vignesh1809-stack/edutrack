@@ -46,6 +46,8 @@ public class PaperEvaluationServiceImpl implements PaperEvaluationService {
     @Autowired
     private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
+    private final java.util.Map<UUID, List<org.springframework.web.servlet.mvc.method.annotation.SseEmitter>> emitters = new java.util.concurrent.ConcurrentHashMap<>();
+
     @Override
     @Transactional
     public PaperSubmission createSubmission(UUID studentId, UUID courseId, String examType,
@@ -123,6 +125,12 @@ public class PaperEvaluationServiceImpl implements PaperEvaluationService {
         // Trigger Async Evaluation Task
         evaluateAsync(submission.getId());
 
+        try {
+            broadcastSubmissionUpdate(submission.getInstitutionId(), submission);
+        } catch (Exception e) {
+            log.error("Failed to broadcast SSE update for submission: {}", submission.getId(), e);
+        }
+
         return submission;
     }
 
@@ -146,9 +154,16 @@ public class PaperEvaluationServiceImpl implements PaperEvaluationService {
             submission.setOverallFeedback("Offloading evaluation payload to Python VLM service...");
             submissionRepository.save(submission);
 
+            try {
+                broadcastSubmissionUpdate(submission.getInstitutionId(), submission);
+            } catch (Exception e) {
+                log.error("Failed to broadcast SSE update for processing submission: {}", submission.getId(), e);
+            }
+
             // Prepare HTTP payload for Python FastAPI service
             java.util.Map<String, Object> payload = new java.util.HashMap<>();
             payload.put("submissionId", submission.getId().toString());
+            payload.put("institutionId", submission.getInstitutionId().toString());
             payload.put("studentId", submission.getStudent().getId().toString());
             payload.put("courseName",
                     submission.getCourse() != null ? submission.getCourse().getCourseName() : "General");
@@ -200,6 +215,11 @@ public class PaperEvaluationServiceImpl implements PaperEvaluationService {
             sub.setStatus(SubmissionStatus.FAILED);
             sub.setOverallFeedback(reason);
             submissionRepository.save(sub);
+            try {
+                broadcastSubmissionUpdate(sub.getInstitutionId(), sub);
+            } catch (Exception e) {
+                log.error("Failed to broadcast SSE update for failed submission: {}", sub.getId(), e);
+            }
         });
     }
 
@@ -246,6 +266,8 @@ public class PaperEvaluationServiceImpl implements PaperEvaluationService {
                 q.setMaxScore(qDto.getMaxScore());
                 q.setMarksObtained(qDto.getMarksObtained());
                 q.setFeedback(qDto.getFeedback());
+                q.setWhatWentWell(qDto.getWhatWentWell());
+                q.setNeedsImprovement(qDto.getNeedsImprovement());
                 questions.add(q);
             }
         }
@@ -255,6 +277,12 @@ public class PaperEvaluationServiceImpl implements PaperEvaluationService {
         submissionRepository.save(submission);
 
         log.info("AI evaluation successfully saved to MySQL. Job ID: {}", submission.getId());
+
+        try {
+            broadcastSubmissionUpdate(submission.getInstitutionId(), submission);
+        } catch (Exception e) {
+            log.error("Failed to broadcast SSE update on webhook: {}", submission.getId(), e);
+        }
     }
 
     @Override
@@ -281,5 +309,79 @@ public class PaperEvaluationServiceImpl implements PaperEvaluationService {
         if (submission.getQuestions() != null)
             submission.getQuestions().size();
         return submission;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PaperSubmission> getSubmissions(UUID institutionId, String status) {
+        List<PaperSubmission> submissions;
+        if (status != null && !status.isEmpty()) {
+            try {
+                com.example.edutrack.entity.enums.SubmissionStatus enumStatus = com.example.edutrack.entity.enums.SubmissionStatus.valueOf(status.toUpperCase());
+                submissions = submissionRepository
+                        .findByInstitutionIdAndStatusAndIsDeletedFalseOrderByCreatedAtDesc(institutionId, enumStatus);
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid submission status: {}, falling back to all", status);
+                submissions = submissionRepository
+                        .findByInstitutionIdAndIsDeletedFalseOrderByCreatedAtDesc(institutionId);
+            }
+        } else {
+            submissions = submissionRepository
+                    .findByInstitutionIdAndIsDeletedFalseOrderByCreatedAtDesc(institutionId);
+        }
+        for (PaperSubmission sub : submissions) {
+            if (sub.getPages() != null)
+                sub.getPages().size();
+            if (sub.getQuestions() != null)
+                sub.getQuestions().size();
+        }
+        return submissions;
+    }
+
+    @Override
+    public org.springframework.web.servlet.mvc.method.annotation.SseEmitter registerEmitter(UUID institutionId) {
+        org.springframework.web.servlet.mvc.method.annotation.SseEmitter emitter = new org.springframework.web.servlet.mvc.method.annotation.SseEmitter(300000L); // 5 mins
+        List<org.springframework.web.servlet.mvc.method.annotation.SseEmitter> list = emitters.computeIfAbsent(institutionId, k -> new java.util.concurrent.CopyOnWriteArrayList<>());
+        list.add(emitter);
+
+        emitter.onCompletion(() -> list.remove(emitter));
+        emitter.onTimeout(() -> list.remove(emitter));
+        emitter.onError((ex) -> list.remove(emitter));
+
+        try {
+            emitter.send(org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event()
+                    .name("handshake")
+                    .data("SSE Connection Established"));
+        } catch (Exception e) {
+            log.error("Failed to send SSE handshake", e);
+        }
+
+        return emitter;
+    }
+
+    private void broadcastSubmissionUpdate(UUID institutionId, PaperSubmission submission) {
+        List<org.springframework.web.servlet.mvc.method.annotation.SseEmitter> list = emitters.get(institutionId);
+        if (list == null || list.isEmpty()) return;
+
+        String json;
+        try {
+            json = objectMapper.writeValueAsString(submission);
+        } catch (Exception e) {
+            log.error("Failed to serialize submission for SSE broadcast", e);
+            return;
+        }
+
+        List<org.springframework.web.servlet.mvc.method.annotation.SseEmitter> deadEmitters = new ArrayList<>();
+        for (org.springframework.web.servlet.mvc.method.annotation.SseEmitter emitter : list) {
+            try {
+                emitter.send(org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event()
+                        .name("message")
+                        .data(json));
+            } catch (Exception e) {
+                log.warn("Dead SSE emitter detected for institution: {}", institutionId);
+                deadEmitters.add(emitter);
+            }
+        }
+        list.removeAll(deadEmitters);
     }
 }

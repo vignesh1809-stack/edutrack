@@ -15,4 +15,5 @@ public interface StudentDashboardService {
     List<StudentRemarkDto> getStudentRemarks(UUID institutionId, UUID studentId);
     void submitRemark(UUID institutionId, UUID studentId, SubmitRemarkRequest request);
     List<StaffListDto> getStaffList(UUID institutionId);
+    com.example.edutrack.dto.StudentSubjectAnalysisDto getStudentSubmissionDetails(UUID institutionId, UUID studentId, UUID submissionId);
 }

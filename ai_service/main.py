@@ -4,6 +4,10 @@ from typing import List, Optional
 import requests
 from fastapi import FastAPI, BackgroundTasks, HTTPException
 from pydantic import BaseModel, Field
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -22,6 +26,8 @@ class QuestionGrade(BaseModel):
     maxScore: float = Field(description="The maximum marks for this question.")
     marksObtained: float = Field(description="The marks awarded to the student.")
     feedback: str = Field(description="Personalized criticism and constructive feedback.")
+    whatWentWell: str = Field(description="Key strengths and correct concepts written by the student.")
+    needsImprovement: str = Field(description="Actionable areas of improvement and specific guidance.")
 
 class PageOCR(BaseModel):
     pageNumber: int = Field(description="The page number of the script.")
@@ -38,6 +44,7 @@ class ExamGradingReport(BaseModel):
 
 class EvaluationRequest(BaseModel):
     submissionId: str
+    institutionId: Optional[str] = None
     studentId: str
     courseName: str
     examType: str
@@ -73,6 +80,81 @@ def resolve_local_path(url_path: str) -> str:
         
     return ""
 
+# ─── MULTIMODAL FILE CONTENT EXTRACTION UTILITY ───
+
+def extract_file_content(file_path: str, label: str) -> List[dict]:
+    """
+    Reads the file at file_path (which could be an image or PDF) and returns
+    a list of content dicts to append to LangChain's HumanMessage content list.
+    """
+    if not file_path or not os.path.exists(file_path):
+        logger.warning(f"File path for {label} does not exist or is empty: {file_path}")
+        return []
+    
+    ext = os.path.splitext(file_path)[1].lower()
+    logger.info(f"Extracting content for {label} from file: {file_path} (extension: {ext})")
+    
+    # Check if PDF
+    if ext == ".pdf":
+        try:
+            from pypdf import PdfReader
+            reader = PdfReader(file_path)
+            text_content = []
+            for i, page in enumerate(reader.pages):
+                text = page.extract_text()
+                if text:
+                    text_content.append(f"--- Page {i+1} ---\n{text}")
+            
+            full_text = "\n".join(text_content)
+            if full_text.strip():
+                logger.info(f"Successfully extracted {len(full_text)} characters of text from PDF {label}")
+                return [{
+                    "type": "text",
+                    "text": f"[{label} (PDF Text Content)]:\n{full_text}"
+                }]
+            else:
+                logger.warning(f"PDF {label} had no extractable text content.")
+                return [{
+                    "type": "text",
+                    "text": f"[{label}] (Empty or Scanned PDF without extractable text)"
+                }]
+        except Exception as e:
+            logger.error(f"Error reading PDF {file_path} for {label}: {str(e)}", exc_info=True)
+            return [{
+                "type": "text",
+                "text": f"[{label}] (Failed to extract PDF text: {str(e)})"
+            }]
+            
+    # Check if Image
+    elif ext in [".png", ".jpg", ".jpeg", ".webp"]:
+        try:
+            import base64
+            mime_type = "image/png" if ext == ".png" else "image/jpeg"
+            with open(file_path, "rb") as f:
+                encoded_string = base64.b64encode(f.read()).decode("utf-8")
+            logger.info(f"Successfully base64 encoded image {label}")
+            return [
+                {
+                    "type": "text",
+                    "text": f"The following is an image of the reference {label}:"
+                },
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:{mime_type};base64,{encoded_string}"
+                    }
+                }
+            ]
+        except Exception as e:
+            logger.error(f"Error encoding image {file_path} for {label}: {str(e)}", exc_info=True)
+            return [{
+                "type": "text",
+                "text": f"[{label}] (Failed to load image: {str(e)})"
+            }]
+            
+    logger.warning(f"Unsupported file type for {label}: {ext}")
+    return []
+
 # ─── LANGCHAIN MULTIMODAL EVALUATION TASK ───
 
 def process_evaluation_task(req: EvaluationRequest):
@@ -102,14 +184,50 @@ def process_evaluation_task(req: EvaluationRequest):
                 maxScore=50.0,
                 marksObtained=43.5,
                 questions=[
-                    QuestionGrade(questionNumber=1, maxScore=10.0, marksObtained=8.5, feedback="Good explanation of bubble sort. Omitted the best case optimized swap check diagram."),
-                    QuestionGrade(questionNumber=2, maxScore=10.0, marksObtained=9.0, feedback="Perfectly detailed all deadlock prevention conditions."),
-                    QuestionGrade(questionNumber=3, maxScore=10.0, marksObtained=7.0, feedback="Explained public key cryptography, but missed details on key signature generation."),
-                    QuestionGrade(questionNumber=4, maxScore=10.0, marksObtained=10.0, feedback="Flawless recursion logic. Clean base cases and recursive stack manipulation."),
-                    QuestionGrade(questionNumber=5, maxScore=10.0, marksObtained=9.0, feedback="Accurate definition of 3NF, but slightly brief explanation of dependency preservation.")
+                    QuestionGrade(
+                        questionNumber=1, 
+                        maxScore=10.0, 
+                        marksObtained=8.5, 
+                        feedback="Good explanation of bubble sort. Omitted the best case optimized swap check diagram.",
+                        whatWentWell="Clearly explained the inner pass swaps and worst-case time complexity O(n^2).",
+                        needsImprovement="Include the optimized version with a swap flag to achieve O(n) best-case complexity."
+                    ),
+                    QuestionGrade(
+                        questionNumber=2, 
+                        maxScore=10.0, 
+                        marksObtained=9.0, 
+                        feedback="Perfectly detailed all deadlock prevention conditions.",
+                        whatWentWell="Excellent detail on Mutual Exclusion, Hold and Wait, No Preemption, and Circular Wait.",
+                        needsImprovement="Briefly contrast circular wait prevention vs avoidance to make it complete."
+                    ),
+                    QuestionGrade(
+                        questionNumber=3, 
+                        maxScore=10.0, 
+                        marksObtained=7.0, 
+                        feedback="Explained public key cryptography, but missed details on key signature generation.",
+                        whatWentWell="Accurately diagrammed the relationship between private and public keys in encryption.",
+                        needsImprovement="Explain how the private key is used to sign the hash of the message for digital signatures."
+                    ),
+                    QuestionGrade(
+                        questionNumber=4, 
+                        maxScore=10.0, 
+                        marksObtained=10.0, 
+                        feedback="Flawless recursion logic. Clean base cases and recursive stack manipulation.",
+                        whatWentWell="Identified the correct base cases and mapped stack frames beautifully in recursion.",
+                        needsImprovement="No major improvements needed. Good job!"
+                    ),
+                    QuestionGrade(
+                        questionNumber=5, 
+                        maxScore=10.0, 
+                        marksObtained=9.0, 
+                        feedback="Accurate definition of 3NF, but slightly brief explanation of dependency preservation.",
+                        whatWentWell="Accurate definitions of prime attributes and transitive dependency removal.",
+                        needsImprovement="Provide a short concrete mathematical relation schema demonstrating lossy/lossless joins."
+                    )
                 ],
                 pages=mock_ocr_pages
             )
+
         else:
             # Native LangChain Gemini VLM Call
             from langchain_google_genai import ChatGoogleGenerativeAI
@@ -117,7 +235,7 @@ def process_evaluation_task(req: EvaluationRequest):
             import base64
             
             llm = ChatGoogleGenerativeAI(
-                model="gemini-1.5-flash",
+                model="gemini-2.5-flash",
                 google_api_key=google_api_key,
                 temperature=0.1
             ).with_structured_output(ExamGradingReport)
@@ -128,26 +246,28 @@ def process_evaluation_task(req: EvaluationRequest):
                     "text": (
                         "You are a strict academic examiner. Perform a spatial OCR extraction on all handwritten student script page images. "
                         "Then, compare the answers against the Question Paper and Answer Key. Allocate marks per question out of their max score, "
-                        "and write highly personalized, helpful constructive feedback for improvements."
+                        "and write highly personalized, helpful constructive feedback. For each question, identify 'whatWentWell' (specific strengths "
+                        "or correct steps in their answer) and 'needsImprovement' (actionable guidance on what was missing or incorrect)."
                     )
                 }
             ]
+
             
             # Read and encode Question Paper if present
             qp_path = resolve_local_path(req.questionPaperUrl)
             if qp_path:
-                content.append({
-                    "type": "text", 
-                    "text": f"Reference Question Paper available locally. Grading against this specification."
-                })
+                qp_contents = extract_file_content(qp_path, "Question Paper")
+                content.extend(qp_contents)
+            else:
+                logger.info("No reference Question Paper was provided or could not be resolved.")
                 
             # Read and encode Answer Key if present
             ak_path = resolve_local_path(req.answerKeyUrl)
             if ak_path:
-                content.append({
-                    "type": "text", 
-                    "text": f"Reference Structured Answer Key available locally. Use this as the ground truth."
-                })
+                ak_contents = extract_file_content(ak_path, "Answer Key")
+                content.extend(ak_contents)
+            else:
+                logger.info("No reference Answer Key was provided or could not be resolved.")
                 
             # Read and base64 encode student script pages
             for i, url in enumerate(req.scriptPageUrls):
@@ -172,6 +292,7 @@ def process_evaluation_task(req: EvaluationRequest):
             req.callbackUrl,
             json={
                 "submissionId": req.submissionId,
+                "institutionId": req.institutionId,
                 "status": "COMPLETED",
                 "overallFeedback": report.overallFeedback,
                 "maxScore": report.maxScore,
@@ -195,6 +316,7 @@ def process_evaluation_task(req: EvaluationRequest):
                 req.callbackUrl,
                 json={
                     "submissionId": req.submissionId,
+                    "institutionId": req.institutionId,
                     "status": "FAILED",
                     "overallFeedback": f"AI Processing Error: {str(e)}",
                     "maxScore": 50.0,

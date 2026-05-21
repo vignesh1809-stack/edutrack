@@ -9,7 +9,8 @@ import {
 
     SUBMIT_PAPER_GRADING_REQUEST,
     SUBMIT_PAPER_GRADING_SUCCESS,
-    SUBMIT_PAPER_GRADING_FAILURE
+    SUBMIT_PAPER_GRADING_FAILURE,
+    UPDATE_PAPER_SUBMISSION
 } from '../types/paperTypes';
 
 // Fetch Paper Master Data Actions (students and courses)
@@ -56,4 +57,9 @@ export const submitPaperGradingSuccess = (data) => ({
 export const submitPaperGradingFailure = (error) => ({
     type: SUBMIT_PAPER_GRADING_FAILURE,
     payload: error
+});
+
+export const updatePaperSubmission = (submission) => ({
+    type: UPDATE_PAPER_SUBMISSION,
+    payload: submission
 });

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import com.example.edutrack.dto.StudentRemarkDto;
 import com.example.edutrack.dto.StaffListDto;
@@ -79,5 +80,19 @@ public class StudentDashboardController {
     public ResponseEntity<List<StaffListDto>> getStaffList(
             @AuthenticationPrincipal CustomUserDetails studentPrincipal) {
         return ResponseEntity.ok(studentDashboardService.getStaffList(studentPrincipal.getInstitutionId()));
+    }
+
+    @GetMapping("/submissions/{id}")
+    @PreAuthorize("hasAuthority('Student')")
+    public ResponseEntity<com.example.edutrack.dto.StudentSubjectAnalysisDto> getStudentSubmissionDetails(
+            @PathVariable java.util.UUID id,
+            @AuthenticationPrincipal CustomUserDetails studentPrincipal) {
+        
+        com.example.edutrack.dto.StudentSubjectAnalysisDto details = studentDashboardService.getStudentSubmissionDetails(
+                studentPrincipal.getInstitutionId(),
+                studentPrincipal.getId(),
+                id
+        );
+        return ResponseEntity.ok(details);
     }
 }

@@ -5,6 +5,7 @@ import com.example.edutrack.security.CustomUserDetails;
 import com.example.edutrack.service.StaffService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +21,7 @@ public class ProfileController {
     private StaffService staffService;
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Lecturer', 'Head_of_Department', 'Principal')")
     public ResponseEntity<StaffProfileDto> getMyProfile(@AuthenticationPrincipal CustomUserDetails principal) {
         // Assuming principal is a Staff member
         StaffProfileDto profile = staffService.getProfile(principal.getId(), principal.getInstitutionId());

@@ -24,6 +24,11 @@ const initialState = {
     success: false,
     error: null
   },
+  subjectAnalysis: {
+    loading: false,
+    data: null,
+    error: null
+  },
   selectedSemester: null
 };
 
@@ -138,6 +143,34 @@ const studentDashboardReducer = (state = initialState, action) => {
       return {
         ...state,
         submission: { ...state.submission, loading: false, success: false, error: action.payload }
+      };
+    case types.FETCH_STUDENT_SUBMISSION_DETAILS_REQUEST:
+      return {
+        ...state,
+        subjectAnalysis: {
+          ...state.subjectAnalysis,
+          loading: true,
+          error: null
+        }
+      };
+    case types.FETCH_STUDENT_SUBMISSION_DETAILS_SUCCESS:
+      return {
+        ...state,
+        subjectAnalysis: {
+          ...state.subjectAnalysis,
+          loading: false,
+          data: action.payload,
+          error: null
+        }
+      };
+    case types.FETCH_STUDENT_SUBMISSION_DETAILS_FAILURE:
+      return {
+        ...state,
+        subjectAnalysis: {
+          ...state.subjectAnalysis,
+          loading: false,
+          error: action.payload
+        }
       };
     default:
       return state;

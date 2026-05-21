@@ -100,10 +100,18 @@ public class PaperSubmissionController {
     @GetMapping("/submissions")
     @PreAuthorize("hasAnyAuthority('Administrator', 'Lecturer', 'Head_of_Department', 'Principal')")
     public ResponseEntity<List<PaperSubmission>> getSubmissions(
+            @RequestParam(value = "status", required = false) String status,
             @AuthenticationPrincipal CustomUserDetails principal) {
         
-        List<PaperSubmission> submissions = evaluationService.getSubmissions(principal.getInstitutionId());
+        List<PaperSubmission> submissions = evaluationService.getSubmissions(principal.getInstitutionId(), status);
         return ResponseEntity.ok(submissions);
+    }
+
+    @GetMapping(value = "/submissions/events", produces = org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE)
+    @PreAuthorize("hasAnyAuthority('Administrator', 'Lecturer', 'Head_of_Department', 'Principal')")
+    public org.springframework.web.servlet.mvc.method.annotation.SseEmitter getSubmissionsEvents(
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        return evaluationService.registerEmitter(principal.getInstitutionId());
     }
 
     @GetMapping("/submissions/{id}")
@@ -119,7 +127,14 @@ public class PaperSubmissionController {
     @PostMapping("/webhook")
     public ResponseEntity<String> handleWebhook(
             @RequestBody com.example.edutrack.dto.PaperEvaluationWebhookRequest payload) {
-        evaluationService.handleEvaluationWebhook(payload);
-        return ResponseEntity.ok("Webhook processed successfully.");
+        if (payload.getInstitutionId() != null) {
+            com.example.edutrack.config.TenantContext.setCurrentTenant(payload.getInstitutionId().toString());
+        }
+        try {
+            evaluationService.handleEvaluationWebhook(payload);
+            return ResponseEntity.ok("Webhook processed successfully.");
+        } finally {
+            com.example.edutrack.config.TenantContext.clear();
+        }
     }
 }

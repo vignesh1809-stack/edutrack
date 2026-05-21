@@ -61,10 +61,22 @@ function* submitRemark(action) {
   }
 }
 
+function* fetchStudentSubmissionDetails(action) {
+  try {
+    const { submissionId } = action.payload;
+    const response = yield call(axiosInstance.get, `/api/student/dashboard/submissions/${submissionId}`);
+    yield put(actions.fetchStudentSubmissionDetailsSuccess(response.data));
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch subject analysis details';
+    yield put(actions.fetchStudentSubmissionDetailsFailure(errorMessage));
+  }
+}
+
 export function* studentDashboardSaga() {
   yield takeLatest(types.FETCH_STUDENT_DASHBOARD_REQUEST, fetchStudentDashboard);
   yield takeLatest(types.FETCH_STUDENT_PROFILE_REQUEST, fetchStudentProfile);
   yield takeLatest(types.FETCH_STUDENT_REMARKS_REQUEST, fetchStudentRemarks);
   yield takeLatest(types.FETCH_STAFF_LIST_REQUEST, fetchStaffList);
   yield takeLatest(types.SUBMIT_REMARK_REQUEST, submitRemark);
+  yield takeLatest(types.FETCH_STUDENT_SUBMISSION_DETAILS_REQUEST, fetchStudentSubmissionDetails);
 }

@@ -46,42 +46,42 @@ function App() {
         <Route path="/signup" element={<SignUpPage />} />
 
         {/* --- Principal --- */}
-        <Route path="/principal/dashboard" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-        <Route path="/principal/students" element={<ProtectedRoute><Students /></ProtectedRoute>} />
-        <Route path="/principal/student-profile/:id" element={<ProtectedRoute><StudentProfile /></ProtectedRoute>} />
-        <Route path="/principal/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
-        <Route path="/principal/top-performers" element={<ProtectedRoute><TopPerformers /></ProtectedRoute>} />
-        <Route path="/principal/remarks" element={<ProtectedRoute><Remarks /></ProtectedRoute>} />
-        <Route path="/principal/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/principal/dashboard" element={<ProtectedRoute allowedRoles={['Principal', 'Administrator']}><Home /></ProtectedRoute>} />
+        <Route path="/principal/students" element={<ProtectedRoute allowedRoles={['Principal', 'Administrator']}><Students /></ProtectedRoute>} />
+        <Route path="/principal/student-profile/:id" element={<ProtectedRoute allowedRoles={['Principal', 'Administrator']}><StudentProfile /></ProtectedRoute>} />
+        <Route path="/principal/reports" element={<ProtectedRoute allowedRoles={['Principal', 'Administrator']}><Reports /></ProtectedRoute>} />
+        <Route path="/principal/top-performers" element={<ProtectedRoute allowedRoles={['Principal', 'Administrator']}><TopPerformers /></ProtectedRoute>} />
+        <Route path="/principal/remarks" element={<ProtectedRoute allowedRoles={['Principal', 'Administrator']}><Remarks /></ProtectedRoute>} />
+        <Route path="/principal/profile" element={<ProtectedRoute allowedRoles={['Principal', 'Administrator']}><Profile /></ProtectedRoute>} />
 
         {/* --- Guardian --- */}
-        <Route path="/guardian/dashboard" element={<ProtectedRoute><GuardianDashboard /></ProtectedRoute>} />
-        <Route path="/guardian/faculty-directory" element={<ProtectedRoute><FacultyDirectory /></ProtectedRoute>} />
-        <Route path="/guardian/faculty-profile" element={<ProtectedRoute><FacultyProfile /></ProtectedRoute>} />
-        <Route path="/guardian/profile" element={<ProtectedRoute><GuardianProfile /></ProtectedRoute>} />
-        <Route path="/guardian/chat" element={<ProtectedRoute><GuardianChat /></ProtectedRoute>} />
+        <Route path="/guardian/dashboard" element={<ProtectedRoute allowedRoles={['Guardian']}><GuardianDashboard /></ProtectedRoute>} />
+        <Route path="/guardian/faculty-directory" element={<ProtectedRoute allowedRoles={['Guardian']}><FacultyDirectory /></ProtectedRoute>} />
+        <Route path="/guardian/faculty-profile" element={<ProtectedRoute allowedRoles={['Guardian']}><FacultyProfile /></ProtectedRoute>} />
+        <Route path="/guardian/profile" element={<ProtectedRoute allowedRoles={['Guardian']}><GuardianProfile /></ProtectedRoute>} />
+        <Route path="/guardian/chat" element={<ProtectedRoute allowedRoles={['Guardian']}><GuardianChat /></ProtectedRoute>} />
 
         {/* --- Student --- */}
-        <Route path="/student/dashboard" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
-        <Route path="/student/academics" element={<ProtectedRoute><Academics /></ProtectedRoute>} />
-        <Route path="/student/subject-analysis" element={<ProtectedRoute><SubjectAnalysis /></ProtectedRoute>} />
-        <Route path="/student/remarks" element={<ProtectedRoute><StudentRemarks /></ProtectedRoute>} />
-        <Route path="/student/submit-feedback" element={<ProtectedRoute><SubmitFeedback /></ProtectedRoute>} />
-        <Route path="/student/profile" element={<ProtectedRoute><StudentOwnProfile /></ProtectedRoute>} />
+        <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['Student']}><StudentDashboard /></ProtectedRoute>} />
+        <Route path="/student/academics" element={<ProtectedRoute allowedRoles={['Student']}><Academics /></ProtectedRoute>} />
+        <Route path="/student/subject-analysis" element={<ProtectedRoute allowedRoles={['Student']}><SubjectAnalysis /></ProtectedRoute>} />
+        <Route path="/student/remarks" element={<ProtectedRoute allowedRoles={['Student']}><StudentRemarks /></ProtectedRoute>} />
+        <Route path="/student/submit-feedback" element={<ProtectedRoute allowedRoles={['Student']}><SubmitFeedback /></ProtectedRoute>} />
+        <Route path="/student/profile" element={<ProtectedRoute allowedRoles={['Student']}><StudentOwnProfile /></ProtectedRoute>} />
 
         {/* --- Transport Incharge --- */}
-        <Route path="/transport/dashboard" element={<ProtectedRoute><TransportDashboard /></ProtectedRoute>} />
-        <Route path="/transport/staff" element={<ProtectedRoute><TransportStaffDirectory /></ProtectedRoute>} />
-        <Route path="/transport/routes" element={<ProtectedRoute><TransportRoutes /></ProtectedRoute>} />
-        <Route path="/transport/add-staff" element={<ProtectedRoute><AddTransportStaff /></ProtectedRoute>} />
-        <Route path="/transport/add-log" element={<ProtectedRoute><AddTransportLog /></ProtectedRoute>} />
-        <Route path="/transport/profile" element={<ProtectedRoute><TransportProfile /></ProtectedRoute>} />
+        <Route path="/transport/dashboard" element={<ProtectedRoute allowedRoles={['Transport', 'Transport_Incharge']}><TransportDashboard /></ProtectedRoute>} />
+        <Route path="/transport/staff" element={<ProtectedRoute allowedRoles={['Transport', 'Transport_Incharge']}><TransportStaffDirectory /></ProtectedRoute>} />
+        <Route path="/transport/routes" element={<ProtectedRoute allowedRoles={['Transport', 'Transport_Incharge']}><TransportRoutes /></ProtectedRoute>} />
+        <Route path="/transport/add-staff" element={<ProtectedRoute allowedRoles={['Transport', 'Transport_Incharge']}><AddTransportStaff /></ProtectedRoute>} />
+        <Route path="/transport/add-log" element={<ProtectedRoute allowedRoles={['Transport', 'Transport_Incharge']}><AddTransportLog /></ProtectedRoute>} />
+        <Route path="/transport/profile" element={<ProtectedRoute allowedRoles={['Transport', 'Transport_Incharge']}><TransportProfile /></ProtectedRoute>} />
 
         {/* --- Staff / Lecturer --- */}
-        <Route path="/staff/dashboard" element={<ProtectedRoute><LecturerDashboard /></ProtectedRoute>} />
-        <Route path="/staff/attendance" element={<ProtectedRoute><LecturerAttendance /></ProtectedRoute>} />
-        <Route path="/staff/papers" element={<ProtectedRoute><LecturerPapers /></ProtectedRoute>} />
-        <Route path="/staff/profile" element={<ProtectedRoute><LecturerProfile /></ProtectedRoute>} />
+        <Route path="/staff/dashboard" element={<ProtectedRoute allowedRoles={['Lecturer', 'Class_Teacher', 'Head_of_Department']}><LecturerDashboard /></ProtectedRoute>} />
+        <Route path="/staff/attendance" element={<ProtectedRoute allowedRoles={['Lecturer', 'Class_Teacher', 'Head_of_Department']}><LecturerAttendance /></ProtectedRoute>} />
+        <Route path="/staff/papers" element={<ProtectedRoute allowedRoles={['Lecturer', 'Class_Teacher', 'Head_of_Department']}><LecturerPapers /></ProtectedRoute>} />
+        <Route path="/staff/profile" element={<ProtectedRoute allowedRoles={['Lecturer', 'Class_Teacher', 'Head_of_Department']}><LecturerProfile /></ProtectedRoute>} />
       </Routes>
     </Router>
   );

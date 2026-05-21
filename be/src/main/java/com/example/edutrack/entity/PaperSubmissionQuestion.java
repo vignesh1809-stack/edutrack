@@ -45,6 +45,12 @@ public class PaperSubmissionQuestion {
     @Column(columnDefinition = "TEXT")
     private String feedback;
 
+    @Column(name = "what_went_well", columnDefinition = "TEXT")
+    private String whatWentWell;
+
+    @Column(name = "needs_improvement", columnDefinition = "TEXT")
+    private String needsImprovement;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

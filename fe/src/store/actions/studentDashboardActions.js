@@ -75,3 +75,19 @@ export const fetchStaffListFailure = (error) => ({
   type: types.FETCH_STAFF_LIST_FAILURE,
   payload: error
 });
+
+export const fetchStudentSubmissionDetailsRequest = (submissionId) => ({
+  type: types.FETCH_STUDENT_SUBMISSION_DETAILS_REQUEST,
+  payload: { submissionId }
+});
+
+export const fetchStudentSubmissionDetailsSuccess = (data) => ({
+  type: types.FETCH_STUDENT_SUBMISSION_DETAILS_SUCCESS,
+  payload: data
+});
+
+export const fetchStudentSubmissionDetailsFailure = (error) => ({
+  type: types.FETCH_STUDENT_SUBMISSION_DETAILS_FAILURE,
+  payload: error
+});
+

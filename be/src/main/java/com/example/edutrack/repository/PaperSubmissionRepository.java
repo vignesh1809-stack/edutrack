@@ -15,6 +15,16 @@ public interface PaperSubmissionRepository extends JpaRepository<PaperSubmission
     @Query("SELECT s FROM PaperSubmission s LEFT JOIN FETCH s.student LEFT JOIN FETCH s.course WHERE s.institutionId = :institutionId AND s.isDeleted = false ORDER BY s.createdAt DESC")
     List<PaperSubmission> findByInstitutionIdAndIsDeletedFalseOrderByCreatedAtDesc(UUID institutionId);
 
+    @Query("SELECT s FROM PaperSubmission s LEFT JOIN FETCH s.student LEFT JOIN FETCH s.course WHERE s.institutionId = :institutionId AND s.status = :status AND s.isDeleted = false ORDER BY s.createdAt DESC")
+    List<PaperSubmission> findByInstitutionIdAndStatusAndIsDeletedFalseOrderByCreatedAtDesc(UUID institutionId, com.example.edutrack.entity.enums.SubmissionStatus status);
+
     @Query("SELECT s FROM PaperSubmission s LEFT JOIN FETCH s.student LEFT JOIN FETCH s.course WHERE s.id = :id AND s.institutionId = :institutionId AND s.isDeleted = false")
     Optional<PaperSubmission> findByIdAndInstitutionIdAndIsDeletedFalse(UUID id, UUID institutionId);
+
+    @Query("SELECT s FROM PaperSubmission s LEFT JOIN FETCH s.student LEFT JOIN FETCH s.course WHERE s.student.id = :studentId AND s.institutionId = :institutionId AND s.status = :status AND s.isDeleted = false ORDER BY s.createdAt DESC")
+    List<PaperSubmission> findByStudentIdAndInstitutionIdAndStatusAndIsDeletedFalse(
+            @org.springframework.data.repository.query.Param("studentId") UUID studentId,
+            @org.springframework.data.repository.query.Param("institutionId") UUID institutionId,
+            @org.springframework.data.repository.query.Param("status") com.example.edutrack.entity.enums.SubmissionStatus status
+    );
 }

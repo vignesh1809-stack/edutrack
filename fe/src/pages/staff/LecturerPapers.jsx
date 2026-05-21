@@ -7,7 +7,8 @@ import ProfessionalDropdown from '../../components/ProfessionalDropdown';
 import {
     fetchPaperMasterDataRequest,
     fetchPaperSubmissionsRequest,
-    submitPaperGradingRequest
+    submitPaperGradingRequest,
+    updatePaperSubmission
 } from '../../store/actions/paperActions';
 
 const LecturerPapers = () => {
@@ -152,17 +153,36 @@ const LecturerPapers = () => {
 
     }, [students, courses, selectedBatch, selectedDept, selectedSemester, selectedSection]);
 
-    // Polling active evaluations (every 3 seconds if there is a PENDING or PROCESSING job)
+    // Real-time AI evaluation updates via SSE stream
     useEffect(() => {
-        const hasActiveJobs = submissions.some(sub => sub.status === 'PENDING' || sub.status === 'PROCESSING');
-        if (!hasActiveJobs) return;
+        const token = localStorage.getItem('accessToken');
+        if (!token) return;
 
-        const interval = setInterval(() => {
-            dispatch(fetchPaperSubmissionsRequest());
-        }, 3000);
+        // Establish persistent connection to SSE endpoint
+        const eventSource = new EventSource(`/api/staff/papers/submissions/events?token=${token}`);
 
-        return () => clearInterval(interval);
-    }, [submissions, dispatch]);
+        eventSource.onmessage = (event) => {
+            try {
+                const updatedSubmission = JSON.parse(event.data);
+                dispatch(updatePaperSubmission(updatedSubmission));
+            } catch (e) {
+                console.error('Error parsing SSE event data:', e);
+            }
+        };
+
+        eventSource.addEventListener('handshake', (event) => {
+            console.log('SSE connection handshake:', event.data);
+        });
+
+        eventSource.onerror = (error) => {
+            console.error('SSE connection error, closing event source:', error);
+            eventSource.close();
+        };
+
+        return () => {
+            eventSource.close();
+        };
+    }, [dispatch]);
 
     // Keep the currently viewed report in the modal reactive to polling updates
     useEffect(() => {

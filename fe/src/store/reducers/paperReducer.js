@@ -9,7 +9,8 @@ import {
 
     SUBMIT_PAPER_GRADING_REQUEST,
     SUBMIT_PAPER_GRADING_SUCCESS,
-    SUBMIT_PAPER_GRADING_FAILURE
+    SUBMIT_PAPER_GRADING_FAILURE,
+    UPDATE_PAPER_SUBMISSION
 } from '../types/paperTypes';
 
 const initialState = {
@@ -78,6 +79,20 @@ const paperReducer = (state = initialState, action) => {
                 submitLoading: false,
                 submitError: action.payload
             };
+        case UPDATE_PAPER_SUBMISSION: {
+            const updatedSub = action.payload;
+            const exists = state.submissions.some(s => s.id === updatedSub.id);
+            let newSubmissions;
+            if (exists) {
+                newSubmissions = state.submissions.map(s => s.id === updatedSub.id ? updatedSub : s);
+            } else {
+                newSubmissions = [updatedSub, ...state.submissions];
+            }
+            return {
+                ...state,
+                submissions: newSubmissions
+            };
+        }
         default:
             return state;
     }

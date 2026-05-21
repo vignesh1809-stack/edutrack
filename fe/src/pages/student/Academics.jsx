@@ -95,7 +95,13 @@ const Academics = () => {
                                         <div className="w-8 h-8 rounded-full border-2 border-surface-container-lowest bg-surface-container-high flex items-center justify-center text-[10px] font-bold">+12</div>
                                     </div>
                                     <button 
-                                        onClick={() => navigate('/student/subject-analysis')}
+                                        onClick={() => {
+                                            if (subject.submissionId) {
+                                                navigate(`/student/subject-analysis?submissionId=${subject.submissionId}`);
+                                            } else {
+                                                navigate('/student/subject-analysis');
+                                            }
+                                        }}
                                         className="flex items-center gap-2 text-primary font-bold text-sm hover:gap-3 transition-all"
                                     >
                                         View Analysis
